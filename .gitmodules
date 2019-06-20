@@ -1,0 +1,6 @@
+[submodule "libraries/JC_Button"]
+	path = libraries/JC_Button
+	url = https://github.com/JChristensen/JC_Button
+[submodule "libraries/FastLED"]
+	path = libraries/FastLED
+	url = git@github.com:maddogjt/FastLED.git
