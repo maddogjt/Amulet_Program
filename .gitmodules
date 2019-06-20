@@ -4,3 +4,6 @@
 [submodule "libraries/FastLED"]
 	path = libraries/FastLED
 	url = git@github.com:maddogjt/FastLED.git
+[submodule "hardware/narc/amulet"]
+	path = hardware/narc/amulet
+	url = git@github.com:maddogjt/Amulet_Arduino
