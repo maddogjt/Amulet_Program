@@ -1,4 +1,6 @@
+#define ARDUINO_GENERIC
 #include <FastLED.h>
+#undef ARDUINO_GENERIC
 #include <bluefruit.h>
 
 #include <JC_Button.h>
