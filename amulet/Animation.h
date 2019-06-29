@@ -2,16 +2,27 @@
 #ifndef AMULET_ANIMATION_H
 #define AMULET_ANIMATION_H
 
-class Animation
-{
-    public:
-        virtual void init( int param1, int param2) =0;
-        virtual void step( int frame) =0;
-    protected:
-        int _p1;
-        int _p2;
-};
+typedef void (*init_func)();
+typedef void (*step_func)(int frame);
 
-#define ANIMATION_SUBCLASS_DECL(A) class A : public Animation {public: void init(int p1, int p2);void step(int step);};
+typedef struct
+{
+    init_func init;
+    step_func step;
+    int p1;
+    int p2;
+} animation_t;
+
+typedef enum
+{
+    ANIMATION_SOLID_HUE,
+    ANIMATION_RAINBOW,
+    ANIMATION_TWISTER,
+    ANIMATION_FLAME,
+    ANIMATION_DEBUG_INFO,
+} animation_name_type_t;
+
+void animation_for_name( animation_t &out, animation_name_type_t name, int p1, int p2);
+bool animations_are_equal( animation_t const &p1, animation_t const &p2);
 
 #endif

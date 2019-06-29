@@ -12,72 +12,26 @@ FASTLED_USING_NAMESPACE
 #define BRIGHTNESS 8
 
 bool show_ambient= true;
+bool led_test_mode = false;
 
-Animation *currentAnimation;
-SolidHue anim_solidHue;
-Twister anim_twister;
-Rainbow anim_rainbow;
+animation_t current_animation;
 
-// List of patterns to cycle through.  Each is defined as a separate function below.
-const int anim_count = 3;
-void setCurrentAnimationForPatternIdx( int pattern_idx ) {
-  int idx = max(0, min(anim_count-1, pattern_idx));
-  switch (idx) {
-    case 0:
-      currentAnimation = &anim_solidHue;
-      break;
-    case 1:
-      currentAnimation = &anim_rainbow;
-      break;
-    case 2:
-      currentAnimation = &anim_twister;
-      break;
-    default:
-      LOG_LV1("LED", "Bad animation index");
-  }
-}
-
-// Patterns are animation templates
-typedef struct {
-  int function_idx;
-  int param1;
-  int param2;
-} pattern_t;
-
-pattern_t pattern_from_signal( Signal *s) {
+// returns true if animation was changed
+bool set_animation_from_signal( Signal *s) {
+  animation_t anim_from_signal;
   if( s && (s->_scan._cmd == command_beacon || s->_scan._cmd == command_flashmob ) ) {
-    return {
-      .function_idx = max(0,min(anim_count,s->_scan._p0)),
-      .param1 = s->_scan._p1,
-      .param2 = s->_scan._p2,
-    };
+    animation_for_name( anim_from_signal, (animation_name_type_t) s->_scan._p0, s->_scan._p1, s->_scan._p2);
+  } else {
+    show_ambient = true;
+    animation_for_name( anim_from_signal, ANIMATION_SOLID_HUE, 0, 1);
   }
-  else {
-    return {
-      .function_idx = 0, // solidHue
-      .param1 = 0,
-      .param2 = 1,
-    };
+  if( !animations_are_equal(current_animation, anim_from_signal) ) {
+    current_animation = anim_from_signal;
+    return true;
+  } else {
+    return false;
   }
 }
-
-void printPattern( pattern_t &p) {
-  Serial.println("Pattern:");
-  Serial.printf("func idx: %d\n", p.function_idx);
-  Serial.printf("param 1:  %d\n", p.param1);
-  Serial.printf("param 2:  %d\n\n", p.param2);
-}
-
-bool patternsAreEqual( pattern_t &p1, pattern_t &p2) {
-  return p1.function_idx == p2.function_idx && p1.param1 == p2.param1 && p1.param2 == p2.param2;
-}
-
-
-pattern_t currentPattern = {
-  .function_idx = 0,
-  .param1 = 0,
-  .param2 = 1,
-};
 
 void led_setup()
 {
@@ -87,34 +41,82 @@ void led_setup()
     FastLED.setBrightness(BRIGHTNESS);
 
     // Set the initial animation
-    currentAnimation = &anim_solidHue;
-    currentAnimation->init(0,1);
+    animation_for_name( current_animation, ANIMATION_SOLID_HUE, 0, 1);
+    start_animation(current_animation);
 }
 
 void choose_pattern_by_signal() {
   LOG_LV1("LED", "choose_pattern_by_signal");
-
   Signal *signal = current_top_signal();
   LOG_LV1("LED", "Has Top Signal: %s", signal ? "Yes" : "No");
-  pattern_t pattern = pattern_from_signal( signal );
-  if( !patternsAreEqual( pattern, currentPattern )) {
-    LOG_LV1("LED", "New Pattern Chosen");
-    printPattern(pattern);
-    currentPattern = pattern;
-    setCurrentAnimationForPatternIdx(pattern.function_idx);
-    currentAnimation->init(pattern.param1,pattern.param2);
+  if( set_animation_from_signal(signal) ) {
+    start_animation(current_animation);
   }
 }
 
 void led_loop( int step )
 {
   // Update the LED pattern based on bluetooth signals every 500ms
-  if( step % 12 == 0 ) { 
+  if( !led_test_mode && step % 12 == 0 ) { 
     choose_pattern_by_signal(); 
   }
 
   // Step the currentAnimation
-  currentAnimation->step( step );
+  step_animation(current_animation);
   FastLED.show();
+}
+
+// -----------------------
+//
+// TEST PATTERN CODE
+//
+// -----------------------
+int test_pattern_idx=0;
+const int test_pattern_count = 5;
+
+void led_show_test_pattern_by_index(int idx)
+{
+  switch (idx) 
+  {
+  case 0:
+    animation_for_name( current_animation, ANIMATION_SOLID_HUE, 0, 5);
+    break;
+  case 1:
+    animation_for_name( current_animation, ANIMATION_RAINBOW, 0, 2);
+    break;
+  case 2:
+    animation_for_name( current_animation, ANIMATION_TWISTER, 0, 0);
+    break;
+  case 3:
+    animation_for_name( current_animation, ANIMATION_FLAME, 0, 0);
+    break;
+  case 4:
+    animation_for_name( current_animation, ANIMATION_DEBUG_INFO, 5, 0);
+    break;
+  default:
+    break;
+  }
+  start_animation(current_animation);
+  led_test_mode = true;
+}
+
+void led_show_test_pattern(bool show)
+{
+  led_test_mode = show;
+  if( led_test_mode ) {
+    test_pattern_idx = 0;
+    led_show_test_pattern_by_index( 0 ); 
+  }
+}
+
+bool led_test_has_next_pattern()
+{
+  return test_pattern_idx + 1 < test_pattern_count;
+}
+
+void led_show_next_test_pattern()
+{
+  test_pattern_idx = (test_pattern_idx + 1) % test_pattern_count;
+  led_show_test_pattern_by_index( test_pattern_idx ); 
 }
 

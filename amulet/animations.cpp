@@ -7,19 +7,35 @@ FASTLED_USING_NAMESPACE
 #define NUM_LEDS RGB_LED_COUNT
 CRGB gLeds[NUM_LEDS];
 
-uint8_t gHue = 0;                  // rotating "base color" used by many of the patterns
+uint8_t gHue = 0; // rotating "base color" used by many of the patterns
+int animation_p1=0;
+int animation_p2=0;
+
+int frame_counter = 0;
+void start_animation( animation_t &anim)
+{
+  frame_counter = 0;
+  animation_p1 = anim.p1;
+  animation_p2 = anim.p2;
+  anim.init();
+}
+
+void step_animation( animation_t &anim)
+{
+  anim.step(frame_counter++);
+}
 
 // Rainbow: Each LED has a progressive hue and rotates by incrementing base hue
 // p1 : Start hue
 // p2 : rate of hue change per frame ( can be positive or negative )
-void Rainbow::init(int p1, int p2) {
-  LOG_LV1("LED", "Rainbow::init( %d, %d )", p1, p2);
-  gHue = p1;
-  _p2 = p2;
+void Rainbow_init() {
+  LOG_LV1("LED", "Rainbow::init( %d, %d )", animation_p1, animation_p2);
+  gHue = animation_p1;
   fill_rainbow(gLeds, NUM_LEDS, gHue++, 20);
 }
-void Rainbow::step( int frame ) {
-  gHue += _p2;
+void Rainbow_step( int frame ) {
+  gHue += animation_p2;
+  fill_rainbow(gLeds, NUM_LEDS, gHue++, 20);
 }
 
 // Twister: randomly rotates through the colors of th twister mat
@@ -30,13 +46,14 @@ CRGB g_twister_colors[] = {
     CRGB::Blue,
     CRGB::Red
 };
-void Twister::init(int p1, int p2) {
-  LOG_LV1("LED", "Twister::init( %d, %d )", p1, p2);
+void Twister_init() {
+  LOG_LV1("LED", "Twister::init( %d, %d )", animation_p1, animation_p2);
+
   for( int i =0; i<NUM_LEDS; i++) {
     gLeds[i] = g_twister_colors[random8() % ARRAY_SIZE(g_twister_colors)];
   }
 }
-void Twister::step( int frame ) {
+void Twister_step( int frame ) {
   if( frame % 24 == 0 ) {
     for( int i =0; i<NUM_LEDS; i++) {
       if( random8() % 3 == 0 ) {
@@ -49,21 +66,89 @@ void Twister::step( int frame ) {
 // SolidHue: All LEDs are the same color, and can optionally rotate hue 
 // p1 : Start hue
 // p2 : rate of hue change per frame ( can be 0, positive, or negative )
-void SolidHue::init(int p1, int p2) {
-  LOG_LV1("LED", "SolidHue::init( %d, %d )", p1, p2);
-  _p2 = p2;
-  gHue = p1;
+void SolidHue_init() {
+  LOG_LV1("LED", "SolidHue::init( %d, %d )", animation_p1, animation_p2);
+  gHue = animation_p1;
   fill_solid(gLeds, NUM_LEDS, CHSV(gHue, 255, 192));
 }
-void SolidHue::step( int frame ) {
-  gHue += _p2;
+void SolidHue_step( int frame ) {
+  gHue += animation_p2;
   fill_solid(gLeds, NUM_LEDS, CHSV(gHue, 255, 192));
 }
 
+// Flame: Adapted from https://github.com/FastLED/FastLED/blob/master/examples/Fire2012WithPalette/Fire2012WithPalette.ino
+// p1 : 
+// p2 : 
+bool gReverseDirection = false;
+CRGBPalette16 gPal;
+void Flame_init() {
+  LOG_LV1("LED", "Flame::init( %d, %d )", animation_p1, animation_p2);
+  gPal = HeatColors_p;
+  fill_solid(gLeds, NUM_LEDS, CHSV(gHue, 255, 192));
+}
+void Fire2012WithPalette();
+void Flame_step( int frame ) {
+  // Add entropy to random number generator; we use a lot of it.
+  random16_add_entropy( random());
+  Fire2012WithPalette(); // run simulation frame, using palette colors
+  mirror();
+}
+#define COOLING  30
+#define SPARKING 180
+void Fire2012WithPalette()
+{
+// Array of temperature readings at each simulation cell
+  static byte heat[NUM_LEDS];
 
+  // Step 1.  Cool down every cell a little
+    for( int i = 0; i < NUM_LEDS; i++) {
+      heat[i] = qsub8( heat[i],  random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
+    }
+  
+    // Step 2.  Heat from each cell drifts 'up' and diffuses a little
+    for( int k= NUM_LEDS - 1; k >= 2; k--) {
+      heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
+    }
+    
+    // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
+    if( random8() < SPARKING ) {
+      int y = random8(7);
+      heat[y] = qadd8( heat[y], random8(160,255) );
+    }
+
+    // Step 4.  Map from heat cells to LED colors
+    for( int j = 0; j < NUM_LEDS; j++) {
+      // Scale the heat value from 0-255 down to 0-240
+      // for best results with color palettes.
+      byte colorindex = scale8( heat[j], 240);
+      CRGB color = ColorFromPalette( gPal, colorindex);
+      int pixelnumber;
+      if( gReverseDirection ) {
+        pixelnumber = (NUM_LEDS-1) - j;
+      } else {
+        pixelnumber = j;
+      }
+      gLeds[pixelnumber] = color;
+    }
+}
+
+// DebugInfo: Lights LEDs as parameters to provide debug info. Each number is between 1-8.
+// Zero is not allowed since you can't see zero lights.
+// p1 : The first int 
+// p2 : Hue
+void DebugInfo_init() {
+  LOG_LV1("LED", "DebugInfo::init( %d, %d )", animation_p1, animation_p2);
+  gHue = animation_p2;
+  fill_solid(gLeds, NUM_LEDS, CHSV(gHue, 255, 0));
+  fill_solid(gLeds, max(1,min(NUM_LEDS,animation_p1)), CHSV(gHue, 255, 64));
+}
+void DebugInfo_step( int frame ) {
+  // Pulse the brightness between 64 and 192
+  fill_solid(gLeds, max(1,min(NUM_LEDS,animation_p1)), CHSV(gHue, 255, 64 + sin8(frame)/2));
+}
 
 //
-//  Functions below have not been converted to Animation subclasses
+//  Functions below have not been converted to animations
 // 
 
 

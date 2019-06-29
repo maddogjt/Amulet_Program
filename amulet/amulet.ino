@@ -16,9 +16,21 @@ constexpr int longHold = 3;
 #warning "Requires FastLED 3.1 or later; check github for latest code."
 #endif
 
+
+
 // NOTE! If (when) we get asserts (crashes) it's probably because we have violated the timing needs of the BLE layer
 // see Sigurd's response here: https://devzone.nordicsemi.com/f/nordic-q-a/33961/s132-5-1-0-sd-assert-error
+// or something to do with FASTLED interrupts https://github.com/FastLED/FastLED/wiki/Interrupt-problems
 
+typedef enum {
+  AMULET_MODE_AMULET,
+  AMULET_MODE_BEACON,
+  AMULET_MODE_LED_TEST,
+  AMULET_MODE_COUNT,
+} amulet_mode_t;
+
+amulet_mode_t mode = AMULET_MODE_AMULET;
+void nextMode();
 void systemSleep();
 
 void setup()
@@ -40,7 +52,7 @@ void setup()
 
   // Custom setup for the LED and BLE components
   led_setup();
-  ble_setup();
+  // ble_setup();
 }
 
 int step = 0;
@@ -49,7 +61,7 @@ void loop()
   // LOG_LV2("LOOP", "Loop start");
   led_loop( step );
   // yield();
-  ble_loop( step );
+  // ble_loop( step );
   // yield();
   signal_loop( step );
 
@@ -60,16 +72,53 @@ void loop()
     systemSleep();
   } else if (dfuButton.wasReleased())
   { 
-    // Currently undefined function.
-    Serial.println("DFU button released");
+    Serial.println("DFU button released, switching mode");
+    switch( mode ) {
+      case AMULET_MODE_AMULET:
+        nextMode();
+        break;
+      case AMULET_MODE_BEACON:
+        nextMode();
+        break;
+      case AMULET_MODE_LED_TEST:
+        // Instead of going to the next mode, go to the next test pattern if there is one.
+        if( led_test_has_next_pattern() ) {
+          led_show_next_test_pattern();
+        } else {
+          led_show_test_pattern(false);
+          nextMode();
+        }
+        break;
+      case AMULET_MODE_COUNT:
+      default:
+        break;
+    }
   }
 
   // Advance the step counter and enforce the max framerate
-  delay( 1000 / FRAMERATE );
-  // FastLED.delay(1000 / FRAMERATE);
+  // delay( 1000 / FRAMERATE );
+  FastLED.delay(1000 / FRAMERATE);
   step++;
   // LOG_LV2("LOOP", "Loop end");
+}
 
+void nextMode()
+{
+  mode = (amulet_mode_t)(((int)mode + 1) % (int)AMULET_MODE_COUNT);
+  switch( mode ) {
+    case AMULET_MODE_AMULET:
+    case AMULET_MODE_BEACON:
+      break;
+    case AMULET_MODE_LED_TEST:
+      digitalWrite(LED_BUILTIN, LED_STATE_ON);
+      led_show_test_pattern(true);
+      break;
+    case AMULET_MODE_COUNT:
+      // shouldn't be here
+      break;
+  }
+  // Turn on the builtin if we are not an amulet.
+  digitalWrite(LED_BUILTIN, mode==AMULET_MODE_AMULET ? !LED_STATE_ON : LED_STATE_ON);
 }
 
 void systemSleep()
