@@ -72,7 +72,7 @@ void led_loop( int step )
 //
 // -----------------------
 int test_pattern_idx=0;
-const int test_pattern_count = 8;
+const int test_pattern_count = 10;
 
 void led_show_test_pattern_by_index(int idx)
 {
@@ -100,7 +100,13 @@ void led_show_test_pattern_by_index(int idx)
     animation_for_name( current_animation, ANIMATION_JUGGLE, 5, 0);
     break;
   case 7:
-    animation_for_name( current_animation, ANIMATION_SINELON, 5, 5);
+    animation_for_name( current_animation, ANIMATION_SINELON, 5, 2);
+    break;
+  case 8:
+    animation_for_name( current_animation, ANIMATION_BPM, 5, 2);
+    break;
+  case 9:
+    animation_for_name( current_animation, ANIMATION_CONFETTI, 0, 0);
     break;
   default:
     break;

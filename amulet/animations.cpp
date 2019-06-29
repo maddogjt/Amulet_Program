@@ -188,7 +188,7 @@ void Juggle_step( int frame )
 // p1 : Start Hue
 // p2 : Hue increment
 void Sinelon_init() {
-  LOG_LV1("LED", "Juggle::init( %d, %d )", animation_p1, animation_p2);
+  LOG_LV1("LED", "Sinelon::init( %d, %d )", animation_p1, animation_p2);
   gHue = animation_p1;
 }
 void Sinelon_step( int frame )
@@ -200,12 +200,45 @@ void Sinelon_step( int frame )
   gHue += animation_p2;
 }
 
+// BPM: 
+// p1 : Start Hue
+// p2 : Hue increment
+void Bpm_init() {
+  LOG_LV1("LED", "Bpm::init( %d, %d )", animation_p1, animation_p2);
+  gHue = animation_p1;
+}
+void Bpm_step( int frame )
+{
+  // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
+  uint8_t BeatsPerMinute = 62;
+  CRGBPalette16 palette = PartyColors_p;
+  uint8_t beat = beatsin8(BeatsPerMinute, 64, 255);
+  for (int i = 0; i < NUM_LEDS; i++)
+  { //9948
+    gLeds[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
+  }
+  gHue += animation_p2;
+}
+
+// Confetti: Random colored speckles that blink in and fade smoothly
+// p1 : 
+// p2 : 
+void Confetti_init() {
+  LOG_LV1("LED", "Confetti::init( %d, %d )", animation_p1, animation_p2);
+  gHue = animation_p1;
+}
+void Confetti_step( int frame)
+{
+  fadeToBlackBy(gLeds, NUM_LEDS, 10);
+  int pos = random16(NUM_LEDS);
+  gLeds[pos] += CHSV(gHue + random8(64), 200, 255);
+}
+
+
 
 //
 //  Functions below have not been converted to animations
 // 
-
-
 void mirror()
 {
   for (int i = 0; i < 4; i++) {
@@ -234,24 +267,6 @@ void rainbowWithGlitter()
   fill_rainbow(gLeds, 4, gHue++, 20);
   addGlitter(80);
 }
-void confetti()
-{
-  // random colored speckles that blink in and fade smoothly
-  fadeToBlackBy(gLeds, NUM_LEDS, 10);
-  int pos = random16(NUM_LEDS);
-  gLeds[pos] += CHSV(gHue + random8(64), 200, 255);
-}
 
-void bpm()
-{
-  // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-  uint8_t BeatsPerMinute = 62;
-  CRGBPalette16 palette = PartyColors_p;
-  uint8_t beat = beatsin8(BeatsPerMinute, 64, 255);
-  for (int i = 0; i < NUM_LEDS; i++)
-  { //9948
-    gLeds[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
-  }
-}
 
 

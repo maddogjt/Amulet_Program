@@ -36,6 +36,12 @@ void Juggle_step( int frame );
 void Sinelon_init();
 void Sinelon_step( int frame );
 
+void Bpm_init();
+void Bpm_step( int frame );
+
+void Confetti_init();
+void Confetti_step( int frame );
+
 // Functions that should be adapted to animations or removed
 void rainbow2();
 void confetti();

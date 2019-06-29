@@ -47,6 +47,14 @@ void animation_for_name( animation_t &out, animation_name_type_t name, int p1, i
         out.init = Sinelon_init;
         out.step = Sinelon_step;
         break;
+    case ANIMATION_BPM:
+        out.init = Bpm_init;
+        out.step = Bpm_step;
+        break;
+    case ANIMATION_CONFETTI:
+        out.init = Confetti_init;
+        out.step = Confetti_step;
+        break;
     default:
         LOG_LV1("ANIM", "Bad animation name");
         break;

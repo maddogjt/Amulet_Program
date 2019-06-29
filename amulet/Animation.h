@@ -23,6 +23,8 @@ typedef enum
     ANIMATION_CYLON,
     ANIMATION_JUGGLE,
     ANIMATION_SINELON,
+    ANIMATION_BPM,
+    ANIMATION_CONFETTI,
 } animation_name_type_t;
 
 void animation_for_name( animation_t &out, animation_name_type_t name, int p1, int p2);
