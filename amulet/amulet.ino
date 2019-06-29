@@ -8,9 +8,6 @@
 
 Button dfuButton(PIN_DFU, 25, true, true);
 
-constexpr int singleClick = 1;
-constexpr int doubleClick = 2;
-constexpr int longHold = 3;
 
 #if defined(FASTLED_VERSION) && (FASTLED_VERSION < 3001000)
 #warning "Requires FastLED 3.1 or later; check github for latest code."

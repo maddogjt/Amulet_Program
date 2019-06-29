@@ -1,3 +1,4 @@
+#pragma once
 
 // process scan -> signal array
 // process signal (signal / strength array) -> top signal + state data

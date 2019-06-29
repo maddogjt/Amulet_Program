@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Arduino.h>
 
 // Order matters since we use this to prioritize. Higher index means higher priority
