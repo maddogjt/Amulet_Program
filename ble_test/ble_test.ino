@@ -40,7 +40,7 @@ CRGB leds[NUM_LEDS];
   {
     pinMode(28, INPUT_PULLUP);
     pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, LED_STATE_ON);
+    digitalWrite(LED_BUILTIN, !LED_STATE_ON);
     Serial.begin(115200);
     // while (!Serial)
     //    delay(10); // for nrf52840 with native usb
