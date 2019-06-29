@@ -27,10 +27,17 @@ void DebugInfo_step( int frame );
 void Flame_init();
 void Flame_step( int frame );
 
+void Cylon_init();
+void Cylon_step( int frame );
+
+void Juggle_init();
+void Juggle_step( int frame );
+
+void Sinelon_init();
+void Sinelon_step( int frame );
 
 // Functions that should be adapted to animations or removed
 void rainbow2();
-void cylon();
 void confetti();
 void sinelon();
 void mirror();

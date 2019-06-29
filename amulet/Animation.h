@@ -20,6 +20,9 @@ typedef enum
     ANIMATION_TWISTER,
     ANIMATION_FLAME,
     ANIMATION_DEBUG_INFO,
+    ANIMATION_CYLON,
+    ANIMATION_JUGGLE,
+    ANIMATION_SINELON,
 } animation_name_type_t;
 
 void animation_for_name( animation_t &out, animation_name_type_t name, int p1, int p2);

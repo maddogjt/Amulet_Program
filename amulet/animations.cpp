@@ -147,6 +147,60 @@ void DebugInfo_step( int frame ) {
   fill_solid(gLeds, max(1,min(NUM_LEDS,animation_p1)), CHSV(gHue, 255, 64 + sin8(frame)/2));
 }
 
+// Cylon: 
+// p1 : start hue
+// p2 : hue increment
+void Cylon_init() {
+  LOG_LV1("LED", "Cylon::init( %d, %d )", animation_p1, animation_p2);
+  gHue = animation_p1;
+  fill_solid(gLeds, NUM_LEDS, CHSV(gHue, 255, 0));
+}
+void Cylon_step( int frame ) {
+  // a colored dot sweeping back and forth, with fading trails
+  fadeToBlackBy(gLeds, 4, 20);
+  int pos = beatsin16(26, 0, 4 - 1);
+  gLeds[pos] += CHSV(gHue, 255, 192);
+  mirror();
+  gHue += animation_p2;
+}
+
+// Juggle: 
+// p1 : 
+// p2 : 
+void Juggle_init() {
+  LOG_LV1("LED", "Juggle::init( %d, %d )", animation_p1, animation_p2);
+  gHue = animation_p1;
+  fill_solid(gLeds, NUM_LEDS, CHSV(gHue, 255, 0));
+}
+void Juggle_step( int frame )
+{
+  // eight colored dots, weaving in and out of sync with each other
+  fadeToBlackBy(gLeds, NUM_LEDS, 20);
+  byte dothue = 0;
+  for (int i = 0; i < 8; i++)
+  {
+    gLeds[beatsin16(i + 7, 0, NUM_LEDS - 1)] |= CHSV(dothue, 200, 255);
+    dothue += 32;
+  }
+}
+
+// Sinelon: 
+// p1 : Start Hue
+// p2 : Hue increment
+void Sinelon_init() {
+  LOG_LV1("LED", "Juggle::init( %d, %d )", animation_p1, animation_p2);
+  gHue = animation_p1;
+}
+void Sinelon_step( int frame )
+{
+  // a colored dot sweeping back and forth, with fading trails
+  fadeToBlackBy(gLeds, NUM_LEDS, 20);
+  int pos = beatsin16(13, 0, NUM_LEDS - 1);
+  gLeds[pos] += CHSV(gHue, 255, 192);
+  gHue += animation_p2;
+}
+
+
 //
 //  Functions below have not been converted to animations
 // 
@@ -163,15 +217,6 @@ void rainbow2()
 {
   // FastLED's built-in rainbow generator
   fill_rainbow(gLeds, 4, gHue++, 20);
-  mirror();
-}
-
-void cylon()
-{
-  // a colored dot sweeping back and forth, with fading trails
-  fadeToBlackBy(gLeds, 4, 20);
-  int pos = beatsin16(26, 0, 4 - 1);
-  gLeds[pos] += CHSV(gHue, 255, 192);
   mirror();
 }
 
@@ -197,14 +242,6 @@ void confetti()
   gLeds[pos] += CHSV(gHue + random8(64), 200, 255);
 }
 
-void sinelon()
-{
-  // a colored dot sweeping back and forth, with fading trails
-  fadeToBlackBy(gLeds, NUM_LEDS, 20);
-  int pos = beatsin16(13, 0, NUM_LEDS - 1);
-  gLeds[pos] += CHSV(gHue, 255, 192);
-}
-
 void bpm()
 {
   // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
@@ -217,14 +254,4 @@ void bpm()
   }
 }
 
-void juggle()
-{
-  // eight colored dots, weaving in and out of sync with each other
-  fadeToBlackBy(gLeds, NUM_LEDS, 20);
-  byte dothue = 0;
-  for (int i = 0; i < 8; i++)
-  {
-    gLeds[beatsin16(i + 7, 0, NUM_LEDS - 1)] |= CHSV(dothue, 200, 255);
-    dothue += 32;
-  }
-}
+

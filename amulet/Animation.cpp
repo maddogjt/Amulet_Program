@@ -35,6 +35,18 @@ void animation_for_name( animation_t &out, animation_name_type_t name, int p1, i
         out.init = DebugInfo_init;
         out.step = DebugInfo_step;
         break;
+    case ANIMATION_CYLON:
+        out.init = Cylon_init;
+        out.step = Cylon_step;
+        break;
+    case ANIMATION_JUGGLE:
+        out.init = Juggle_init;
+        out.step = Juggle_step;
+        break;
+    case ANIMATION_SINELON:
+        out.init = Sinelon_init;
+        out.step = Sinelon_step;
+        break;
     default:
         LOG_LV1("ANIM", "Bad animation name");
         break;
