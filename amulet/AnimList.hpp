@@ -10,26 +10,27 @@
 #include "animations/AnimSinelon.h"
 #include "animations/AnimBPM.h"
 #include "animations/AnimConfetti.h"
-#else 
+#include "animations/AnimBallRaster.h"
+#else
 
 #ifndef DEFINE_ANIM
 #define CLEAR_DEFINE_ANIM
-#define DEFINE_ANIM(...) 
+#define DEFINE_ANIM(...)
 #endif
 
-DEFINE_ANIM( AnimSolidHue )
-DEFINE_ANIM( AnimRainbow )
-DEFINE_ANIM( AnimTwister )
-DEFINE_ANIM( AnimFlame )
-DEFINE_ANIM( AnimDebugInfo )
-DEFINE_ANIM( AnimCylon )
-DEFINE_ANIM( AnimJuggle )
-DEFINE_ANIM( AnimSinelon )
-DEFINE_ANIM( AnimBPM )
-DEFINE_ANIM( AnimConfetti )
+DEFINE_ANIM(AnimSolidHue)
+DEFINE_ANIM(AnimRainbow)
+DEFINE_ANIM(AnimTwister)
+DEFINE_ANIM(AnimFlame)
+DEFINE_ANIM(AnimDebugInfo)
+DEFINE_ANIM(AnimCylon)
+DEFINE_ANIM(AnimJuggle)
+DEFINE_ANIM(AnimSinelon)
+DEFINE_ANIM(AnimBPM)
+DEFINE_ANIM(AnimConfetti)
+DEFINE_ANIM(AnimBallRaster)
 
 #ifdef CLEAR_DEFINE_ANIM
 #undef DEFINE_ANIM
 #endif
 #endif
-

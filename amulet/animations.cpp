@@ -4,7 +4,6 @@
 #include "animations.h"
 #include "globals.h"
 
-
 #define NUM_LEDS RGB_LED_COUNT
 CRGB gLeds[NUM_LEDS];
 
@@ -17,50 +16,66 @@ int frame_counter = 0;
 
 void start_animation(Anim name, int p1, int p2)
 {
-	if (currentAnim != nullptr) {
+	if (currentAnim != nullptr)
+	{
 		delete currentAnim;
 		currentAnim = nullptr;
 	}
 
-	animParams params {};
+	animParams params{};
 	params.extra_[0] = p1;
 	params.extra_[1] = p2;
 
 	switch (name)
 	{
-	#define DEFINE_ANIM( animName ) case Anim::animName: \
-		currentAnim = new animName(); \
+#define DEFINE_ANIM(animName)             \
+	case Anim::animName:                  \
+		currentAnim = new animName();     \
 		currentAnimName = Anim::animName; \
-		break; 
-	
-	#include "AnimList.hpp"
-	#undef DEFINE_ANIM
-	
+		break;
+
+#include "AnimList.hpp"
+#undef DEFINE_ANIM
+
 	default:
 		LOG_LV1("ANIM", "Bad animation name");
 		break;
 	}
 
-
-	if (currentAnim != nullptr) {
+	if (currentAnim != nullptr)
+	{
 		currentAnim->setParams(params);
 
-		  frame_counter = 0;
-  			currentAnim->init();
+		frame_counter = 0;
+		currentAnim->init();
 	}
 }
 
-void step_animation( )
+void step_animation()
 {
-	if (currentAnim != nullptr) {
+	if (currentAnim != nullptr)
+	{
 		currentAnim->step(frame_counter++, 0.f, 1.f);
+
+		if (currentAnim->params_.flags_ & ANIMATION_FLAG_FOLD)
+		{
+			fold();
+		}
+		if (currentAnim->params_.flags_ & ANIMATION_FLAG_MIRROR)
+		{
+			mirror();
+		}
+		if (currentAnim->params_.flags_ & ANIMATION_FLAG_LOOP)
+		{
+			mirror_invert();
+		}
 	}
 }
-
 
 bool matches_current_animation(Anim name, int p1, int p2)
 {
-	if (currentAnim == nullptr) {
+	if (currentAnim == nullptr)
+	{
 		return false;
 	}
 	return currentAnimName == name &&
@@ -68,37 +83,63 @@ bool matches_current_animation(Anim name, int p1, int p2)
 		   currentAnim->params_.extra_[1] == p2;
 }
 
-
 //
 //  Functions below have not been converted to animations
-// 
+//
+
+void fold()
+{
+	/* *
+	+------+
+	\ 4  3 /
+	| 5  2 |
+	| 6  1 |
+	/ 7  0 \
+	+------+
+	*/
+	leds[2] = leds[1];
+	leds[3] = leds[0];
+	leds[4] = leds[7];
+	leds[5] = leds[6];
+}
+
+void mirror_invert()
+{
+	for (int i = 0; i < 4; i++)
+	{
+		leds[7 - i] = CRGB(
+			leds[i].g,
+			leds[i].b,
+			leds[i].r);
+	}
+}
+
 void mirror()
 {
-  for (int i = 0; i < 4; i++) {
-    gLeds[7-i] = gLeds[i];
-  }
+	for (int i = 0; i < 4; i++)
+	{
+		gLeds[7 - i] = gLeds[i];
+	}
 }
 
 void rainbow2()
 {
-  // FastLED's built-in rainbow generator
-  fill_rainbow(gLeds, 4, gHue++, 20);
-  mirror();
+	// FastLED's built-in rainbow generator
+	fill_rainbow(gLeds, 4, gHue++, 20);
+	mirror();
 }
 
 void addGlitter(fract8 chanceOfGlitter)
 {
-  if (random8() < chanceOfGlitter)
-  {
-    gLeds[random16(NUM_LEDS)] += CRGB::White;
-  }
+	if (random8() < chanceOfGlitter)
+	{
+		gLeds[random16(NUM_LEDS)] += CRGB::White;
+	}
 }
 
 void rainbowWithGlitter()
 {
-  // built-in FastLED rainbow, plus some random sparkly glitter
-  fill_rainbow(gLeds, 4, gHue++, 20);
-  addGlitter(80);
+	// built-in FastLED rainbow, plus some random sparkly glitter
+	fill_rainbow(gLeds, 4, gHue++, 20);
+	addGlitter(80);
 }
-
-

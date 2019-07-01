@@ -274,14 +274,12 @@ void raster()
 	}
 }
 
-static float angle = PI / 4;
+static float angle = 0.2; //0; //PI / 4;
+float fHue = 0;
 void rainbow_raster()
 {
-	EVERY_N_MILLISECONDS(100)
-	{
-		gHue++;
-		angle += 0.1;
-	}
+	fHue += 0.2;
+	angle += 0.005;
 
 	float x;
 	float y;
@@ -294,11 +292,11 @@ void rainbow_raster()
 		float c = distance(0, x, 0, y);
 		// Serial.printf("c: %f     angle: %f\n", c, angle);
 
-		float hue = c * cosf(alpha - angle);
-		int ihue = (int)(hue + 255 + gHue) % 255;
+		float hue = c * cosf(alpha - angle) + fHue;
+		int ihue = (int)(hue + 255) % 255;
 		if (i == 7)
 		{
-			Serial.printf("hue: (%d) %f\n", ihue, hue + gHue);
+			// Serial.printf("hue: (%d) %f\n", ihue, hue);
 		}
 		leds[i] = CHSV(ihue, 255, 192);
 	}
