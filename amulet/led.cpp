@@ -16,22 +16,21 @@ FASTLED_USING_NAMESPACE
 bool show_ambient= true;
 bool led_test_mode = false;
 
-animation_t current_animation;
+
 
 // returns true if animation was changed
-bool set_animation_from_signal( Signal *s) {
-  animation_t anim_from_signal;
+void set_animation_from_signal( Signal *s) {
+  
   if( s && (s->_scan._cmd == command_beacon || s->_scan._cmd == command_flashmob ) ) {
-    animation_for_name( anim_from_signal, (animation_name_type_t) s->_scan._p0, s->_scan._p1, s->_scan._p2);
+	if (!matches_current_animation((Anim) s->_scan._p0, s->_scan._p1, s->_scan._p2)) {
+		start_animation((Anim) s->_scan._p0, s->_scan._p1, s->_scan._p2);
+	}
+
   } else {
     show_ambient = true;
-    animation_for_name( anim_from_signal, ANIMATION_SOLID_HUE, 0, 1);
-  }
-  if( !animations_are_equal(current_animation, anim_from_signal) ) {
-    current_animation = anim_from_signal;
-    return true;
-  } else {
-    return false;
+	if (!matches_current_animation( Anim::AnimSolidHue, 0, 1)) {
+		start_animation( Anim::AnimSolidHue, 0, 1);
+	}
   }
 }
 
@@ -43,17 +42,14 @@ void led_setup()
     FastLED.setBrightness(BRIGHTNESS);
 
     // Set the initial animation
-    animation_for_name( current_animation, ANIMATION_SOLID_HUE, 0, 1);
-    start_animation(current_animation);
+    start_animation( Anim::AnimSolidHue, 0, 1);
 }
 
 void choose_pattern_by_signal() {
   LOG_LV1("LED", "choose_pattern_by_signal");
   Signal *signal = current_top_signal();
   LOG_LV1("LED", "Has Top Signal: %s", signal ? "Yes" : "No");
-  if( set_animation_from_signal(signal) ) {
-    start_animation(current_animation);
-  }
+  set_animation_from_signal(signal);
 }
 
 void led_loop( int step )
@@ -64,7 +60,7 @@ void led_loop( int step )
   }
 
   // Step the currentAnimation
-  step_animation(current_animation);
+  step_animation();
   FastLED.show();
 }
 
@@ -81,39 +77,39 @@ void led_show_test_pattern_by_index(int idx)
   switch (idx) 
   {
   case 0:
-    animation_for_name( current_animation, ANIMATION_SOLID_HUE, 0, 5);
+    start_animation( Anim::AnimSolidHue, 0, 5);
     break;
   case 1:
-    animation_for_name( current_animation, ANIMATION_RAINBOW, 0, 2);
+    start_animation( Anim::AnimRainbow, 0, 2);
     break;
   case 2:
-    animation_for_name( current_animation, ANIMATION_TWISTER, 0, 0);
+    start_animation( Anim::AnimTwister, 0, 0);
     break;
   case 3:
-    animation_for_name( current_animation, ANIMATION_FLAME, 0, 0);
+    start_animation( Anim::AnimFlame, 0, 0);
     break;
   case 4:
-    animation_for_name( current_animation, ANIMATION_DEBUG_INFO, 5, 0);
+    start_animation( Anim::AnimDebugInfo, 5, 0);
     break;
   case 5:
-    animation_for_name( current_animation, ANIMATION_CYLON, 5, 0);
+    start_animation( Anim::AnimCylon, 5, 0);
     break;
   case 6:
-    animation_for_name( current_animation, ANIMATION_JUGGLE, 5, 0);
+    start_animation( Anim::AnimJuggle, 5, 0);
     break;
   case 7:
-    animation_for_name( current_animation, ANIMATION_SINELON, 5, 2);
+    start_animation( Anim::AnimSinelon, 5, 2);
     break;
   case 8:
-    animation_for_name( current_animation, ANIMATION_BPM, 5, 2);
+    start_animation( Anim::AnimBPM, 5, 2);
     break;
   case 9:
-    animation_for_name( current_animation, ANIMATION_CONFETTI, 0, 0);
+    start_animation( Anim::AnimConfetti, 0, 0);
     break;
   default:
     break;
   }
-  start_animation(current_animation);
+
   led_test_mode = true;
 }
 

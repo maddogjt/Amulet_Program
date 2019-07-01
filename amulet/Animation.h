@@ -1,33 +1,53 @@
+#pragma once
 
-#ifndef AMULET_ANIMATION_H
-#define AMULET_ANIMATION_H
+#include <cstdint>
+#include <Arduino.h>
+#include "globals.h"
+#include <FastLED.h>
+FASTLED_USING_NAMESPACE
 
-typedef void (*init_func)();
-typedef void (*step_func)(int frame);
+struct animColor {
+	uint8_t h;
+	uint8_t s;
+	uint8_t v;
+};
 
-typedef struct
+struct animParams {
+	animColor color1_;
+	animColor color2_;
+	animColor color3_;
+	uint8_t speed_;
+	uint8_t flags_;
+	uint8_t extra_[6];
+};
+
+// TODO: remove?
+extern uint8_t gHue;
+
+extern CRGB gLeds[RGB_LED_COUNT];
+
+void mirror();
+
+
+class Animation
 {
-    init_func init;
-    step_func step;
-    int p1;
-    int p2;
-} animation_t;
+	public:
+	virtual ~Animation(){}
 
-typedef enum
-{
-    ANIMATION_SOLID_HUE,
-    ANIMATION_RAINBOW,
-    ANIMATION_TWISTER,
-    ANIMATION_FLAME,
-    ANIMATION_DEBUG_INFO,
-    ANIMATION_CYLON,
-    ANIMATION_JUGGLE,
-    ANIMATION_SINELON,
-    ANIMATION_BPM,
-    ANIMATION_CONFETTI,
-} animation_name_type_t;
+	// temporary, switch to using params_
+		int animation_p1;
+		int animation_p2;
 
-void animation_for_name( animation_t &out, animation_name_type_t name, int p1, int p2);
-bool animations_are_equal( animation_t const &p1, animation_t const &p2);
+	public:
+		// Animation(const animParams &parameters) : params_(parameters) {}
+		void setParams(const animParams &parameters)
+		{
+			params_ = parameters;
+			animation_p1 = params_.extra_[0];
+			animation_p2 = params_.extra_[1];
+	}
+	  virtual void init() {}
+	  virtual void step(const int frame, const float deltaTime, const float sourceDistance) = 0;
 
-#endif
+	  animParams params_;
+};

@@ -1,239 +1,72 @@
+#define DO_INCLUDES
+#include "AnimList.hpp"
 
 #include "animations.h"
 #include "globals.h"
 
-FASTLED_USING_NAMESPACE
 
 #define NUM_LEDS RGB_LED_COUNT
 CRGB gLeds[NUM_LEDS];
 
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
-int animation_p1=0;
-int animation_p2=0;
+
+Animation *currentAnim = nullptr;
+Anim currentAnimName = Anim::Unknown;
 
 int frame_counter = 0;
-void start_animation( animation_t &anim)
+
+void start_animation(Anim name, int p1, int p2)
 {
-  frame_counter = 0;
-  animation_p1 = anim.p1;
-  animation_p2 = anim.p2;
-  anim.init();
+	if (currentAnim != nullptr) {
+		delete currentAnim;
+		currentAnim = nullptr;
+	}
+
+	animParams params {};
+	params.extra_[0] = p1;
+	params.extra_[1] = p2;
+
+	switch (name)
+	{
+	#define DEFINE_ANIM( animName ) case Anim::animName: \
+		currentAnim = new animName(); \
+		currentAnimName = Anim::animName; \
+		break; 
+	
+	#include "AnimList.hpp"
+	#undef DEFINE_ANIM
+	
+	default:
+		LOG_LV1("ANIM", "Bad animation name");
+		break;
+	}
+
+
+	if (currentAnim != nullptr) {
+		currentAnim->setParams(params);
+
+		  frame_counter = 0;
+  			currentAnim->init();
+	}
 }
 
-void step_animation( animation_t &anim)
+void step_animation( )
 {
-  anim.step(frame_counter++);
+	if (currentAnim != nullptr) {
+		currentAnim->step(frame_counter++, 0.f, 1.f);
+	}
 }
 
-// Rainbow: Each LED has a progressive hue and rotates by incrementing base hue
-// p1 : Start hue
-// p2 : rate of hue change per frame ( can be positive or negative )
-void Rainbow_init() {
-  LOG_LV1("LED", "Rainbow::init( %d, %d )", animation_p1, animation_p2);
-  gHue = animation_p1;
-  fill_rainbow(gLeds, NUM_LEDS, gHue++, 20);
-}
-void Rainbow_step( int frame ) {
-  gHue += animation_p2;
-  fill_rainbow(gLeds, NUM_LEDS, gHue++, 20);
-}
 
-// Twister: randomly rotates through the colors of th twister mat
-// no parameters
-CRGB g_twister_colors[] = {
-    CRGB::Green,
-    CRGB::Yellow,
-    CRGB::Blue,
-    CRGB::Red
-};
-void Twister_init() {
-  LOG_LV1("LED", "Twister::init( %d, %d )", animation_p1, animation_p2);
-
-  for( int i =0; i<NUM_LEDS; i++) {
-    gLeds[i] = g_twister_colors[random8() % ARRAY_SIZE(g_twister_colors)];
-  }
-}
-void Twister_step( int frame ) {
-  if( frame % 24 == 0 ) {
-    for( int i =0; i<NUM_LEDS; i++) {
-      if( random8() % 3 == 0 ) {
-        gLeds[i] = g_twister_colors[random8() % ARRAY_SIZE(g_twister_colors)];
-      }
-    }
-  }
-}
-
-// SolidHue: All LEDs are the same color, and can optionally rotate hue 
-// p1 : Start hue
-// p2 : rate of hue change per frame ( can be 0, positive, or negative )
-void SolidHue_init() {
-  LOG_LV1("LED", "SolidHue::init( %d, %d )", animation_p1, animation_p2);
-  gHue = animation_p1;
-  fill_solid(gLeds, NUM_LEDS, CHSV(gHue, 255, 192));
-}
-void SolidHue_step( int frame ) {
-  gHue += animation_p2;
-  fill_solid(gLeds, NUM_LEDS, CHSV(gHue, 255, 192));
-}
-
-// Flame: Adapted from https://github.com/FastLED/FastLED/blob/master/examples/Fire2012WithPalette/Fire2012WithPalette.ino
-// p1 : 
-// p2 : 
-bool gReverseDirection = false;
-CRGBPalette16 gPal;
-void Flame_init() {
-  LOG_LV1("LED", "Flame::init( %d, %d )", animation_p1, animation_p2);
-  gPal = HeatColors_p;
-  fill_solid(gLeds, NUM_LEDS, CHSV(gHue, 255, 192));
-}
-void Fire2012WithPalette();
-void Flame_step( int frame ) {
-  // Add entropy to random number generator; we use a lot of it.
-  random16_add_entropy( random());
-  Fire2012WithPalette(); // run simulation frame, using palette colors
-  mirror();
-}
-#define COOLING  30
-#define SPARKING 180
-void Fire2012WithPalette()
+bool matches_current_animation(Anim name, int p1, int p2)
 {
-// Array of temperature readings at each simulation cell
-  static byte heat[NUM_LEDS];
-
-  // Step 1.  Cool down every cell a little
-    for( int i = 0; i < NUM_LEDS; i++) {
-      heat[i] = qsub8( heat[i],  random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
-    }
-  
-    // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-    for( int k= NUM_LEDS - 1; k >= 2; k--) {
-      heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
-    }
-    
-    // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
-    if( random8() < SPARKING ) {
-      int y = random8(7);
-      heat[y] = qadd8( heat[y], random8(160,255) );
-    }
-
-    // Step 4.  Map from heat cells to LED colors
-    for( int j = 0; j < NUM_LEDS; j++) {
-      // Scale the heat value from 0-255 down to 0-240
-      // for best results with color palettes.
-      byte colorindex = scale8( heat[j], 240);
-      CRGB color = ColorFromPalette( gPal, colorindex);
-      int pixelnumber;
-      if( gReverseDirection ) {
-        pixelnumber = (NUM_LEDS-1) - j;
-      } else {
-        pixelnumber = j;
-      }
-      gLeds[pixelnumber] = color;
-    }
+	if (currentAnim == nullptr) {
+		return false;
+	}
+	return currentAnimName == name &&
+		   currentAnim->params_.extra_[0] == p1 &&
+		   currentAnim->params_.extra_[1] == p2;
 }
-
-// DebugInfo: Lights LEDs as parameters to provide debug info. Each number is between 1-8.
-// Zero is not allowed since you can't see zero lights.
-// p1 : The first int 
-// p2 : Hue
-void DebugInfo_init() {
-  LOG_LV1("LED", "DebugInfo::init( %d, %d )", animation_p1, animation_p2);
-  gHue = animation_p2;
-  fill_solid(gLeds, NUM_LEDS, CHSV(gHue, 255, 0));
-  fill_solid(gLeds, max(1,min(NUM_LEDS,animation_p1)), CHSV(gHue, 255, 64));
-}
-void DebugInfo_step( int frame ) {
-  // Pulse the brightness between 64 and 192
-  fill_solid(gLeds, max(1,min(NUM_LEDS,animation_p1)), CHSV(gHue, 255, 64 + sin8(frame)/2));
-}
-
-// Cylon: 
-// p1 : start hue
-// p2 : hue increment
-void Cylon_init() {
-  LOG_LV1("LED", "Cylon::init( %d, %d )", animation_p1, animation_p2);
-  gHue = animation_p1;
-  fill_solid(gLeds, NUM_LEDS, CHSV(gHue, 255, 0));
-}
-void Cylon_step( int frame ) {
-  // a colored dot sweeping back and forth, with fading trails
-  fadeToBlackBy(gLeds, 4, 20);
-  int pos = beatsin16(26, 0, 4 - 1);
-  gLeds[pos] += CHSV(gHue, 255, 192);
-  mirror();
-  gHue += animation_p2;
-}
-
-// Juggle: 
-// p1 : 
-// p2 : 
-void Juggle_init() {
-  LOG_LV1("LED", "Juggle::init( %d, %d )", animation_p1, animation_p2);
-  gHue = animation_p1;
-  fill_solid(gLeds, NUM_LEDS, CHSV(gHue, 255, 0));
-}
-void Juggle_step( int frame )
-{
-  // eight colored dots, weaving in and out of sync with each other
-  fadeToBlackBy(gLeds, NUM_LEDS, 20);
-  byte dothue = 0;
-  for (int i = 0; i < 8; i++)
-  {
-    gLeds[beatsin16(i + 7, 0, NUM_LEDS - 1)] |= CHSV(dothue, 200, 255);
-    dothue += 32;
-  }
-}
-
-// Sinelon: 
-// p1 : Start Hue
-// p2 : Hue increment
-void Sinelon_init() {
-  LOG_LV1("LED", "Sinelon::init( %d, %d )", animation_p1, animation_p2);
-  gHue = animation_p1;
-}
-void Sinelon_step( int frame )
-{
-  // a colored dot sweeping back and forth, with fading trails
-  fadeToBlackBy(gLeds, NUM_LEDS, 20);
-  int pos = beatsin16(13, 0, NUM_LEDS - 1);
-  gLeds[pos] += CHSV(gHue, 255, 192);
-  gHue += animation_p2;
-}
-
-// BPM: 
-// p1 : Start Hue
-// p2 : Hue increment
-void Bpm_init() {
-  LOG_LV1("LED", "Bpm::init( %d, %d )", animation_p1, animation_p2);
-  gHue = animation_p1;
-}
-void Bpm_step( int frame )
-{
-  // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-  uint8_t BeatsPerMinute = 62;
-  CRGBPalette16 palette = PartyColors_p;
-  uint8_t beat = beatsin8(BeatsPerMinute, 64, 255);
-  for (int i = 0; i < NUM_LEDS; i++)
-  { //9948
-    gLeds[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
-  }
-  gHue += animation_p2;
-}
-
-// Confetti: Random colored speckles that blink in and fade smoothly
-// p1 : 
-// p2 : 
-void Confetti_init() {
-  LOG_LV1("LED", "Confetti::init( %d, %d )", animation_p1, animation_p2);
-  gHue = animation_p1;
-}
-void Confetti_step( int frame)
-{
-  fadeToBlackBy(gLeds, NUM_LEDS, 10);
-  int pos = random16(NUM_LEDS);
-  gLeds[pos] += CHSV(gHue + random8(64), 200, 255);
-}
-
 
 
 //
@@ -267,6 +100,5 @@ void rainbowWithGlitter()
   fill_rainbow(gLeds, 4, gHue++, 20);
   addGlitter(80);
 }
-
 
 
