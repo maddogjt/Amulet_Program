@@ -34,396 +34,544 @@ constexpr int longHold = 3;
 CRGB leds[NUM_LEDS];
 
 #define BRIGHTNESS 8
-#define FRAMES_PER_SECOND 120
+#define FRAMES_PER_SECOND 240
 
-  void setup()
-  {
-    pinMode(28, INPUT_PULLUP);
-    pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, !LED_STATE_ON);
-    Serial.begin(115200);
-    // while (!Serial)
-    //    delay(10); // for nrf52840 with native usb
+void setup()
+{
+	pinMode(28, INPUT_PULLUP);
+	pinMode(LED_BUILTIN, OUTPUT);
+	digitalWrite(LED_BUILTIN, !LED_STATE_ON);
+	Serial.begin(115200);
+	// while (!Serial)
+	//    delay(10); // for nrf52840 with native usb
 
-  // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
-  #if defined(__AVR_ATtiny85__)
-    if (F_CPU == 16000000)
-      clock_prescale_set(clock_div_1);
-  #endif
-    // End of trinket special codex
-     //digitalWrite(LED_BUILTIN, HIGH);
+// This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
+#if defined(__AVR_ATtiny85__)
+	if (F_CPU == 16000000)
+		clock_prescale_set(clock_div_1);
+#endif
+	// End of trinket special codex
+	//digitalWrite(LED_BUILTIN, HIGH);
 
-  // Serial.println("Wheee!");
+	// Serial.println("Wheee!");
 
-  pinMode(PIN_RGB_LED_PWR, OUTPUT);
-  digitalWrite(PIN_RGB_LED_PWR, RGB_LED_PWR_ON);
+	pinMode(PIN_RGB_LED_PWR, OUTPUT);
+	digitalWrite(PIN_RGB_LED_PWR, RGB_LED_PWR_ON);
 
+	dfuButton.begin();
 
-  dfuButton.begin();
+	// tell FastLED about the LED strip configuration
+	FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, RGB_LED_COUNT).setCorrection(TypicalLEDStrip);
+	// FastLED.addLeds<LED_TYPE, 16, COLOR_ORDER>(leds + 4, 4).setCorrection(TypicalLEDStrip);
+	//FastLED.addLeds<LED_TYPE,DATA_PIN,CLK_PIN,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
 
-  // tell FastLED about the LED strip configuration
-  FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, RGB_LED_COUNT).setCorrection(TypicalLEDStrip);
-  // FastLED.addLeds<LED_TYPE, 16, COLOR_ORDER>(leds + 4, 4).setCorrection(TypicalLEDStrip);
-  //FastLED.addLeds<LED_TYPE,DATA_PIN,CLK_PIN,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+	// set master brightness control
+	FastLED.setBrightness(BRIGHTNESS);
 
-  // set master brightness control
-  FastLED.setBrightness(BRIGHTNESS);
+	// FastLED.setDither(false);
 
+	// // Initialize Bluefruit with maximum connections as Peripheral = 0, Central = 1
+	// // SRAM usage required by SoftDevice will increase dramatically with number of connections
+	// Bluefruit.begin(0, 1);
+	// Bluefruit.setTxPower(4);    // Check bluefruit.h for supported values
+	// Bluefruit.setName("Bluefruit52");
 
-  // // Initialize Bluefruit with maximum connections as Peripheral = 0, Central = 1
-  // // SRAM usage required by SoftDevice will increase dramatically with number of connections
-  // Bluefruit.begin(0, 1);
-  // Bluefruit.setTxPower(4);    // Check bluefruit.h for supported values
-  // Bluefruit.setName("Bluefruit52");
-
-  // // Start Central Scan
-  // Bluefruit.setConnLedInterval(250);
-  // Bluefruit.Scanner.setRxCallback(scan_callback);
-  // Bluefruit.Scanner.start(0);
-
+	// // Start Central Scan
+	// Bluefruit.setConnLedInterval(250);
+	// Bluefruit.Scanner.setRxCallback(scan_callback);
+	// Bluefruit.Scanner.start(0);
 }
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
 typedef void (*SimplePatternList[])();
 SimplePatternList gPatterns = {
-    rainbow,
-    rainbow2,
-    purple,
-    cylon,
-    //red,
-    //green,
-    //blue, 
-    confetti, sinelon, cycleHSV};
+	rainbow_raster,
+	raster,
+	rune,
+	rainbow,
+	rainbow2,
+	purple,
+	cylon,
+	//red,
+	//green,
+	//blue,
+	confetti, sinelon, cycleHSV};
 
 uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
-uint8_t gHue = 0;                  // rotating "base color" used by many of the patterns
+uint8_t gHue = 0;				   // rotating "base color" used by many of the patterns
 
 uint32_t lastMillis = 0;
 bool ledState = 0;
 void loop()
 {
 
- // Serial.println("Looping!");
-  // if ((millis() - lastMillis) > 2000) {
-  //   lastMillis = millis();
-  //   ledState = !ledState;
-  //   digitalWrite(LED_BUILTIN, ledState);
-  //  Serial.println("Looping!");
-  // }
+	// Serial.println("Looping!");
+	// if ((millis() - lastMillis) > 2000) {
+	//   lastMillis = millis();
+	//   ledState = !ledState;
+	//   digitalWrite(LED_BUILTIN, ledState);
+	//  Serial.println("Looping!");
+	// }
 
+	// Call the current pattern function once, updating the 'leds' array
+	gPatterns[gCurrentPatternNumber]();
 
-  // Call the current pattern function once, updating the 'leds' array
-  gPatterns[gCurrentPatternNumber]();
+	// mirror();
+	// reverse_mirror();
+	// colorPattern(5, 0);
+	// fold();
+	// mirror_invert();
+	// invert();
 
-  // send the 'leds' array out to the actual LED strip
-  FastLED.show();
-  // insert a delay to keep the framerate modest
-  FastLED.delay(1000 / FRAMES_PER_SECOND);
+	// send the 'leds' array out to the actual LED strip
+	FastLED.show();
+	// insert a delay to keep the framerate modest
+	FastLED.delay(1000 / FRAMES_PER_SECOND);
 
-  // do some periodic updates
-  EVERY_N_MILLISECONDS(20) { gHue++; }   // slowly cycle the "base color" through the rainbow
+	// do some periodic updates
+	EVERY_N_MILLISECONDS(20) { gHue++; } // slowly cycle the "base color" through the rainbow
 
-  dfuButton.read();
+	dfuButton.read();
 
-  if (dfuButton.pressedFor(2000)) {
-    Serial.println("Going to sleep now");
-//    delay(500);
+	if (dfuButton.pressedFor(2000))
+	{
+		Serial.println("Going to sleep now");
+		//    delay(500);
 
-    digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
-    digitalWrite(LED_BUILTIN, !LED_STATE_ON);
+		digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
+		digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 
-    systemOff(29, 0);
-
-  } else if (dfuButton.wasReleased())
-  { // Just a click event to advance to next pattern
-    // gCurrentPatternNumber = (gCurrentPatternNumber + 1) % maxMode;
-    nextPattern();
-    Serial.print("Switching pattern to ");
-    Serial.println(gCurrentPatternNumber);
-
-  }
-
-
-//  EVERY_N_SECONDS(10) { nextPattern(); } // change patterns periodically
+		systemOff(29, 0);
+	}
+	else if (dfuButton.wasReleased())
+	{ // Just a click event to advance to next pattern
+		// gCurrentPatternNumber = (gCurrentPatternNumber + 1) % maxMode;
+		nextPattern();
+		Serial.print("Switching pattern to ");
+		Serial.println(gCurrentPatternNumber);
+	}
+	//  EVERY_N_SECONDS(10) { nextPattern(); } // change patterns periodically
 }
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
 void nextPattern()
 {
-  // add one to the current pattern number, and wrap around at the end
-  gCurrentPatternNumber = (gCurrentPatternNumber + 1) % ARRAY_SIZE(gPatterns);
+	// add one to the current pattern number, and wrap around at the end
+	gCurrentPatternNumber = (gCurrentPatternNumber + 1) % ARRAY_SIZE(gPatterns);
 }
 
 void mirror()
 {
-  for (int i = 0; i < 4; i++) {
-    leds[7-i] = leds[i];
-  }
+	for (int i = 0; i < 4; i++)
+	{
+		leds[7 - i] = leds[i];
+	}
 }
 
+void reverse_mirror()
+{
+	for (int i = 0; i < 4; i++)
+	{
+		leds[7 - i] = leds[3 - i];
+	}
+}
+
+void fold()
+{
+	/* *
+	+------+
+	\ 4  3 /
+	| 5  2 |
+	| 6  1 |
+	/ 7  0 \
+	+------+
+	*/
+	leds[2] = leds[1];
+	leds[3] = leds[0];
+	leds[4] = leds[7];
+	leds[5] = leds[6];
+}
+
+void mirror_invert()
+{
+	for (int i = 0; i < 4; i++)
+	{
+		leds[7 - i] = CRGB(
+			leds[i].g,
+			leds[i].b,
+			leds[i].r);
+	}
+}
+
+void colorPattern(int pattern, int mod)
+{
+	uint8_t led_mask = pattern;
+	for (int i = 0; i < NUM_LEDS; i++)
+	{
+		if (1 << i & pattern)
+		{
+			leds[i] = CRGB(0, 0, 255);
+		}
+	}
+}
+
+void rune()
+{
+	gHue++;
+	int val = beatsin16(15, 0, 64);
+	uint8_t led_mask = 93;
+	for (int i = 0; i < NUM_LEDS; i++)
+	{
+		if (1 << i & led_mask)
+		{
+			leds[i] = CHSV(HSVHue::HUE_BLUE, 255, 192 - val);
+		}
+		else
+		{
+			leds[i] = CRGB(64 - val, 0, 128 - val * 2);
+		}
+	}
+}
+
+typedef struct
+{
+	float_t x;
+	float_t y;
+} position_t;
+
+const float width = 60;
+const float indent_w = 10;
+const float height = 52;
+
+position_t led_positions[] =
+	{
+		{.x = 122, .y = 0},
+		{.x = 94, .y = height},
+		{.x = 94, .y = height * 2},
+		{.x = 122, .y = height * 3},
+		{.x = 0, .y = height * 3},
+		{.x = 14, .y = height * 2},
+		{.x = 14, .y = height},
+		{.x = 0, .y = 0},
+};
+
+float_t distance(float_t x1, float_t x2, float_t y1, float_t y2)
+{
+	return sqrtf((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+}
+void raster()
+{
+	int32_t xval = beatsin16(11, 0, 122 + 50) - 25;
+	int32_t yval = beatsin16(14, 0, 156 + 50) - 25;
+	EVERY_N_MILLISECONDS(150)
+	gHue++;
+	for (int i = 0; i < NUM_LEDS; i++)
+	{
+		float_t dist = distance(led_positions[i].x, (float_t)xval, led_positions[i].y, (float_t)yval);
+		dist = max(0, min(255, dist * 1.5 - 35));
+		leds[i] = CHSV(gHue, 255, (int)dist);
+	}
+}
+
+static float angle = PI / 4;
+void rainbow_raster()
+{
+	EVERY_N_MILLISECONDS(100)
+	{
+		gHue++;
+		angle += 0.1;
+	}
+
+	float x;
+	float y;
+	for (int i = 0; i < NUM_LEDS; i++)
+	{
+		x = led_positions[i].x + 50;
+		y = led_positions[i].y + 50;
+		float alpha = i == 7 ? 0 : atanf(y / x);
+		// Serial.printf("alpha: %f  (y:%f / x:%f)\n", alpha, y, x);
+		float c = distance(0, x, 0, y);
+		// Serial.printf("c: %f     angle: %f\n", c, angle);
+
+		float hue = c * cosf(alpha - angle);
+		int ihue = (int)(hue + 255 + gHue) % 255;
+		if (i == 7)
+		{
+			Serial.printf("hue: (%d) %f\n", ihue, hue + gHue);
+		}
+		leds[i] = CHSV(ihue, 255, 192);
+	}
+}
+
+// void invert_hsv()
+// {
+// 	for (int i = 0; i < 4; i++)
+// 	{
+// 		CHSV
+// 			leds[i] = CRGB(256 - leds[i].r, 256 - leds[i].g, 256 - leds[i].b);
+// 	}
+// }
 void red()
 {
-  fill_solid(leds, NUM_LEDS, CRGB(255, 0, 0));
+	fill_solid(leds, NUM_LEDS, CRGB(255, 0, 0));
 }
 
 void green()
 {
-  fill_solid(leds, NUM_LEDS, CRGB(0, 255, 0));
+	fill_solid(leds, NUM_LEDS, CRGB(0, 255, 0));
 }
 
 void blue()
 {
-  fill_solid(leds, NUM_LEDS, CRGB(0, 0, 255));
+	fill_solid(leds, NUM_LEDS, CRGB(0, 0, 255));
 }
 
 void purple()
 {
-  fill_solid(leds, NUM_LEDS, CRGB(255, 0, 255));
+	fill_solid(leds, NUM_LEDS, CRGB(255, 0, 255));
 }
-
 
 void rainbow()
 {
-  // FastLED's built-in rainbow generator
-  fill_rainbow(leds, NUM_LEDS, gHue, 20);
+	// FastLED's built-in rainbow generator
+	fill_rainbow(leds, NUM_LEDS, gHue, 40);
 }
-
 
 void rainbow2()
 {
-  // FastLED's built-in rainbow generator
-  fill_rainbow(leds, 4, gHue, 20);
-  mirror();
+	// FastLED's built-in rainbow generator
+	fill_rainbow(leds, 4, gHue, 20);
+	mirror();
 }
 
 void cylon()
 {
-  // a colored dot sweeping back and forth, with fading trails
-  fadeToBlackBy(leds, 4, 20);
-  int pos = beatsin16(26, 0, 4 - 1);
-  leds[pos] += CHSV(gHue, 255, 192);
-  mirror();
+	// a colored dot sweeping back and forth, with fading trails
+	fadeToBlackBy(leds, 4, 20);
+	int pos = beatsin16(26, 0, 4 - 1);
+	leds[pos] += CHSV(gHue, 255, 192);
+	mirror();
 }
 
 void addGlitter(fract8 chanceOfGlitter)
 {
-  if (random8() < chanceOfGlitter)
-  {
-    leds[random16(NUM_LEDS)] += CRGB::White;
-  }
+	if (random8() < chanceOfGlitter)
+	{
+		leds[random16(NUM_LEDS)] += CRGB::White;
+	}
 }
 
 void rainbowWithGlitter()
 {
-  // built-in FastLED rainbow, plus some random sparkly glitter
-  rainbow();
-  addGlitter(80);
+	// built-in FastLED rainbow, plus some random sparkly glitter
+	rainbow();
+	addGlitter(80);
 }
 void confetti()
 {
-  // random colored speckles that blink in and fade smoothly
-  fadeToBlackBy(leds, NUM_LEDS, 10);
-  int pos = random16(NUM_LEDS);
-  leds[pos] += CHSV(gHue + random8(64), 200, 255);
+	// random colored speckles that blink in and fade smoothly
+	fadeToBlackBy(leds, NUM_LEDS, 10);
+	int pos = random16(NUM_LEDS);
+	leds[pos] += CHSV(gHue + random8(64), 200, 255);
 }
 
 void sinelon()
 {
-  // a colored dot sweeping back and forth, with fading trails
-  fadeToBlackBy(leds, NUM_LEDS, 20);
-  int pos = beatsin16(13, 0, NUM_LEDS - 1);
-  leds[pos] += CHSV(gHue, 255, 192);
+	// a colored dot sweeping back and forth, with fading trails
+	fadeToBlackBy(leds, NUM_LEDS, 20);
+	int pos = beatsin16(13, 0, NUM_LEDS - 1);
+	leds[pos] += CHSV(gHue, 255, 192);
 }
 
 void bpm()
 {
-  // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-  uint8_t BeatsPerMinute = 62;
-  CRGBPalette16 palette = PartyColors_p;
-  uint8_t beat = beatsin8(BeatsPerMinute, 64, 255);
-  for (int i = 0; i < NUM_LEDS; i++)
-  { //9948
-    leds[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
-  }
+	// colored stripes pulsing at a defined Beats-Per-Minute (BPM)
+	uint8_t BeatsPerMinute = 62;
+	CRGBPalette16 palette = PartyColors_p;
+	uint8_t beat = beatsin8(BeatsPerMinute, 64, 255);
+	for (int i = 0; i < NUM_LEDS; i++)
+	{ //9948
+		leds[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
+	}
 }
 
 void juggle()
 {
-  // eight colored dots, weaving in and out of sync with each other
-  fadeToBlackBy(leds, NUM_LEDS, 20);
-  byte dothue = 0;
-  for (int i = 0; i < 8; i++)
-  {
-    leds[beatsin16(i + 7, 0, NUM_LEDS - 1)] |= CHSV(dothue, 200, 255);
-    dothue += 32;
-  }
+	// eight colored dots, weaving in and out of sync with each other
+	fadeToBlackBy(leds, NUM_LEDS, 20);
+	byte dothue = 0;
+	for (int i = 0; i < 8; i++)
+	{
+		leds[beatsin16(i + 7, 0, NUM_LEDS - 1)] |= CHSV(dothue, 200, 255);
+		dothue += 32;
+	}
 }
 
 void cycleHSV()
 {
-  fill_solid(leds, NUM_LEDS, CHSV(gHue, 255, 192));
+	fill_solid(leds, NUM_LEDS, CHSV(gHue, 255, 192));
 }
 
 void scan_callback(ble_gap_evt_adv_report_t *report)
 {
-    PRINT_LOCATION();
-    uint8_t len = 0;
-    uint8_t buffer[32];
-    memset(buffer, 0, sizeof(buffer));
+	PRINT_LOCATION();
+	uint8_t len = 0;
+	uint8_t buffer[32];
+	memset(buffer, 0, sizeof(buffer));
 
-    /* Display the timestamp and device address */
-    if (report->type.scan_response)
-    {
-        Serial.printf("[SR%10d] Packet received from ", millis());
-    }
-    else
-    {
-        Serial.printf("[ADV%9d] Packet received from ", millis());
-    }
-    // MAC is in little endian --> print reverse
-    Serial.printBufferReverse(report->peer_addr.addr, 6, ':');
-    Serial.print("\n");
+	/* Display the timestamp and device address */
+	if (report->type.scan_response)
+	{
+		Serial.printf("[SR%10d] Packet received from ", millis());
+	}
+	else
+	{
+		Serial.printf("[ADV%9d] Packet received from ", millis());
+	}
+	// MAC is in little endian --> print reverse
+	Serial.printBufferReverse(report->peer_addr.addr, 6, ':');
+	Serial.print("\n");
 
-    /* Raw buffer contents */
-    Serial.printf("%14s %d bytes\n", "PAYLOAD", report->data.len);
-    if (report->data.len)
-    {
-        Serial.printf("%15s", " ");
-        Serial.printBuffer(report->data.p_data, report->data.len, '-');
-        Serial.println();
-    }
+	/* Raw buffer contents */
+	Serial.printf("%14s %d bytes\n", "PAYLOAD", report->data.len);
+	if (report->data.len)
+	{
+		Serial.printf("%15s", " ");
+		Serial.printBuffer(report->data.p_data, report->data.len, '-');
+		Serial.println();
+	}
 
-    /* RSSI value */
-    Serial.printf("%14s %d dBm\n", "RSSI", report->rssi);
+	/* RSSI value */
+	Serial.printf("%14s %d dBm\n", "RSSI", report->rssi);
 
-    /* Adv Type */
-    Serial.printf("%14s ", "ADV TYPE");
-    if (report->type.connectable)
-    {
-        Serial.print("Connectable ");
-    }
-    else
-    {
-        Serial.print("Non-connectable ");
-    }
+	/* Adv Type */
+	Serial.printf("%14s ", "ADV TYPE");
+	if (report->type.connectable)
+	{
+		Serial.print("Connectable ");
+	}
+	else
+	{
+		Serial.print("Non-connectable ");
+	}
 
-    if (report->type.directed)
-    {
-        Serial.println("directed");
-    }
-    else
-    {
-        Serial.println("undirected");
-    }
+	if (report->type.directed)
+	{
+		Serial.println("directed");
+	}
+	else
+	{
+		Serial.println("undirected");
+	}
 
-    /* Shortened Local Name */
-    if (Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME, buffer, sizeof(buffer)))
-    {
-        Serial.printf("%14s %s\n", "SHORT NAME", buffer);
-        memset(buffer, 0, sizeof(buffer));
-    }
+	/* Shortened Local Name */
+	if (Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME, buffer, sizeof(buffer)))
+	{
+		Serial.printf("%14s %s\n", "SHORT NAME", buffer);
+		memset(buffer, 0, sizeof(buffer));
+	}
 
-    /* Complete Local Name */
-    if (Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME, buffer, sizeof(buffer)))
-    {
-        Serial.printf("%14s %s\n", "COMPLETE NAME", buffer);
-        memset(buffer, 0, sizeof(buffer));
-    }
+	/* Complete Local Name */
+	if (Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME, buffer, sizeof(buffer)))
+	{
+		Serial.printf("%14s %s\n", "COMPLETE NAME", buffer);
+		memset(buffer, 0, sizeof(buffer));
+	}
 
-    /* TX Power Level */
-    if (Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_TX_POWER_LEVEL, buffer, sizeof(buffer)))
-    {
-        Serial.printf("%14s %i\n", "TX PWR LEVEL", buffer[0]);
-        memset(buffer, 0, sizeof(buffer));
-    }
+	/* TX Power Level */
+	if (Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_TX_POWER_LEVEL, buffer, sizeof(buffer)))
+	{
+		Serial.printf("%14s %i\n", "TX PWR LEVEL", buffer[0]);
+		memset(buffer, 0, sizeof(buffer));
+	}
 
-    /* Check for UUID16 Complete List */
-    len = Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE, buffer, sizeof(buffer));
-    if (len)
-    {
-        printUuid16List(buffer, len);
-    }
+	/* Check for UUID16 Complete List */
+	len = Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE, buffer, sizeof(buffer));
+	if (len)
+	{
+		printUuid16List(buffer, len);
+	}
 
-    /* Check for UUID16 More Available List */
-    len = Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_MORE_AVAILABLE, buffer, sizeof(buffer));
-    if (len)
-    {
-        printUuid16List(buffer, len);
-    }
+	/* Check for UUID16 More Available List */
+	len = Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_MORE_AVAILABLE, buffer, sizeof(buffer));
+	if (len)
+	{
+		printUuid16List(buffer, len);
+	}
 
-    /* Check for UUID128 Complete List */
-    len = Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_COMPLETE, buffer, sizeof(buffer));
-    if (len)
-    {
-        printUuid128List(buffer, len);
-    }
+	/* Check for UUID128 Complete List */
+	len = Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_COMPLETE, buffer, sizeof(buffer));
+	if (len)
+	{
+		printUuid128List(buffer, len);
+	}
 
-    /* Check for UUID128 More Available List */
-    len = Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_MORE_AVAILABLE, buffer, sizeof(buffer));
-    if (len)
-    {
-        printUuid128List(buffer, len);
-    }
+	/* Check for UUID128 More Available List */
+	len = Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_MORE_AVAILABLE, buffer, sizeof(buffer));
+	if (len)
+	{
+		printUuid128List(buffer, len);
+	}
 
-    /* Check for BLE UART UUID */
-    if (Bluefruit.Scanner.checkReportForUuid(report, BLEUART_UUID_SERVICE))
-    {
-        Serial.printf("%14s %s\n", "BLE UART", "UUID Found!");
-    }
+	/* Check for BLE UART UUID */
+	if (Bluefruit.Scanner.checkReportForUuid(report, BLEUART_UUID_SERVICE))
+	{
+		Serial.printf("%14s %s\n", "BLE UART", "UUID Found!");
+	}
 
-    /* Check for DIS UUID */
-    if (Bluefruit.Scanner.checkReportForUuid(report, UUID16_SVC_DEVICE_INFORMATION))
-    {
-        Serial.printf("%14s %s\n", "DIS", "UUID Found!");
-    }
+	/* Check for DIS UUID */
+	if (Bluefruit.Scanner.checkReportForUuid(report, UUID16_SVC_DEVICE_INFORMATION))
+	{
+		Serial.printf("%14s %s\n", "DIS", "UUID Found!");
+	}
 
-    /* Check for Manufacturer Specific Data */
-    len = Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA, buffer, sizeof(buffer));
-    if (len)
-    {
-        Serial.printf("%14s ", "MAN SPEC DATA");
-        Serial.printBuffer(buffer, len, '-');
-        Serial.println();
-        memset(buffer, 0, sizeof(buffer));
-    }
+	/* Check for Manufacturer Specific Data */
+	len = Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA, buffer, sizeof(buffer));
+	if (len)
+	{
+		Serial.printf("%14s ", "MAN SPEC DATA");
+		Serial.printBuffer(buffer, len, '-');
+		Serial.println();
+		memset(buffer, 0, sizeof(buffer));
+	}
 
-    Serial.println();
+	Serial.println();
 
-    // For Softdevice v6: after received a report, scanner will be paused
-    // We need to call Scanner resume() to continue scanning
-    Bluefruit.Scanner.resume();
+	// For Softdevice v6: after received a report, scanner will be paused
+	// We need to call Scanner resume() to continue scanning
+	Bluefruit.Scanner.resume();
 }
 
 void printUuid16List(uint8_t *buffer, uint8_t len)
 {
-    Serial.printf("%14s %s", "16-Bit UUID");
-    // for (int i = 0; i < len; i += 2)
-    // {
-    //     uint16_t uuid16;
-    //     memcpy(&uuid16, buffer + i, 2);
-    //     Serial.printf("%04X ", uuid16);
-    // }
-    Serial.println();
+	Serial.printf("%14s %s", "16-Bit UUID");
+	// for (int i = 0; i < len; i += 2)
+	// {
+	//     uint16_t uuid16;
+	//     memcpy(&uuid16, buffer + i, 2);
+	//     Serial.printf("%04X ", uuid16);
+	// }
+	Serial.println();
 }
 
 void printUuid128List(uint8_t *buffer, uint8_t len)
 {
-    (void)len;
-    Serial.printf("%14s %s", "128-Bit UUID");
+	(void)len;
+	Serial.printf("%14s %s", "128-Bit UUID");
 
-    // Print reversed order
-    for (int i = 0; i < 16; i++)
-    {
-        const char *fm = (i == 4 || i == 6 || i == 8 || i == 10) ? "-%02X" : "%02X";
-        Serial.printf(fm, buffer[15 - i]);
-    }
+	// Print reversed order
+	for (int i = 0; i < 16; i++)
+	{
+		const char *fm = (i == 4 || i == 6 || i == 8 || i == 10) ? "-%02X" : "%02X";
+		Serial.printf(fm, buffer[15 - i]);
+	}
 
-    Serial.println();
+	Serial.println();
 }
 
 // void startAdv(void)
-// {   
+// {
 //   // Advertising packet
 //   Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
 //   Bluefruit.Advertising.addTxPower();
@@ -434,7 +582,7 @@ void printUuid128List(uint8_t *buffer, uint8_t len)
 //    * - Interval:  fast mode = 20 ms, slow mode = 152.5 ms
 //    * - Timeout for fast mode is 30 seconds
 //    * - Start(timeout) with timeout = 0 will advertise forever (until connected)
-//    * 
+//    *
 //    * For recommended advertising interval
 //    * https://developer.apple.com/library/content/qa/qa1931/_index.html
 //    */
@@ -442,5 +590,5 @@ void printUuid128List(uint8_t *buffer, uint8_t len)
 //   Bluefruit.Advertising.restartOnDisconnect(true);
 //   Bluefruit.Advertising.setInterval(32, 244);    // in units of 0.625 ms
 //   Bluefruit.Advertising.setFastTimeout(30);      // number of seconds in fast mode
-//   Bluefruit.Advertising.start(ADV_TIMEOUT);      // Stop advertising entirely after ADV_TIMEOUT seconds 
+//   Bluefruit.Advertising.start(ADV_TIMEOUT);      // Stop advertising entirely after ADV_TIMEOUT seconds
 // }
