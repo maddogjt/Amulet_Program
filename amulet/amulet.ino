@@ -1,5 +1,7 @@
 #include <JC_Button.h>
+#define ARDUINO_GENERIC
 #include <FastLED.h>
+#undef ARDUINO_GENERIC
 
 #include "globals.h"
 #include "led.h"
@@ -49,7 +51,7 @@ void setup()
 
   // Custom setup for the LED and BLE components
   led_setup();
-  // ble_setup();
+  ble_setup();
 }
 
 int step = 0;
@@ -57,11 +59,8 @@ void loop()
 {
   // LOG_LV2("LOOP", "Loop start");
   led_loop( step );
-  // yield();
-  // ble_loop( step );
-  // yield();
+  ble_loop( step );
   signal_loop( step );
-
 
   dfuButton.read();
   if (dfuButton.pressedFor(2000)) {
