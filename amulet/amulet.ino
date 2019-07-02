@@ -55,7 +55,6 @@ void loop()
 	}
 	else if (dfuButton.wasReleased())
 	{
-		Serial.println("DFU button released, switching brightness mode");
 		nextBrightnessMode();
 	}
 

@@ -45,13 +45,18 @@ void setBrightnessMode(amulet_brightness_mode_t mode)
 	if (newLedPower)
 	{
 		// Turn on LED power rail
+		LOG_LV1("BRIT", "Setting brightness to %d (mode %d)", newBrightness, mode);
 		digitalWrite(PIN_RGB_LED_PWR, RGB_LED_PWR_ON);
 		FastLED.setBrightness(newBrightness);
 	}
 	else
 	{
+		LOG_LV1("BRIT", "Turning off LED power rail (mode %d)", mode);
 		// Turn off the LED power rail
 		digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
+
+		// TODO: Also turn off bluetooth.
+		// FEATURE: Maybe advertise in special off mode so we can find lost beacons by rssi?
 	}
 }
 
