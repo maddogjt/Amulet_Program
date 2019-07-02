@@ -5,6 +5,7 @@
 #include "animations.h"
 #include "signal.h"
 #include "globals.h"
+#include "BrightnessMode.h"
 
 FASTLED_USING_NAMESPACE
 
@@ -42,7 +43,7 @@ void led_setup()
 	FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(gLeds, RGB_LED_COUNT).setCorrection(TypicalLEDStrip);
 
 	// set master brightness control
-	FastLED.setBrightness(BRIGHTNESS);
+	FastLED.setBrightness(g_led_brightness_medium);
 
 	// Set the initial animation
 	start_animation(Anim::AnimSolidHue, 0, 1);

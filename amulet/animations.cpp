@@ -97,20 +97,20 @@ void fold()
 	/ 7  0 \
 	+------+
 	*/
-	leds[2] = leds[1];
-	leds[3] = leds[0];
-	leds[4] = leds[7];
-	leds[5] = leds[6];
+	gLeds[2] = gLeds[1];
+	gLeds[3] = gLeds[0];
+	gLeds[4] = gLeds[7];
+	gLeds[5] = gLeds[6];
 }
 
 void mirror_invert()
 {
 	for (int i = 0; i < 4; i++)
 	{
-		leds[7 - i] = CRGB(
-			leds[i].g,
-			leds[i].b,
-			leds[i].r);
+		gLeds[7 - i] = CRGB(
+			gLeds[i].g,
+			gLeds[i].b,
+			gLeds[i].r);
 	}
 }
 

@@ -33,7 +33,7 @@ constexpr int longHold = 3;
 #define NUM_LEDS RGB_LED_COUNT
 CRGB leds[NUM_LEDS];
 
-#define BRIGHTNESS 8
+#define BRIGHTNESS 20
 #define FRAMES_PER_SECOND 240
 
 void setup()
