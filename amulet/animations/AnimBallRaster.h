@@ -1,18 +1,7 @@
 #pragma once
 
 #include "../Animation.h"
-
-position_t led_positions[] =
-	{
-		{.x = 122, .y = 0},
-		{.x = 94, .y = 52},
-		{.x = 94, .y = 104},
-		{.x = 122, .y = 156},
-		{.x = 0, .y = 156},
-		{.x = 14, .y = 104},
-		{.x = 14, .y = 52},
-		{.x = 0, .y = 0},
-};
+#include "RasterHelper.h"
 
 class AnimBallRaster : public Animation
 {

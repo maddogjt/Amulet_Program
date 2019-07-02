@@ -43,7 +43,7 @@ void startAsAmulet()
 	FastLED.setBrightness(g_led_brightness_medium);
 
 	// Set the initial ambient animation
-	led_set_ambient_animation({.name = Anim::AnimBallRaster,
+	led_set_ambient_animation({.name = Anim::AnimRainbowRaster,
 							   .params = {}});
 }
 

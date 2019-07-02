@@ -27,22 +27,11 @@ struct animParams
 	uint8_t extra_[6];
 	bool operator==(const animParams &p) const
 	{
+		bool extrasMatch = !memcmp(extra_, p.extra_, 6);
 		return color1_ == p.color1_ && color2_ == p.color2_ && color3_ == p.color3_ &&
-			   speed_ == p.speed_ && flags_ == p.flags_ && extra_ == p.extra_;
+			   speed_ == p.speed_ && flags_ == p.flags_ && extrasMatch;
 	};
 };
-
-// These are used by 'raster' style animations
-typedef struct
-{
-	float_t x;
-	float_t y;
-} position_t;
-
-inline float_t distance(float_t x1, float_t x2, float_t y1, float_t y2)
-{
-	return sqrtf((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
-}
 
 // TODO: remove?
 extern uint8_t gHue;

@@ -20,11 +20,11 @@ animPattern ambientAnimation = {};
 // returns true if animation was changed
 void set_animation_from_signal(Signal *s)
 {
-
 	if (s && (s->_scan._cmd == command_beacon || s->_scan._cmd == command_flashmob))
 	{
 		if (!matches_current_animation((Anim)s->_scan._p0, s->_scan._p1, s->_scan._p2))
 		{
+			LOG_LV1("LED", "Starting Animation from scan");
 			start_animation((Anim)s->_scan._p0, s->_scan._p1, s->_scan._p2);
 		}
 	}
@@ -33,6 +33,7 @@ void set_animation_from_signal(Signal *s)
 		show_ambient = true;
 		if (!matches_current_animation(ambientAnimation))
 		{
+			LOG_LV1("LED", "Starting Ambient Animation");
 			start_animation(ambientAnimation);
 		}
 	}
@@ -75,7 +76,7 @@ void led_set_ambient_animation(const animPattern &anim)
 //
 // -----------------------
 int test_pattern_idx = 0;
-const int test_pattern_count = 11;
+const int test_pattern_count = 12;
 
 void led_show_test_pattern_by_index(int idx)
 {
@@ -113,6 +114,9 @@ void led_show_test_pattern_by_index(int idx)
 		break;
 	case 10:
 		start_animation(Anim::AnimBallRaster, 0, 0);
+		break;
+	case 11:
+		start_animation(Anim::AnimRainbowRaster, 0, 0);
 		break;
 	default:
 		break;

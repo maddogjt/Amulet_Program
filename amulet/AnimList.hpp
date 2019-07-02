@@ -11,6 +11,7 @@
 #include "animations/AnimBPM.h"
 #include "animations/AnimConfetti.h"
 #include "animations/AnimBallRaster.h"
+#include "animations/AnimRainbowRaster.h"
 #else
 
 #ifndef DEFINE_ANIM
@@ -29,6 +30,7 @@ DEFINE_ANIM(AnimSinelon)
 DEFINE_ANIM(AnimBPM)
 DEFINE_ANIM(AnimConfetti)
 DEFINE_ANIM(AnimBallRaster)
+DEFINE_ANIM(AnimRainbowRaster)
 
 #ifdef CLEAR_DEFINE_ANIM
 #undef DEFINE_ANIM

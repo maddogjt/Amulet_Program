@@ -53,6 +53,16 @@ void start_animation(const animPattern &pattern)
 	{
 		currentAnim->setParams(pattern.params);
 
+		LOG_LV1("ANIM", "Current Anim changed to %d", currentAnimName);
+		LOG_LV1("ANIM", "Param 0:	%d", pattern.params.extra_[0]);
+		LOG_LV1("ANIM", "Param 1:	%d", pattern.params.extra_[1]);
+		LOG_LV1("ANIM", "Param 2:	%d", pattern.params.extra_[2]);
+		LOG_LV1("ANIM", "Param 3:	%d", pattern.params.extra_[3]);
+		LOG_LV1("ANIM", "Fold: %d, Mirror: %d, Loop: %d",
+				currentAnim->params_.flags_ & ANIMATION_FLAG_FOLD,
+				currentAnim->params_.flags_ & ANIMATION_FLAG_MIRROR,
+				currentAnim->params_.flags_ & ANIMATION_FLAG_LOOP);
+
 		frame_counter = 0;
 		currentAnim->init();
 	}
