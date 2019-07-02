@@ -11,6 +11,10 @@ struct animColor
 	uint8_t h;
 	uint8_t s;
 	uint8_t v;
+	bool operator==(const animColor &c) const
+	{
+		return h == c.h && s == c.s && v == c.v;
+	};
 };
 
 struct animParams
@@ -21,6 +25,11 @@ struct animParams
 	uint8_t speed_;
 	uint8_t flags_;
 	uint8_t extra_[6];
+	bool operator==(const animParams &p) const
+	{
+		return color1_ == p.color1_ && color2_ == p.color2_ && color3_ == p.color3_ &&
+			   speed_ == p.speed_ && flags_ == p.flags_ && extra_ == p.extra_;
+	};
 };
 
 // These are used by 'raster' style animations

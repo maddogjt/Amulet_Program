@@ -8,6 +8,7 @@
 #include "ble.h"
 #include "signal.h"
 #include "BrightnessMode.h"
+#include "Startup.h"
 
 Button dfuButton(PIN_DFU, 25, true, true);
 
@@ -15,16 +16,6 @@ Button dfuButton(PIN_DFU, 25, true, true);
 #warning "Requires FastLED 3.1 or later; check github for latest code."
 #endif
 
-typedef enum
-{
-	AMULET_MODE_AMULET,
-	AMULET_MODE_BEACON,
-	AMULET_MODE_RUNE,
-	AMULET_MODE_LED_TEST,
-	AMULET_MODE_COUNT,
-} amulet_mode_t;
-
-amulet_mode_t mode = AMULET_MODE_AMULET;
 void nextMode();
 void systemSleep();
 
@@ -45,9 +36,7 @@ void setup()
 	// Start reading the DFU button so we can trigger off long and short presses
 	dfuButton.begin();
 
-	// Custom setup for the LED and BLE components
-	led_setup();
-	ble_setup();
+	start();
 }
 
 int step = 0;
@@ -74,6 +63,7 @@ void loop()
 	step++;
 }
 
+/* 
 void nextDebugModeButton()
 {
 	switch (mode)
@@ -131,7 +121,7 @@ void setMode(amulet_mode_t mode)
 	// Turn on the builtin if we are not an amulet.
 	// digitalWrite(LED_BUILTIN, mode == AMULET_MODE_AMULET ? !LED_STATE_ON : LED_STATE_ON);
 }
-
+*/
 void systemSleep()
 {
 	Serial.println("Going to sleep now");

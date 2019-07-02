@@ -16,17 +16,24 @@ int frame_counter = 0;
 
 void start_animation(Anim name, int p1, int p2)
 {
+	animPattern pattern{};
+	pattern.name = name;
+	pattern.params.extra_[0] = p1;
+	pattern.params.extra_[1] = p2;
+	pattern.params.flags_ = 0;
+	pattern.params.speed_ = 1;
+	start_animation(pattern);
+}
+
+void start_animation(const animPattern &pattern)
+{
 	if (currentAnim != nullptr)
 	{
 		delete currentAnim;
 		currentAnim = nullptr;
 	}
 
-	animParams params{};
-	params.extra_[0] = p1;
-	params.extra_[1] = p2;
-
-	switch (name)
+	switch (pattern.name)
 	{
 #define DEFINE_ANIM(animName)             \
 	case Anim::animName:                  \
@@ -44,7 +51,7 @@ void start_animation(Anim name, int p1, int p2)
 
 	if (currentAnim != nullptr)
 	{
-		currentAnim->setParams(params);
+		currentAnim->setParams(pattern.params);
 
 		frame_counter = 0;
 		currentAnim->init();
@@ -70,6 +77,12 @@ void step_animation()
 			mirror_invert();
 		}
 	}
+}
+
+bool matches_current_animation(const animPattern &pattern)
+{
+	return currentAnimName == pattern.name &&
+		   currentAnim->params_ == pattern.params;
 }
 
 bool matches_current_animation(Anim name, int p1, int p2)

@@ -5,7 +5,6 @@
 #include "animations.h"
 #include "signal.h"
 #include "globals.h"
-#include "BrightnessMode.h"
 
 FASTLED_USING_NAMESPACE
 
@@ -16,6 +15,7 @@ FASTLED_USING_NAMESPACE
 
 bool show_ambient = true;
 bool led_test_mode = false;
+animPattern ambientAnimation = {};
 
 // returns true if animation was changed
 void set_animation_from_signal(Signal *s)
@@ -31,9 +31,9 @@ void set_animation_from_signal(Signal *s)
 	else
 	{
 		show_ambient = true;
-		if (!matches_current_animation(Anim::AnimSolidHue, 0, 1))
+		if (!matches_current_animation(ambientAnimation))
 		{
-			start_animation(Anim::AnimSolidHue, 0, 1);
+			start_animation(ambientAnimation);
 		}
 	}
 }
@@ -41,19 +41,13 @@ void set_animation_from_signal(Signal *s)
 void led_setup()
 {
 	FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(gLeds, RGB_LED_COUNT).setCorrection(TypicalLEDStrip);
-
-	// set master brightness control
-	FastLED.setBrightness(g_led_brightness_medium);
-
-	// Set the initial animation
-	start_animation(Anim::AnimSolidHue, 0, 1);
 }
 
 void choose_pattern_by_signal()
 {
-	LOG_LV1("LED", "choose_pattern_by_signal");
+	// LOG_LV1("LED", "choose_pattern_by_signal");
 	Signal *signal = current_top_signal();
-	LOG_LV1("LED", "Has Top Signal: %s", signal ? "Yes" : "No");
+	// LOG_LV1("LED", "Has Top Signal: %s", signal ? "Yes" : "No");
 	set_animation_from_signal(signal);
 }
 
@@ -68,6 +62,11 @@ void led_loop(int step)
 	// Step the currentAnimation
 	step_animation();
 	FastLED.show();
+}
+
+void led_set_ambient_animation(const animPattern &anim)
+{
+	ambientAnimation = anim;
 }
 
 // -----------------------

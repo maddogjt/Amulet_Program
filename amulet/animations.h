@@ -17,8 +17,16 @@ enum class Anim
 #undef DEFINE_ANIM
 };
 
+struct animPattern
+{
+	Anim name;
+	animParams params;
+};
+
+void start_animation(const animPattern &pattern);
 void start_animation(Anim name, int p1, int p2);
 bool matches_current_animation(Anim name, int p1, int p2);
+bool matches_current_animation(const animPattern &pattern);
 
 void step_animation();
 
