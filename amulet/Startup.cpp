@@ -93,4 +93,11 @@ void startAsPowerAmulet()
 	mode = AMULET_MODE_POWER_AMULET;
 	led_setup();
 	ble_setup(true, true);
+
+	// set master brightness control
+	FastLED.setBrightness(g_led_brightness_medium);
+
+	// Set the initial ambient animation
+	led_set_ambient_animation({.name = Anim::AnimRainbowRaster,
+							   .params = {}});
 }

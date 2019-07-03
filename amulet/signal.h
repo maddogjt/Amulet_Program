@@ -33,5 +33,4 @@ public:
 
 void signal_loop(int step);
 void add_scan_data(Scan &s);
-// void weaken_old_signals();
 Signal *current_top_signal();
