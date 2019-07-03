@@ -23,7 +23,8 @@ void start()
 	// advertise as BLEUart
 	// If no connect after 60 seconds , start as an amulet with random rune
 	// startAsAmulet();
-	startAsBeacon();
+	// startAsBeacon();
+	startAsPowerAmulet();
 }
 
 void startAsRemoteConfig()
@@ -85,7 +86,7 @@ void startAsRune()
 	// Anim name is 4 bytes - could shrink
 	LOG_LV1("STRT", "size of name: %d", sizeof(Anim::AnimBPM));
 	led_set_ambient_animation(runePattern);
-	ble_set_advertisement_data(AdvertisementType::Rune, (uint8_t *)&runePattern, sizeof(beaconPattern));
+	ble_set_advertisement_data(AdvertisementType::Rune, (uint8_t *)&runePattern, sizeof(runePattern));
 }
 
 void startAsPowerAmulet()

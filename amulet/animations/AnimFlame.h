@@ -10,7 +10,7 @@ class AnimFlame : public Animation
 public:
 	virtual void init()
 	{
-		LOG_LV1("LED", "Flame::init( %d, %d )", animation_p1, animation_p2);
+		LOG_LV1("LED", "Flame::init( %d, %d )", params_.extra_[0], params_.extra_[1]);
 		gPal = HeatColors_p;
         fill_solid(gLeds, RGB_LED_COUNT, CHSV(gHue, 255, 192));
     }

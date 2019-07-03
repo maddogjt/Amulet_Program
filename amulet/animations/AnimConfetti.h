@@ -7,8 +7,8 @@ class AnimConfetti : public Animation
 public:
 	virtual void init()
 	{
-		LOG_LV1("LED", "Confetti::init( %d, %d )", animation_p1, animation_p2);
-		gHue = animation_p1;
+		LOG_LV1("LED", "Confetti::init( %d, %d )", params_.extra_[0], params_.extra_[1]);
+		gHue = params_.extra_[0];
 	}
 
 	virtual void step(const int frame, const float deltaTime, const float sourceDistance) override

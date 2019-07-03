@@ -7,8 +7,8 @@ class AnimCylon : public Animation
 public:
 	virtual void init()
 	{
-		LOG_LV1("LED", "Cylon::init( %d, %d )", animation_p1, animation_p2);
-		gHue = animation_p1;
+		LOG_LV1("LED", "Cylon::init( %d, %d )", params_.extra_[0], params_.extra_[1]);
+		gHue = params_.extra_[0];
 		fill_solid(gLeds, RGB_LED_COUNT, CHSV(gHue, 255, 0));
 	}
 
@@ -19,6 +19,6 @@ public:
 		int pos = beatsin16(26, 0, 4 - 1);
 		gLeds[pos] += CHSV(gHue, 255, 192);
 		mirror();
-		gHue += animation_p2;
+		gHue += params_.extra_[1];
 	}
 };

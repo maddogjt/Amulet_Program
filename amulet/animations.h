@@ -6,8 +6,6 @@
 FASTLED_USING_NAMESPACE
 
 extern CRGB gLeds[RGB_LED_COUNT];
-extern int animation_p1;
-extern int animation_p2;
 
 enum class Anim
 {

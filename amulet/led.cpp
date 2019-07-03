@@ -1,6 +1,7 @@
 #define ARDUINO_GENERIC
 #include <FastLED.h>
 #undef ARDUINO_GENERIC
+
 #include "Animation.h"
 #include "animations.h"
 #include "signal.h"
@@ -17,6 +18,11 @@ bool show_ambient = true;
 bool led_test_mode = false;
 animPattern ambientAnimation = {};
 
+void led_set_ambient_animation(const animPattern &anim)
+{
+	ambientAnimation = anim;
+}
+
 // returns true if animation was changed
 void set_animation_from_signal(Signal *s)
 {
@@ -27,7 +33,7 @@ void set_animation_from_signal(Signal *s)
 		memcpy(&pattern, s->_scan._data, sizeof(animPattern));
 		if (!matches_current_animation(pattern))
 		{
-			if (s->_scan.signal_type == AdvertisementType::Rune)
+			if (s->_scan.signal_type == (uint8_t)AdvertisementType::Rune)
 			{
 				LOG_LV1("LED", "Setting Ambient Animation from rune");
 				led_set_ambient_animation(pattern);
@@ -72,10 +78,6 @@ void led_loop(int step)
 	FastLED.show();
 }
 
-void led_set_ambient_animation(const animPattern &anim)
-{
-	ambientAnimation = anim;
-}
 
 // -----------------------
 //

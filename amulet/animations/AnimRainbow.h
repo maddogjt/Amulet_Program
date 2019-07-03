@@ -7,14 +7,14 @@ class AnimRainbow : public Animation
 public:
 	virtual void init()
 	{
-		LOG_LV1("LED", "Rainbow::init( %d, %d )", animation_p1, animation_p2);
-		gHue = animation_p1;
+		LOG_LV1("LED", "Rainbow::init( %d, %d )", params_.extra_[0], params_.extra_[1]);
+		gHue = params_.extra_[0];
 		fill_rainbow(gLeds, RGB_LED_COUNT, gHue++, 20);
 	}
 
 	virtual void step(const int frame, const float deltaTime, const float sourceDistance) override
 	{
-		gHue += animation_p2;
+		gHue += params_.extra_[1];
 		fill_rainbow(gLeds, RGB_LED_COUNT, gHue++, 20);
 	}
 };
