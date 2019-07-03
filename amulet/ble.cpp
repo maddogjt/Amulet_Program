@@ -1,7 +1,11 @@
 #include "ble.h"
 
 #include <bluefruit.h>
+#define ARDUINO_GENERIC
+#include <FastLED.h>
+#undef ARDUINO_GENERIC
 
+#include "led.h"
 #include "signal.h"
 
 // You are supposed to get manufacturer ids from the bluetooth consortium but I made one up
@@ -38,17 +42,40 @@ void debug_print_amulet_mfd(const amulet_mfd_t &mfd)
 void scan_callback(ble_gap_evt_adv_report_t *report);
 void start_advertising_with_data(amulet_mfd_t &data);
 
+// Uart over BLE service
+BLEUart bleuart;
+void start_advertising_uart();
+void prph_bleuart_rx_callback(uint16_t conn_handle);
+
 void ble_setup(bool advertise, bool scan)
 {
+	ble_setup(advertise, scan, false);
+}
+
+void ble_setup(bool advertise, bool scan, bool uart = false)
+{
+	if (advertise && uart)
+	{
+		LOG_LV1("BLE", "Error: we can't advertise and have a uart service");
+	}
 	// Initialize Bluefruit
 	Bluefruit.autoConnLed(false); // Don't blink the led
-	if (!Bluefruit.begin(advertise, scan))
+	if (!Bluefruit.begin(advertise || uart, scan))
 	{
 		// We need to start as both a peripheral and a central
 		digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 		Serial.println("Unable to init bluetooth");
 	}
 	Bluefruit.setTxPower(4); // 4 is (probably) the strongest tx power that we can support.
+
+	if (uart)
+	{
+		Bluefruit.setName("Amulet");
+		// Configure and start the BLE Uart service
+		bleuart.begin();
+		bleuart.setRxCallback(prph_bleuart_rx_callback);
+		start_advertising_uart();
+	}
 
 	if (scan)
 	{
@@ -59,6 +86,128 @@ void ble_setup(bool advertise, bool scan)
 		Bluefruit.Scanner.useActiveScan(true);			// I think active scanning allows it to read the manufacturer data
 		Bluefruit.Scanner.start(0);						// 0 = Don't stop scanning after n seconds
 	}
+}
+
+void start_advertising_uart()
+{
+	// Advertising packet
+	Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
+	Bluefruit.Advertising.addTxPower();
+
+	// Include the BLE UART (AKA 'NUS') 128-bit UUID
+	Bluefruit.Advertising.addService(bleuart);
+
+	// Secondary Scan Response packet (optional)
+	// Since there is no room for 'Name' in Advertising packet
+	Bluefruit.ScanResponse.addName();
+
+	/* Start Advertising
+   * - Enable auto advertising if disconnected
+   * - Interval:  fast mode = 20 ms, slow mode = 152.5 ms
+   * - Timeout for fast mode is 30 seconds
+   * - Start(timeout) with timeout = 0 will advertise forever (until connected)
+   * 
+   * For recommended advertising interval
+   * https://developer.apple.com/library/content/qa/qa1931/_index.html   
+   */
+	Bluefruit.Advertising.restartOnDisconnect(true);
+	Bluefruit.Advertising.setInterval(32, 244); // in unit of 0.625 ms
+	Bluefruit.Advertising.setFastTimeout(30);   // number of seconds in fast mode
+	Bluefruit.Advertising.start(0);				// 0 = Don't stop advertising after n seconds
+}
+
+uint8_t speedForButton(bool up)
+{
+	static uint8_t speeds[] = {3, 7, 11, 14, 20, 44, 78, 120, 200};
+	static uint8_t speed_idx = 5;
+	speed_idx = min(8, max(0, speed_idx + (up ? 1 : -1)));
+	return speeds[speed_idx];
+}
+
+void prph_bleuart_rx_callback(uint16_t conn_handle)
+{
+	(void)conn_handle;
+
+	// Wait for new data to arrive
+	// uint8_t len = readPacket(&bleuart, 500);
+	char str[20 + 1] = {0};
+	uint8_t len = bleuart.read(str, 20);
+
+	Serial.print("[Prph] RX: ");
+	Serial.println(str);
+
+	if (len == 0 || str[0] != '!')
+	{
+		return;
+	}
+
+	static animPattern ambient = {.name = Anim::AnimSinelon, .params = {}};
+
+	// Color
+	if (str[1] == 'C')
+	{
+		uint8_t red = str[2];
+		uint8_t green = str[3];
+		uint8_t blue = str[4];
+		Serial.print("RGB #");
+		if (red < 0x10)
+			Serial.print("0");
+		Serial.print(red, HEX);
+		if (green < 0x10)
+			Serial.print("0");
+		Serial.print(green, HEX);
+		if (blue < 0x10)
+			Serial.print("0");
+		Serial.println(blue, HEX);
+
+		CHSV color = rgb2hsv_approximate(CRGB(red, green, blue));
+
+		ambient.params.color1_ = color.hue;
+
+		// Set the initial ambient animation
+	}
+
+	// Button
+	if (str[1] == 'B')
+	{
+		uint8_t button = str[2];
+		uint8_t press = str[3];
+		uint8_t unknown = str[4];
+		if (press != '0')
+		{
+			// Only do things on button release
+			return;
+		}
+		if (button == '5') // up
+		{
+			Serial.print("[Prph] Up");
+			ambient.params.speed_ = speedForButton(true);
+		}
+		else if (button == '6') // down
+		{
+			ambient.params.speed_ = speedForButton(false);
+		}
+		else if (button == '1') // 1
+		{
+			ambient.params.flags_ = ANIMATION_FLAG_FOLD;
+		}
+		else if (button == '2') // 2
+		{
+			ambient.params.flags_ = ANIMATION_FLAG_MIRROR;
+		}
+		else if (button == '3') // 3
+		{
+			ambient.params.flags_ = ANIMATION_FLAG_LOOP;
+		}
+		else if (button == '4') // 4
+		{
+			ambient.params.flags_ = 0;
+		}
+
+		// Set the initial ambient animation
+	}
+
+	led_set_ambient_animation(ambient);
 }
 
 void start_advertising_with_data(amulet_mfd_t &data)

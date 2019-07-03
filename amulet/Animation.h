@@ -6,23 +6,12 @@
 #include <FastLED.h>
 FASTLED_USING_NAMESPACE
 
-struct animColor
-{
-	uint8_t h;
-	// uint8_t s;
-	// uint8_t v;
-	bool operator==(const animColor &c) const
-	{
-		return h == c.h; // && s == c.s && v == c.v;
-	};
-};
-
 #define ANIM_EXTRAS_SIZE 2
 struct animParams
 {
-	animColor color1_;
-	animColor color2_;
-	animColor color3_;
+	uint8_t color1_;
+	uint8_t color2_;
+	uint8_t color3_;
 	uint8_t speed_;
 	uint8_t flags_;
 	uint8_t extra_[ANIM_EXTRAS_SIZE];

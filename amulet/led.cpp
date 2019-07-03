@@ -6,6 +6,7 @@
 #include "animations.h"
 #include "signal.h"
 #include "globals.h"
+#include "Startup.h"
 
 FASTLED_USING_NAMESPACE
 
@@ -18,10 +19,7 @@ bool show_ambient = true;
 bool led_test_mode = false;
 animPattern ambientAnimation = {};
 
-void led_set_ambient_animation(const animPattern &anim)
-{
-	ambientAnimation = anim;
-}
+void led_set_ambient_animation(const animPattern &anim);
 
 // returns true if animation was changed
 void set_animation_from_signal(Signal *s)
@@ -45,12 +43,19 @@ void set_animation_from_signal(Signal *s)
 	else
 	{
 		show_ambient = true;
+		LOG_LV1("LED", "Going to show new ambient if not same");
 		if (!matches_current_animation(ambientAnimation))
 		{
 			LOG_LV1("LED", "Starting Ambient Animation");
 			start_animation(ambientAnimation);
 		}
 	}
+}
+
+void led_set_ambient_animation(const animPattern &anim)
+{
+	ambientAnimation = anim;
+	set_animation_from_signal(nullptr);
 }
 
 void led_setup()
@@ -68,7 +73,7 @@ void choose_pattern_by_signal()
 void led_loop(int step)
 {
 	// Update the LED pattern based on bluetooth signals every 500ms
-	if (!led_test_mode && step % 12 == 0)
+	if ((mode == AMULET_MODE_AMULET || mode == AMULET_MODE_POWER_AMULET) && !led_test_mode && step % 12 == 0)
 	{
 		choose_pattern_by_signal();
 	}
@@ -77,7 +82,6 @@ void led_loop(int step)
 	step_animation();
 	FastLED.show();
 }
-
 
 // -----------------------
 //

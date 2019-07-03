@@ -7,6 +7,8 @@
 #include <FastLED.h>
 #undef ARDUINO_GENERIC
 
+#include "Startup.h"
+
 #define SIGNALS_MAX_LEN 20
 Signal *signals[SIGNALS_MAX_LEN];
 
@@ -103,8 +105,11 @@ void decay_signals()
 
 void signal_loop(int step)
 {
-	EVERY_N_SECONDS(1)
-	decay_signals();
+	if (mode == AMULET_MODE_AMULET || mode == AMULET_MODE_POWER_AMULET)
+	{
+		EVERY_N_SECONDS(1)
+		decay_signals();
+	}
 }
 
 Signal *current_top_signal()

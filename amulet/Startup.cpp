@@ -24,13 +24,27 @@ void start()
 	// If no connect after 60 seconds , start as an amulet with random rune
 	// startAsAmulet();
 	// startAsBeacon();
-	startAsPowerAmulet();
+	startAsRemoteConfig();
 }
 
 void startAsRemoteConfig()
 {
-	digitalWrite(LED_BUILTIN, LED_STATE_ON);
-	ble_setup_uart();
+	// digitalWrite(LED_BUILTIN, LED_STATE_ON);
+	led_setup();
+	ble_setup(false, true, true);
+
+	// set master brightness control
+	FastLED.setBrightness(g_led_brightness_medium);
+
+	animParams p{};
+	p.color1_ = HSVHue::HUE_PINK;
+	p.color2_ = HSVHue::HUE_BLUE,
+	p.speed_ = 120;
+	animPattern ambient = {.name = Anim::AnimSinelon,
+						   .params = p};
+
+	// Set the initial ambient animation
+	led_set_ambient_animation(ambient);
 }
 
 void startAsAmulet()
@@ -93,12 +107,18 @@ void startAsPowerAmulet()
 {
 	mode = AMULET_MODE_POWER_AMULET;
 	led_setup();
-	ble_setup(true, true);
+	ble_setup(false, true, true);
 
 	// set master brightness control
 	FastLED.setBrightness(g_led_brightness_medium);
 
+	animParams p{};
+	p.color1_ = HSVHue::HUE_PINK;
+	p.color2_ = HSVHue::HUE_BLUE,
+	p.speed_ = 120;
+	animPattern ambient = {.name = Anim::AnimSinelon,
+						   .params = p};
+
 	// Set the initial ambient animation
-	led_set_ambient_animation({.name = Anim::AnimRainbowRaster,
-							   .params = {}});
+	led_set_ambient_animation(ambient);
 }
