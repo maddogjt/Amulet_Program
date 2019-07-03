@@ -25,7 +25,7 @@ struct Scan
 class Signal
 {
 public:
-	Signal( Scan &scan )  : _scan(scan), _strength(scan.power), _nextStrength(0) {}
+	Signal(Scan &scan) : _scan(scan), _strength(scan.power), _nextStrength(0) {}
 	Scan _scan;
 	float_t _strength;
 	float_t _nextStrength;

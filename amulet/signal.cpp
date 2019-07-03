@@ -7,7 +7,6 @@
 #include <FastLED.h>
 #undef ARDUINO_GENERIC
 
-
 #define SIGNALS_MAX_LEN 20
 Signal *signals[SIGNALS_MAX_LEN];
 
@@ -20,16 +19,17 @@ float lerp(float v0, float v1, float t)
 void insert_new_scan(Scan &s);
 void add_scan_data(Scan &s)
 {
-	LOG_LV1("SIG","add_scan_data");
+	LOG_LV1("SIG", "add_scan_data");
 	bool found = false;
 	for (int i = 0; i < SIGNALS_MAX_LEN; i++)
 	{
-		if( signals[i] == nullptr ) {
+		if (signals[i] == nullptr)
+		{
 			continue;
 		}
 		if (signals[i]->_scan == s)
 		{
-			LOG_LV1("SIG","add_scan_data : Updating existing record");
+			LOG_LV1("SIG", "add_scan_data : Updating existing record");
 			signals[i]->_nextStrength = max(signals[i]->_nextStrength, s.power);
 			found = true;
 			break;
@@ -43,7 +43,7 @@ void add_scan_data(Scan &s)
 
 void insert_new_scan(Scan &s)
 {
-	LOG_LV1("SIG","insert_new_scan");
+	LOG_LV1("SIG", "insert_new_scan");
 	bool inserted = false;
 	for (int i = 0; i < SIGNALS_MAX_LEN; i++)
 	{
@@ -56,42 +56,45 @@ void insert_new_scan(Scan &s)
 	}
 	if (!inserted)
 	{
-		LOG_LV1("Scan","Scan array full, scan not inserted.");
+		LOG_LV1("Scan", "Scan array full, scan not inserted.");
 	}
 }
 
 void decay_signals()
 {
-	LOG_LV1("SIG","decay_signals");
+	LOG_LV1("SIG", "decay_signals");
 	for (int i = 0; i < SIGNALS_MAX_LEN; i++)
 	{
 		Signal *s = signals[i];
-		if( s == nullptr) {
+		if (s == nullptr)
+		{
 			continue;
 		}
 
-		if( s->_nextStrength > s->_strength) {
-			LOG_LV1("SIG","decay_signals : New strength was equal %f -> %f", s->_strength,s->_nextStrength);
+		if (s->_nextStrength > s->_strength)
+		{
+			LOG_LV1("SIG", "decay_signals : New strength was equal %f -> %f", s->_strength, s->_nextStrength);
 		}
-		if( s->_nextStrength > s->_strength) {
-			LOG_LV1("SIG","decay_signals : New strength was greater %f -> %f", s->_strength,s->_nextStrength);
+		if (s->_nextStrength > s->_strength)
+		{
+			LOG_LV1("SIG", "decay_signals : New strength was greater %f -> %f", s->_strength, s->_nextStrength);
 			s->_strength = s->_nextStrength;
 		}
 		else
 		{
-			float_t decay = min(1.f, max( 0.05, s->_scan.decayRate));
-			LOG_LV1("SIG","decay_signals : Decaying lerp( %f, %f %f ) -> %f", s->_strength, s->_nextStrength, decay, lerp(s->_strength, s->_nextStrength, decay));
+			float_t decay = min(1.f, max(0.05, s->_scan.decayRate));
+			LOG_LV1("SIG", "decay_signals : Decaying lerp( %f, %f %f ) -> %f", s->_strength, s->_nextStrength, decay, lerp(s->_strength, s->_nextStrength, decay));
 			s->_strength = lerp(s->_strength, s->_nextStrength, decay);
 		}
 
 		// If the signal is too weak, cull it.
-		if (s->_strength <= 1)
+		if (s->_strength <= 10)
 		{
-			LOG_LV1("SIG","decay_signals :Culling strength less than 1" );
+			LOG_LV1("SIG", "decay_signals :Culling strength less than 1");
 			delete s;
 			signals[i] = nullptr;
 		}
-		else 
+		else
 		{
 			s->_nextStrength = 0;
 		}
@@ -112,11 +115,12 @@ Signal *current_top_signal()
 	for (int i = 0; i < SIGNALS_MAX_LEN; i++)
 	{
 		Signal *s = signals[i];
-		if( s == nullptr) {
+		if (s == nullptr)
+		{
 			continue;
 		}
 		dbg_signal_count++;
-		if( s->_strength > current_strength )
+		if (s->_strength > current_strength)
 		{
 			current_strength = s->_strength;
 			current_index = i;
@@ -130,11 +134,10 @@ Signal *current_top_signal()
 	}
 	else
 	{
-		LOG_LV1("SIG", "No current top signal. Num signals %d", dbg_signal_count );
+		LOG_LV1("SIG", "No current top signal. Num signals %d", dbg_signal_count);
 		return nullptr;
 	}
 }
-
 
 /*
 

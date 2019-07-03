@@ -70,8 +70,22 @@ void startAsBeacon()
 void startAsRune()
 {
 	mode = AMULET_MODE_RUNE;
+
+	// Final config should be no LEDs but for now I'm turning on the LEDs and LED_BUILTIN
+	digitalWrite(LED_BUILTIN, LED_STATE_ON);
+	// digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
 	led_setup();
+	FastLED.setBrightness(g_led_brightness_medium);
+
 	ble_setup(true, true);
+
+	animPattern runePattern = {.name = Anim::AnimBallRaster,
+							   .params = {}};
+
+	// Anim name is 4 bytes - could shrink
+	LOG_LV1("STRT", "size of name: %d", sizeof(Anim::AnimBPM));
+	led_set_ambient_animation(runePattern);
+	ble_set_advertisement_data(AdvertisementType::Rune, (uint8_t *)&runePattern, sizeof(beaconPattern));
 }
 
 void startAsPowerAmulet()

@@ -20,13 +20,18 @@ animPattern ambientAnimation = {};
 // returns true if animation was changed
 void set_animation_from_signal(Signal *s)
 {
-	if (s != nullptr  )
+	if (s != nullptr)
 	{
 		animPattern pattern;
 		VERIFY_STATIC(sizeof(pattern) <= MAX_MFD_DATA_LEN);
 		memcpy(&pattern, s->_scan._data, sizeof(animPattern));
 		if (!matches_current_animation(pattern))
 		{
+			if (s->_scan.signal_type == AdvertisementType::Rune)
+			{
+				LOG_LV1("LED", "Setting Ambient Animation from rune");
+				led_set_ambient_animation(pattern);
+			}
 			LOG_LV1("LED", "Starting Animation from scan");
 			start_animation(pattern);
 		}
@@ -53,7 +58,6 @@ void choose_pattern_by_signal()
 	Signal *signal = current_top_signal();
 	set_animation_from_signal(signal);
 }
-
 
 void led_loop(int step)
 {
