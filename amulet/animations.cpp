@@ -91,6 +91,10 @@ void step_animation()
 
 bool matches_current_animation(const animPattern &pattern)
 {
+	if (currentAnim == nullptr)
+	{
+		return false;
+	}
 	return currentAnimName == pattern.name &&
 		   currentAnim->params_ == pattern.params;
 }

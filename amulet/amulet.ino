@@ -44,7 +44,6 @@ void loop()
 {
 	// LOG_LV2("LOOP", "Loop start");
 	led_loop(step);
-	ble_loop(step);
 	signal_loop(step);
 
 	dfuButton.read();

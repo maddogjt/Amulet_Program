@@ -20,12 +20,15 @@ animPattern ambientAnimation = {};
 // returns true if animation was changed
 void set_animation_from_signal(Signal *s)
 {
-	if (s && (s->_scan._cmd == command_beacon || s->_scan._cmd == command_flashmob))
+	if (s != nullptr  )
 	{
-		if (!matches_current_animation((Anim)s->_scan._p0, s->_scan._p1, s->_scan._p2))
+		animPattern pattern;
+		VERIFY_STATIC(sizeof(pattern) <= MAX_MFD_DATA_LEN);
+		memcpy(&pattern, s->_scan._data, sizeof(animPattern));
+		if (!matches_current_animation(pattern))
 		{
 			LOG_LV1("LED", "Starting Animation from scan");
-			start_animation((Anim)s->_scan._p0, s->_scan._p1, s->_scan._p2);
+			start_animation(pattern);
 		}
 	}
 	else
@@ -46,11 +49,11 @@ void led_setup()
 
 void choose_pattern_by_signal()
 {
-	// LOG_LV1("LED", "choose_pattern_by_signal");
+	LOG_LV1("LED", "choose_pattern_by_signal");
 	Signal *signal = current_top_signal();
-	// LOG_LV1("LED", "Has Top Signal: %s", signal ? "Yes" : "No");
 	set_animation_from_signal(signal);
 }
+
 
 void led_loop(int step)
 {

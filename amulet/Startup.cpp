@@ -22,9 +22,8 @@ void start()
 	// If no previous configuration, go to uart mode
 	// advertise as BLEUart
 	// If no connect after 60 seconds , start as an amulet with random rune
-	startAsAmulet();
-
-	// startAsBeacon();
+	// startAsAmulet();
+	startAsBeacon();
 }
 
 void startAsRemoteConfig()
@@ -50,8 +49,22 @@ void startAsAmulet()
 void startAsBeacon()
 {
 	mode = AMULET_MODE_BEACON;
-	digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
-	ble_setup(true, false);
+
+	// Final config should be no LEDs but for now I'm turning on the LEDs and LED_BUILTIN
+	digitalWrite(LED_BUILTIN, LED_STATE_ON);
+	// digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
+	led_setup();
+	FastLED.setBrightness(g_led_brightness_medium);
+
+	ble_setup(true, true);
+
+	animPattern beaconPattern = {.name = Anim::AnimBallRaster,
+								 .params = {}};
+
+	// Anim name is 4 bytes - could shrink
+	LOG_LV1("STRT", "size of name: %d", sizeof(Anim::AnimCylon));
+	led_set_ambient_animation(beaconPattern);
+	ble_set_advertisement_data(AdvertisementType::Beacon, (uint8_t *)&beaconPattern, sizeof(beaconPattern));
 }
 
 void startAsRune()

@@ -2,19 +2,18 @@
 
 #include <Arduino.h>
 
-typedef struct ATTR_PACKED
+enum class AdvertisementType
 {
-	uint16_t company_id;
-	uint8_t command;
-	uint8_t param0;
-	uint8_t param1;
-	uint8_t param2;
-} amulet_mfd_t;
+	Unknown,
+	Amulet,
+	Beacon,
+	Rune,
+	Special,
+};
 
+#define MAX_MFD_DATA_LEN 12
 extern int g_rssi;
 
 void ble_setup_uart();
 void ble_setup(bool advertise, bool scan);
-void ble_loop(int step);
-void ble_set_advertisement_data(amulet_mfd_t &data);
-void ble_viral_override(amulet_mfd_t &override);
+void ble_set_advertisement_data(const AdvertisementType type, const uint8_t *data, const uint8_t len);

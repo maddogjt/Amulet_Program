@@ -5,14 +5,35 @@
 #include "signal.h"
 
 // You are supposed to get manufacturer ids from the bluetooth consortium but I made one up
-const uint16_t BLEAMULET_MFID = 0xFF22;
+const uint16_t BLE_AMULET_MFID = 0x69FF;
+
+#define BLE_AMULET_DATA_VERSION (1)
 
 int g_rssi = 0;
 
-amulet_mfd_t ad_data;
-amulet_mfd_t viral_ad_data;
-uint32_t viral_ad_timestamp = 0;
-bool broadcasting_viral_data = false;
+typedef struct ATTR_PACKED
+{
+	uint16_t company_id;
+	uint8_t signal_type;
+	uint8_t power;
+	int8_t range;
+	uint8_t decayRateInt;
+	uint8_t version;
+	uint8_t data[MAX_MFD_DATA_LEN];
+} amulet_mfd_t;
+
+void debug_print_amulet_mfd(const amulet_mfd_t &mfd)
+{
+	Serial.println("-- Amulet Manufacturer Data --");
+	Serial.printf("company_id 	%02x\n", mfd.company_id);
+	Serial.printf("signal_type: %d\n", mfd.signal_type);
+	Serial.printf("power: %d\n", mfd.power);
+	Serial.printf("range: %d\n", mfd.range);
+	Serial.printf("decay rate: %d\n", mfd.decayRateInt);
+	Serial.printf("version:    	%d\n", mfd.version);
+	Serial.printBuffer(mfd.data, MAX_MFD_DATA_LEN, '-');
+	Serial.println();
+}
 
 void scan_callback(ble_gap_evt_adv_report_t *report);
 void start_advertising_with_data(amulet_mfd_t &data);
@@ -34,41 +55,18 @@ void ble_setup(bool advertise, bool scan)
 		Bluefruit.Scanner.setRxCallback(scan_callback); // the callback that lets us process advertising data from other devices
 		Bluefruit.Scanner.restartOnDisconnect(true);	// maybe not relevant because we don't plan on connecting to anything
 		Bluefruit.Scanner.setInterval(160, 80);			// in unit of 0.625 ms, interval and window (?) perhaps could be tuned
-		Bluefruit.Scanner.filterMSD(BLEAMULET_MFID);	// Only look at advertisements from our made up manufacturer id
+		Bluefruit.Scanner.filterMSD(BLE_AMULET_MFID);   // Only look at advertisements from our made up manufacturer id
 		Bluefruit.Scanner.useActiveScan(true);			// I think active scanning allows it to read the manufacturer data
 		Bluefruit.Scanner.start(0);						// 0 = Don't stop scanning after n seconds
-	}
-
-	if (advertise)
-	{
-		// Set up the amulet's custom payload
-		ad_data =
-			{
-				.company_id = BLEAMULET_MFID,
-				.command = (int)command_beacon,
-				.param0 = 0x02,
-				.param1 = 0x01,
-				.param2 = 0x01,
-			};
-		start_advertising_with_data(ad_data);
 	}
 }
 
 void start_advertising_with_data(amulet_mfd_t &data)
 {
+	LOG_LV1("BLE", "start_advertising_with_data(), len %d", sizeof(data));
 #if CFG_DEBUG >= 1
-	Serial.println("--START ADVERTISING WITH DATA--");
-	Serial.printf("company_id %02x\n", data.company_id);
-	Serial.printf("command:   %d\n", data.command);
-	Serial.printf("param0:    %d\n", data.param0);
-	Serial.printf("param1:    %d\n", data.param1);
-	Serial.printf("param2:    %d\n", data.param2);
-
-	// Serial.printf("%14s ", "MAN SPEC DATA");
-	// Serial.printBuffer(buffer, len, '-');
-	Serial.println();
+	debug_print_amulet_mfd(data);
 #endif
-
 	// Advertise as non-connectable
 	Bluefruit.Advertising.setType(BLE_GAP_ADV_TYPE_NONCONNECTABLE_SCANNABLE_UNDIRECTED);
 
@@ -76,7 +74,7 @@ void start_advertising_with_data(amulet_mfd_t &data)
 	Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
 
 	// add the amulet's data to the advertisement
-	VERIFY_STATIC(sizeof(data) == 6);
+	// VERIFY_STATIC(sizeof(data) == 8 + MAX_MFD_DATA_LEN);
 	Bluefruit.Advertising.addManufacturerData(&data, sizeof(data));
 	Bluefruit.Advertising.restartOnDisconnect(true);
 	Bluefruit.Advertising.setInterval(32, 244); // in unit of 0.625 ms
@@ -84,46 +82,24 @@ void start_advertising_with_data(amulet_mfd_t &data)
 	Bluefruit.Advertising.start(0);				// 0 = Don't stop advertising after n seconds
 }
 
-void ble_set_advertisement_data(amulet_mfd_t &data)
+void ble_set_advertisement_data(const AdvertisementType type, const uint8_t *data, const uint8_t len)
 {
-	LOG_LV1("BLE", "ble_set_advertisement_data");
-	ad_data = data;
-	broadcasting_viral_data = false;
-	start_advertising_with_data(ad_data);
-}
-
-void ble_viral_override(amulet_mfd_t &data)
-{
-	LOG_LV1("BLE", "ble_viral_override");
-	// If we aren't broadcasting viral data,
-	// and its been over 30 seconds since our last viral broadcast,
-	// set the viral payload.
-	if (!broadcasting_viral_data && millis() - viral_ad_timestamp > 30 * 1000)
+	LOG_LV2("BLE", "ble_set_advertisement_data");
+	if (len > MAX_MFD_DATA_LEN)
 	{
-		broadcasting_viral_data = true;
-		viral_ad_data = data;
-		viral_ad_timestamp = millis();
-		start_advertising_with_data(ad_data);
+		LOG_LV1("BLE", "Error: advertisement len (%d) longer than max allowed", len);
+		return;
 	}
-}
-
-void resume_normal_ad_data()
-{
-	// if we've been broadcasting viral data for more than 1s switch back to normal data
-	if (broadcasting_viral_data && millis() - viral_ad_timestamp > 1000)
-	{
-		LOG_LV1("BLE", "resume_normal_ad_data - resuming!");
-		ble_set_advertisement_data(ad_data);
-	}
-}
-
-void ble_loop(int step)
-{
-	if (step % 24 == 0)
-	{
-		// only run the viral pattern for a second
-		resume_normal_ad_data();
-	}
+	amulet_mfd_t mfdata{};
+	mfdata.company_id = BLE_AMULET_MFID;
+	mfdata.signal_type = (uint8_t)type;
+	mfdata.version = BLE_AMULET_DATA_VERSION;
+	mfdata.power = 100;
+	mfdata.range = -80;
+	mfdata.decayRateInt = 0.5 * 255;
+	memset(mfdata.data, 0, MAX_MFD_DATA_LEN);
+	memcpy(&(mfdata.data), data, len);
+	start_advertising_with_data(mfdata);
 }
 
 /*------------------------------------------------------------------*/
@@ -137,38 +113,54 @@ void scan_callback(ble_gap_evt_adv_report_t *report)
 
 	/* Check for Manufacturer Specific Data */
 	len = Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA, buffer, sizeof(buffer));
-	amulet_mfd_t data;
-	if (len == sizeof(amulet_mfd_t)) // possible enhancement: allow the length to be shorter to accomodate future revisions with more fields
+	amulet_mfd_t mfd;
+	if (len == sizeof(amulet_mfd_t))
 	{
-		memcpy(&data, buffer, sizeof(data));
+		memcpy(&mfd, buffer, sizeof(mfd));
 		memset(buffer, 0, sizeof(buffer));
 
 #if CFG_DEBUG >= 2
-		Serial.printf("company_id %02x\n", data.company_id);
-		Serial.printf("command:   %d\n", data.command);
-		Serial.printf("param0:    %d\n", data.param0);
-		Serial.printf("param1:    %d\n", data.param1);
-		Serial.printf("param2:    %d\n", data.param2);
-
-		// Serial.printf("%14s ", "MAN SPEC DATA");
-		// Serial.printBuffer(buffer, len, '-');
-		Serial.println();
+		debug_print_amulet_mfd(mfd);
 #endif
 
-		// set the signal strength
-		LOG_LV2("Scan", "%14s %d dBm\n", "RSSI", report->rssi);
-		g_rssi = report->rssi;
+		bool signalIsValid = true;
 
-		Scan s = {
-			._rssi = report->rssi,
-			._cmd = (amulet_command_t)data.command,
-			._p0 = data.param0,
-			._p1 = data.param1,
-			._p2 = data.param2,
-			._timestamp = millis(),
-		};
-		// Save this entry to signals
-		add_scan_data(s);
+		if (BLE_AMULET_DATA_VERSION != mfd.version)
+		{
+			LOG_LV2("Scan", "Invalid signal. Scan version (%d) is not equal to our version (%d)", mfd.version, BLE_AMULET_DATA_VERSION);
+			signalIsValid = false;
+		}
+
+		// Only report signals that are in range
+		if (report->rssi < mfd.range)
+		{
+			LOG_LV2("Scan", "Invalid signal. RSSI (%d) is weaker than range (%d)", report->rssi, mfd.range);
+			signalIsValid = false;
+		}
+
+		const int8_t AMBIENT_CUTOFF = 10; // Need to put this in a better place.
+		if (mfd.power < AMBIENT_CUTOFF)
+		{
+			LOG_LV2("Scan", "Invalid signal. Power (%d) is weaker than cutoff (%d)", mfd.power, AMBIENT_CUTOFF);
+			signalIsValid = false;
+		}
+
+		if (signalIsValid)
+		{
+			// set the signal strength
+			LOG_LV2("Scan", "%14s %d dBm\n", "RSSI", report->rssi);
+			g_rssi = report->rssi;
+
+			Scan s = {
+				.rssi = report->rssi,
+				.signal_type = mfd.signal_type,
+				.power = mfd.power,
+				.decayRate = ((float)mfd.decayRateInt / 255.f),
+			};
+			s.setData(mfd.data);
+			// Save this entry to signals
+			add_scan_data(s);
+		}
 
 		Bluefruit.Scanner.resume();
 	}
