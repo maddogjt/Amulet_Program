@@ -9,8 +9,10 @@
 #include "signal.h"
 #include "BrightnessMode.h"
 #include "Startup.h"
+#include "dev_mode.h"
 
 Button dfuButton(PIN_DFU, 25, true, true);
+Button resetButton(PIN_RESET, 25, true, true);
 
 #if defined(FASTLED_VERSION) && (FASTLED_VERSION < 3001000)
 #warning "Requires FastLED 3.1 or later; check github for latest code."
@@ -18,6 +20,8 @@ Button dfuButton(PIN_DFU, 25, true, true);
 
 void nextMode();
 void systemSleep();
+
+bool devEnabled = false;
 
 void setup()
 {
@@ -36,23 +40,48 @@ void setup()
 	// Start reading the DFU button so we can trigger off long and short presses
 	dfuButton.begin();
 
+	devEnabled = dev_mode_enabled();
+	if (!devEnabled)
+	{
+		resetButton.begin();
+	}
+
 	start();
 }
 
 int step = 0;
+
 void loop()
 {
 	// LOG_LV2("LOOP", "Loop start");
 	led_loop(step);
 	signal_loop(step);
 
+	Serial.println(dev_mode_enabled());
+
 	dfuButton.read();
-	if (dfuButton.pressedFor(2000))
-	{
-		// Long press means power down.
+	if (!devEnabled) {
+		resetButton.read();
+
+		static int dfuLastReleased = 0;
+		if (resetButton.pressedFor(10000) && dfuButton.wasReleased())
+		{
+			if (millis() - dfuLastReleased < 500)
+			{
+
+				Serial.println("Toggling dev mode");
+				set_dev_mode_enabled_and_reboot();
+				// Long press means power down.
+				//systemSleep();
+			}
+			dfuLastReleased = millis();
+		}
+	}
+
+	if (dfuButton.pressedFor(5000)) {
 		systemSleep();
 	}
-	else if (dfuButton.wasReleased())
+	if (dfuButton.wasReleased() || (!devEnabled && resetButton.wasReleased()))
 	{
 		nextBrightnessMode();
 	}
@@ -127,5 +156,5 @@ void systemSleep()
 	digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
 	digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 
-	systemOff(29, 0);
+	systemOff(21, 0);
 }
