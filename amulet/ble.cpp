@@ -124,6 +124,13 @@ uint8_t speedForButton(bool up)
 	return speeds[speed_idx];
 }
 
+Anim animForButton(bool right)
+{
+	static uint8_t anim_idx = 0;
+	anim_idx = (anim_idx + 12 + (right ? 1 : -1)) % 12;
+	return (Anim)anim_idx;
+}
+
 void prph_bleuart_rx_callback(uint16_t conn_handle)
 {
 	(void)conn_handle;
@@ -186,6 +193,14 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		else if (button == '6') // down
 		{
 			ambient.params.speed_ = speedForButton(false);
+		}
+		else if (button == '7') // left
+		{
+			ambient.name = animForButton(false);
+		}
+		else if (button == '8') // right
+		{
+			ambient.name = animForButton(true);
 		}
 		else if (button == '1') // 1
 		{
