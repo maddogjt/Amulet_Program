@@ -57,8 +57,6 @@ void loop()
 	led_loop(step);
 	signal_loop(step);
 
-	Serial.println(dev_mode_enabled());
-
 	dfuButton.read();
 	if (!devEnabled) {
 		resetButton.read();
