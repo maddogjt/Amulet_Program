@@ -15,6 +15,5 @@ enum class AdvertisementType
 extern int g_rssi;
 
 void ble_setup_uart();
-void ble_setup(bool advertise, bool scan);
-void ble_setup(bool advertise, bool scan, bool uart);
+void ble_setup(bool advertise, bool scan, bool uart = false);
 void ble_set_advertisement_data(const AdvertisementType type, const uint8_t *data, const uint8_t len);

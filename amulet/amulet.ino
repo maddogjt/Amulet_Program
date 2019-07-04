@@ -10,6 +10,7 @@
 #include "BrightnessMode.h"
 #include "Startup.h"
 #include "dev_mode.h"
+#include "settings.h"
 
 Button dfuButton(PIN_DFU, 25, true, true);
 Button resetButton(PIN_RESET, 25, true, true);
@@ -26,12 +27,14 @@ bool devEnabled = false;
 void setup()
 {
 	// Set pin modes
-	pinMode(28, INPUT_PULLUP); // @Jason is this important?
 	pinMode(LED_BUILTIN, OUTPUT);
 
 	// Start Serial
 	Serial.begin(115200);
 	Serial.println("Amulet startup");
+
+	// init settings
+	settings_init();
 
 	// Turn on LED power rail
 	pinMode(PIN_RGB_LED_PWR, OUTPUT);
