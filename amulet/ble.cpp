@@ -7,6 +7,7 @@
 
 #include "led.h"
 #include "signal.h"
+#include "settings.h"
 
 // You are supposed to get manufacturer ids from the bluetooth consortium but I made one up
 const uint16_t BLE_AMULET_MFID = 0x69FF;
@@ -47,12 +48,7 @@ BLEUart bleuart;
 void start_advertising_uart();
 void prph_bleuart_rx_callback(uint16_t conn_handle);
 
-void ble_setup(bool advertise, bool scan)
-{
-	ble_setup(advertise, scan, false);
-}
-
-void ble_setup(bool advertise, bool scan, bool uart = false)
+void ble_setup(bool advertise, bool scan, bool uart)
 {
 	if (advertise && uart)
 	{
@@ -66,7 +62,7 @@ void ble_setup(bool advertise, bool scan, bool uart = false)
 		digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 		Serial.println("Unable to init bluetooth");
 	}
-	Bluefruit.setTxPower(4); // 4 is (probably) the strongest tx power that we can support.
+	Bluefruit.setTxPower(globalSettings_.txPower_); // 4 is (probably) the strongest tx power that we can support.
 
 	if (uart)
 	{
