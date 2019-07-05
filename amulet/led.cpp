@@ -31,7 +31,7 @@ void set_animation_from_signal(Signal *s)
 		memcpy(&pattern, s->_scan._data, sizeof(animPattern));
 		if (!matches_current_animation(pattern))
 		{
-			if (s->_scan.signal_type == (uint8_t)AdvertisementType::Rune)
+			if (s->_scan.signal_type == (uint8_t)AdvertisementType::Runic)
 			{
 				LOG_LV1("LED", "Setting Ambient Animation from rune");
 				led_set_ambient_animation(pattern);
@@ -73,7 +73,7 @@ void choose_pattern_by_signal()
 void led_loop(int step)
 {
 	// Update the LED pattern based on bluetooth signals every 500ms
-	if ((mode == AMULET_MODE_AMULET || mode == AMULET_MODE_POWER_AMULET) && !led_test_mode && step % 12 == 0)
+	if (isAmulet() && !led_test_mode && step % 12 == 0)
 	{
 		choose_pattern_by_signal();
 	}

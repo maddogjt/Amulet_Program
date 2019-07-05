@@ -9,27 +9,52 @@
 
 amulet_mode_t mode = AMULET_MODE_STARTUP;
 
-void startAsRemoteConfig();
-void startAsAmulet();
-void startAsBeacon();
-void startAsRune();
-void startAsPowerAmulet();
+bool isAmulet()
+{
+	return mode == AMULET_MODE_AMULET || mode == AMULET_MODE_BEACON_POWER_AMULET || mode == AMULET_MODE_RUNIC_POWER_AMULET;
+}
+
+void startAsRemoteConfig(const StartupConfig &config);
+void startAsAmulet(const StartupConfig &config);
+void startAsBeacon(const StartupConfig &config);
+void startAsRune(const StartupConfig &config);
+void startAsPowerAmulet(const StartupConfig &config);
+
+void startWithConfig(const StartupConfig &config)
+{
+	switch (config.mode)
+	{
+	case AMULET_MODE_STARTUP:
+		startAsRemoteConfig(config);
+		break;
+	case AMULET_MODE_AMULET:
+		startAsAmulet(config);
+		break;
+	case AMULET_MODE_BEACON:
+		startAsBeacon(config);
+		break;
+	case AMULET_MODE_RUNE:
+		startAsRune(config);
+		break;
+	case AMULET_MODE_BEACON_POWER_AMULET:
+	case AMULET_MODE_RUNIC_POWER_AMULET:
+		startAsPowerAmulet(config);
+		break;
+
+	default:
+		startAsRemoteConfig(config);
+		break;
+	}
+}
 
 void start()
 {
-	// testSerialization();
-
-	// Check for previous configuration
-
-	// If no previous configuration, go to uart mode
-	// advertise as BLEUart
-	// If no connect after 60 seconds , start as an amulet with random rune
-	// startAsAmulet();
-	// startAsBeacon();
-	startAsRemoteConfig();
+	StartupConfig config{};
+	config.mode = AMULET_MODE_STARTUP;
+	startWithConfig(config);
 }
 
-void startAsRemoteConfig()
+void startAsRemoteConfig(const StartupConfig &config)
 {
 	// digitalWrite(LED_BUILTIN, LED_STATE_ON);
 	led_setup();
@@ -38,18 +63,11 @@ void startAsRemoteConfig()
 	// set master brightness control
 	FastLED.setBrightness(g_led_brightness_medium);
 
-	animParams p{};
-	p.color1_ = HSVHue::HUE_PINK;
-	p.color2_ = HSVHue::HUE_BLUE,
-	p.speed_ = 120;
-	animPattern ambient = {.name = Anim::AnimSinelon,
-						   .params = p};
-
 	// Set the initial ambient animation
-	led_set_ambient_animation(ambient);
+	led_set_ambient_animation(config.pattern);
 }
 
-void startAsAmulet()
+void startAsAmulet(const StartupConfig &config)
 {
 	mode = AMULET_MODE_AMULET;
 	led_setup();
@@ -59,11 +77,10 @@ void startAsAmulet()
 	FastLED.setBrightness(g_led_brightness_medium);
 
 	// Set the initial ambient animation
-	led_set_ambient_animation({.name = Anim::AnimRainbowRaster,
-							   .params = {}});
+	led_set_ambient_animation(config.pattern);
 }
 
-void startAsBeacon()
+void startAsBeacon(const StartupConfig &config)
 {
 	mode = AMULET_MODE_BEACON;
 
@@ -75,16 +92,11 @@ void startAsBeacon()
 
 	ble_setup(true, true);
 
-	animPattern beaconPattern = {.name = Anim::AnimTwister,
-								 .params = {}};
-
-	// Anim name is 4 bytes - could shrink
-	LOG_LV1("STRT", "size of name: %d", sizeof(Anim::AnimCylon));
-	led_set_ambient_animation(beaconPattern);
-	ble_set_advertisement_data(AdvertisementType::Beacon, (uint8_t *)&beaconPattern, sizeof(beaconPattern));
+	led_set_ambient_animation(config.pattern);
+	ble_set_advertisement_data(AdvertisementType::Beacon, config.ad, (uint8_t *)&config.pattern, sizeof(config.pattern));
 }
 
-void startAsRune()
+void startAsRune(const StartupConfig &config)
 {
 	mode = AMULET_MODE_RUNE;
 
@@ -96,31 +108,19 @@ void startAsRune()
 
 	ble_setup(true, true);
 
-	animPattern runePattern = {.name = Anim::AnimBallRaster,
-							   .params = {}};
-
-	// Anim name is 4 bytes - could shrink
-	LOG_LV1("STRT", "size of name: %d", sizeof(Anim::AnimBPM));
-	led_set_ambient_animation(runePattern);
-	ble_set_advertisement_data(AdvertisementType::Rune, (uint8_t *)&runePattern, sizeof(runePattern));
+	led_set_ambient_animation(config.pattern);
+	ble_set_advertisement_data(AdvertisementType::Runic, config.ad, (uint8_t *)&config.pattern, sizeof(config.pattern));
 }
 
-void startAsPowerAmulet()
+void startAsPowerAmulet(const StartupConfig &config)
 {
-	mode = AMULET_MODE_POWER_AMULET;
+	mode = config.mode;
 	led_setup();
 	ble_setup(false, true, true);
 
 	// set master brightness control
 	FastLED.setBrightness(g_led_brightness_medium);
 
-	animParams p{};
-	p.color1_ = HSVHue::HUE_PINK;
-	p.color2_ = HSVHue::HUE_BLUE,
-	p.speed_ = 120;
-	animPattern ambient = {.name = Anim::AnimSinelon,
-						   .params = p};
-
 	// Set the initial ambient animation
-	led_set_ambient_animation(ambient);
+	led_set_ambient_animation(config.pattern);
 }

@@ -22,9 +22,9 @@ StartupConfig deserializeStartupConfig(char *str, uint8_t len)
 {
 	StartupConfig config;
 	config.mode = (amulet_mode_t)first_tok(str);
-	config.power = next_tok();
-	config.decay = next_tok();
-	config.range = next_tok();
+	config.ad.power = next_tok();
+	config.ad.decay = next_tok();
+	config.ad.range = next_tok();
 	config.pattern.name = (Anim)next_tok();
 	config.pattern.params.color1_ = next_tok();
 	config.pattern.params.color2_ = next_tok();
@@ -50,9 +50,9 @@ uint8_t serializeStartupConfig(char *buffer, const uint8_t len, const StartupCon
 	strcat(buffer, ",");
 
 	APPEND_INT_COMMA(config.mode)
-	APPEND_INT_COMMA(config.power)
-	APPEND_INT_COMMA(config.decay)
-	APPEND_INT_COMMA(config.range)
+	APPEND_INT_COMMA(config.ad.power)
+	APPEND_INT_COMMA(config.ad.decay)
+	APPEND_INT_COMMA(config.ad.range)
 	APPEND_INT_COMMA(config.pattern.name)
 	APPEND_INT_COMMA(config.pattern.params.color1_)
 	APPEND_INT_COMMA(config.pattern.params.color2_)
@@ -61,7 +61,7 @@ uint8_t serializeStartupConfig(char *buffer, const uint8_t len, const StartupCon
 	APPEND_INT_COMMA(config.pattern.params.mods_)
 	APPEND_INT_COMMA(config.pattern.params.extra0_)
 	APPEND_INT_COMMA(config.pattern.params.extra1_)
-	buffer[strlen(buffer) - 1] = NULL; // delete last comma
+	buffer[strlen(buffer) - 1] = '\0'; // delete last comma
 
 	Serial.println(buffer);
 	Serial.printf("Buffer (%d): %s\n", strlen(buffer), buffer);
@@ -72,9 +72,9 @@ void testSerialization()
 {
 	StartupConfig config{};
 	config.mode = AMULET_MODE_BEACON;
-	config.power = 80;
-	config.decay = 50;
-	config.range = -80;
+	config.ad.power = 80;
+	config.ad.decay = 50;
+	config.ad.range = -80;
 	config.pattern.name = Anim::AnimSinelon;
 	config.pattern.params.color1_ = 40;
 	config.pattern.params.mods_ = 1;

@@ -22,7 +22,7 @@ typedef struct ATTR_PACKED
 	uint8_t signal_type;
 	uint8_t power;
 	int8_t range;
-	uint8_t decayRateInt;
+	uint8_t decayRateInt; // essentially a fract8
 	uint8_t version;
 	uint8_t data[MAX_MFD_DATA_LEN];
 } amulet_mfd_t;
@@ -336,7 +336,7 @@ void start_advertising_with_data(amulet_mfd_t &data)
 	Bluefruit.Advertising.start(0);				// 0 = Don't stop advertising after n seconds
 }
 
-void ble_set_advertisement_data(const AdvertisementType type, const uint8_t *data, const uint8_t len)
+void ble_set_advertisement_data(const AdvertisementType type, const advertisementParams &params, const uint8_t *data, const uint8_t len)
 {
 	LOG_LV2("BLE", "ble_set_advertisement_data");
 	if (len > MAX_MFD_DATA_LEN)
@@ -348,9 +348,9 @@ void ble_set_advertisement_data(const AdvertisementType type, const uint8_t *dat
 	mfdata.company_id = BLE_AMULET_MFID;
 	mfdata.signal_type = (uint8_t)type;
 	mfdata.version = BLE_AMULET_DATA_VERSION;
-	mfdata.power = 100;
-	mfdata.range = -80;
-	mfdata.decayRateInt = 0.5 * 255;
+	mfdata.power = params.power;
+	mfdata.range = params.range;
+	mfdata.decayRateInt = params.decay;
 	memset(mfdata.data, 0, MAX_MFD_DATA_LEN);
 	memcpy(&(mfdata.data), data, len);
 	start_advertising_with_data(mfdata);

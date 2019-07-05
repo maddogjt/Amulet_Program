@@ -1,5 +1,6 @@
 #pragma once
 #include "animations.h"
+#include "ble.h"
 
 typedef enum
 {
@@ -7,7 +8,8 @@ typedef enum
 	AMULET_MODE_AMULET,
 	AMULET_MODE_BEACON,
 	AMULET_MODE_RUNE,
-	AMULET_MODE_POWER_AMULET,
+	AMULET_MODE_BEACON_POWER_AMULET,
+	AMULET_MODE_RUNIC_POWER_AMULET,
 	AMULET_MODE_COUNT,
 } amulet_mode_t;
 
@@ -16,17 +18,14 @@ struct StartupConfig
 	// Top level mode
 	amulet_mode_t mode;
 
-	// signal type
-	uint8_t power;
-	uint8_t decay;
-	int8_t range;
+	advertisementParams ad;
 
 	// The animation
 	animPattern pattern;
 
 	bool operator==(const StartupConfig &c) const
 	{
-		return mode == c.mode && power == c.power && decay == c.decay && range == c.range && pattern == c.pattern;
+		return mode == c.mode && ad == c.ad && pattern == c.pattern;
 	}
 };
 

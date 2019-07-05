@@ -105,7 +105,7 @@ void decay_signals()
 
 void signal_loop(int step)
 {
-	if (mode == AMULET_MODE_AMULET || mode == AMULET_MODE_POWER_AMULET)
+	if (isAmulet())
 	{
 		EVERY_N_SECONDS(1)
 		decay_signals();
