@@ -8,8 +8,7 @@ public:
 	virtual void init()
 	{
 		LOG_LV1("LED", "Juggle::init( %d, %d )", params_.extra_[0], params_.extra_[1]);
-		gHue = params_.color1_;
-		fill_solid(gLeds, RGB_LED_COUNT, CHSV(gHue, 255, 0));
+		fill_solid(gLeds, RGB_LED_COUNT, CHSV(params_.color1_, 255, 0));
 	}
 
 	virtual void step(const int frame, const float deltaTime, const float sourceDistance) override

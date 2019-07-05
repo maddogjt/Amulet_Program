@@ -24,7 +24,6 @@ struct animParams
 };
 
 // TODO: remove?
-extern uint8_t gHue;
 extern CRGB gLeds[RGB_LED_COUNT];
 
 #define ANIMATION_FLAG_FOLD (0x01)			   /**< Top 4 leds mirror bottom 4 leds */

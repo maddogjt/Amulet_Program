@@ -7,8 +7,6 @@
 #define NUM_LEDS RGB_LED_COUNT
 CRGB gLeds[NUM_LEDS];
 
-uint8_t gHue = 0; // rotating "base color" used by many of the patterns
-
 Animation *currentAnim = nullptr;
 Anim currentAnimName = Anim::Unknown;
 
@@ -149,13 +147,6 @@ void mirror()
 	}
 }
 
-void rainbow2()
-{
-	// FastLED's built-in rainbow generator
-	fill_rainbow(gLeds, 4, gHue++, 20);
-	mirror();
-}
-
 void addGlitter(fract8 chanceOfGlitter)
 {
 	if (random8() < chanceOfGlitter)
@@ -164,9 +155,9 @@ void addGlitter(fract8 chanceOfGlitter)
 	}
 }
 
-void rainbowWithGlitter()
-{
-	// built-in FastLED rainbow, plus some random sparkly glitter
-	fill_rainbow(gLeds, 4, gHue++, 20);
-	addGlitter(80);
-}
+// void rainbowWithGlitter()
+// {
+// 	// built-in FastLED rainbow, plus some random sparkly glitter
+// 	fill_rainbow(gLeds, 4, gHue++, 20);
+// 	addGlitter(80);
+// }

@@ -25,11 +25,10 @@ public:
 	virtual void init()
 	{
 		LOG_LV1("LED", "AnimRainbowRaster::init( %d, %d )", params_.extra_[0], params_.extra_[1]);
-		gHue = params_.color1_;
-		fHue = gHue;
+		fHue = (float_t)params_.color1_;
 		for (int i = 0; i < RGB_LED_COUNT; i++)
 		{
-			gLeds[i] = CHSV(gHue, 255, 255);
+			gLeds[i] = CHSV((int)fHue, 255, 255);
 		}
 	}
 

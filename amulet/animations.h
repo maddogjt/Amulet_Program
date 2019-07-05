@@ -31,7 +31,6 @@ void step_animation();
 // Functions that should be adapted to animations or removed
 void fold();
 void mirror_invert();
-void rainbow2();
 void confetti();
 void sinelon();
 void mirror();
