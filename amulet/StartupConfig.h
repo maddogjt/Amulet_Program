@@ -13,14 +13,22 @@ typedef enum
 
 struct StartupConfig
 {
+	// Top level mode
 	amulet_mode_t mode;
-	animPattern pattern;
 
 	// signal type
 	uint8_t power;
 	uint8_t decay;
 	int8_t range;
+
+	// The animation
+	animPattern pattern;
+
+	bool operator==(const StartupConfig &c) const
+	{
+		return mode == c.mode && power == c.power && decay == c.decay && range == c.range && pattern == c.pattern;
+	}
 };
 
-void deserializeAnimPacket(animPattern &pattern, uint8_t *buffer, uint8_t len);
-void deserializeModeAndSignal(StartupConfig &config, uint8_t *buffer, uint8_t len);
+void testSerialization();
+StartupConfig deserializeStartupConfig(char *str, uint8_t len);

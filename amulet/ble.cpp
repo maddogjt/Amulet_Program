@@ -131,17 +131,17 @@ void colorCycle(bool next, uint8_t idx)
 }
 void extraCycle(bool next, uint8_t idx)
 {
-	uint8_t extra = (idx == 7) ? ambient.params.extra_[0] : ambient.params.extra_[1];
+	uint8_t extra = (idx == 7) ? ambient.params.extra0_ : ambient.params.extra1_;
 	extra = (extra + 255 + (next ? 16 : -16)) % 255;
 	if (idx == 7)
 	{
 		Serial.printf("Setting extra[0]'s value to %d\n", extra);
-		ambient.params.extra_[0] = extra;
+		ambient.params.extra0_ = extra;
 	}
 	else
 	{
 		Serial.printf("Setting extra[0]'s value to %d\n", extra);
-		ambient.params.extra_[1] = extra;
+		ambient.params.extra1_ = extra;
 	}
 }
 

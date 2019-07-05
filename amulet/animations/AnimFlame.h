@@ -14,10 +14,10 @@ public:
 	uint8_t sparking; // try 180
 	virtual void init()
 	{
-		LOG_LV1("LED", "Flame::init( %d, %d )", params_.extra_[0], params_.extra_[1]);
+		LOG_LV1("LED", "Flame::init( %d, %d )", params_.extra0_, params_.extra1_);
 		gPal = HeatColors_p;
-		cooling = params_.extra_[0];
-		sparking = params_.extra_[1];
+		cooling = params_.extra0_;
+		sparking = params_.extra1_;
 		fill_solid(leds, RGB_LED_COUNT, CHSV(params_.color1_, 255, 192));
 	}
 

@@ -21,6 +21,10 @@ struct animPattern
 {
 	Anim name;
 	animParams params;
+	bool operator==(const animPattern &p) const
+	{
+		return name == p.name && params == p.params;
+	}
 };
 
 void start_animation(const animPattern &pattern);

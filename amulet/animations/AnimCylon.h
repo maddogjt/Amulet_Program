@@ -8,7 +8,7 @@ public:
 	int hue;
 	virtual void init()
 	{
-		LOG_LV1("LED", "Cylon::init( %d, %d )", params_.extra_[0], params_.extra_[1]);
+		LOG_LV1("LED", "Cylon::init( %d, %d )", params_.extra0_, params_.extra1_);
 		hue = params_.color1_;
 		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
 	}
@@ -20,6 +20,6 @@ public:
 		int pos = beatsin16(params_.speed_, 0, 4 - 1);
 		leds[pos] += CHSV(hue, 255, 192);
 		mirror();
-		hue += params_.extra_[0] / 16;
+		hue += params_.extra0_ / 16;
 	}
 };

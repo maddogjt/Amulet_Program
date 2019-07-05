@@ -8,7 +8,6 @@
 #undef ARDUINO_GENERIC
 FASTLED_USING_NAMESPACE
 
-#define ANIM_EXTRAS_SIZE 2
 struct animParams
 {
 	uint8_t color1_;
@@ -16,12 +15,12 @@ struct animParams
 	uint8_t speed_;
 	uint8_t flags_;
 	uint8_t mods_;
-	uint8_t extra_[ANIM_EXTRAS_SIZE];
+	uint8_t extra0_;
+	uint8_t extra1_;
 	bool operator==(const animParams &p) const
 	{
-		bool extrasMatch = !memcmp(extra_, p.extra_, ANIM_EXTRAS_SIZE);
 		return color1_ == p.color1_ && color2_ == p.color2_ && mods_ == p.mods_ &&
-			   speed_ == p.speed_ && flags_ == p.flags_ && extrasMatch;
+			   speed_ == p.speed_ && flags_ == p.flags_ && extra0_ == p.extra0_ && extra1_ == p.extra1_;
 	};
 };
 

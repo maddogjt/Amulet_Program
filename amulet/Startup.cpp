@@ -17,6 +17,8 @@ void startAsPowerAmulet();
 
 void start()
 {
+	// testSerialization();
+
 	// Check for previous configuration
 
 	// If no previous configuration, go to uart mode

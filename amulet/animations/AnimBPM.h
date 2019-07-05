@@ -8,7 +8,7 @@ public:
 	int hue;
 	virtual void init()
 	{
-		LOG_LV1("LED", "Bpm::init( %d, %d )", params_.extra_[0], params_.extra_[1]);
+		LOG_LV1("LED", "Bpm::init( %d, %d )", params_.extra0_, params_.extra1_);
 		hue = params_.color1_;
 	}
 
@@ -22,6 +22,6 @@ public:
 		{ //9948
 			leds[i] = ColorFromPalette(palette, hue + (i * 2), beat - hue + (i * 10));
 		}
-		hue += params_.extra_[0] / 16;
+		hue += params_.extra0_ / 16;
 	}
 };
