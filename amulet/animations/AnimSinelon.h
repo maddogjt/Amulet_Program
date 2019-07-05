@@ -16,9 +16,9 @@ public:
 	virtual void step(const int frame, const float deltaTime, const float sourceDistance) override
 	{
 		// a colored dot sweeping back and forth, with fading trails
-		fadeToBlackBy(gLeds, RGB_LED_COUNT, 20);
+		fadeToBlackBy(leds, RGB_LED_COUNT, 20);
 		int pos = beatsin16(params_.speed_, 0, RGB_LED_COUNT - 1);
-		gLeds[pos] += CHSV(hue, 255, 192);
+		leds[pos] += CHSV(hue, 255, 192);
 		hue += params_.extra_[0];
 	}
 };

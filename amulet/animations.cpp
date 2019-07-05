@@ -3,6 +3,7 @@
 
 #include "animations.h"
 #include "globals.h"
+#include "AnimationMod.h"
 
 #define NUM_LEDS RGB_LED_COUNT
 CRGB gLeds[NUM_LEDS];
@@ -71,6 +72,13 @@ void step_animation()
 	if (currentAnim != nullptr)
 	{
 		currentAnim->step(frame_counter++, 0.f, 1.f);
+		for (int i = 0; i < RGB_LED_COUNT; i++)
+		{
+			gLeds[i] = currentAnim->leds[i];
+		}
+
+		modLEDs(gLeds, RGB_LED_COUNT, currentAnim->params_.mods_);
+		// void modLEDs(CRGB *leds, const uint8_t len, const uint8_t mod);
 
 		if (currentAnim->params_.flags_ & ANIMATION_FLAG_FOLD)
 		{

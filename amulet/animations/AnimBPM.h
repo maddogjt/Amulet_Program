@@ -15,13 +15,13 @@ public:
 	virtual void step(const int frame, const float deltaTime, const float sourceDistance) override
 	{
 		// colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-		uint8_t BeatsPerMinute = 62;
+		uint8_t BeatsPerMinute = params_.speed_;
 		CRGBPalette16 palette = PartyColors_p;
 		uint8_t beat = beatsin8(BeatsPerMinute, 64, 255);
 		for (int i = 0; i < RGB_LED_COUNT; i++)
 		{ //9948
-			gLeds[i] = ColorFromPalette(palette, hue + (i * 2), beat - hue + (i * 10));
+			leds[i] = ColorFromPalette(palette, hue + (i * 2), beat - hue + (i * 10));
 		}
-		hue += params_.extra_[0];
+		hue += params_.extra_[0] / 16;
 	}
 };

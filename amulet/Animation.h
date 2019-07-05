@@ -3,7 +3,9 @@
 #include <cstdint>
 #include <Arduino.h>
 #include "globals.h"
+#define ARDUINO_GENERIC
 #include <FastLED.h>
+#undef ARDUINO_GENERIC
 FASTLED_USING_NAMESPACE
 
 #define ANIM_EXTRAS_SIZE 2
@@ -23,7 +25,6 @@ struct animParams
 	};
 };
 
-// TODO: remove?
 extern CRGB gLeds[RGB_LED_COUNT];
 
 #define ANIMATION_FLAG_FOLD (0x01)			   /**< Top 4 leds mirror bottom 4 leds */
@@ -38,6 +39,8 @@ void mirror();
 class Animation
 {
 public:
+	CRGB leds[RGB_LED_COUNT];
+
 	virtual ~Animation() {}
 	void setParams(const animParams &parameters)
 	{

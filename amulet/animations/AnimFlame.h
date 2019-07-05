@@ -2,7 +2,9 @@
 
 #include "../Animation.h"
 
+#define ARDUINO_GENERIC
 #include <FastLED.h>
+#undef ARDUINO_GENERIC
 FASTLED_USING_NAMESPACE
 
 class AnimFlame : public Animation
@@ -16,7 +18,7 @@ public:
 		gPal = HeatColors_p;
 		cooling = params_.extra_[0];
 		sparking = params_.extra_[1];
-		fill_solid(gLeds, RGB_LED_COUNT, CHSV(params_.color1_, 255, 192));
+		fill_solid(leds, RGB_LED_COUNT, CHSV(params_.color1_, 255, 192));
 	}
 
 	virtual void step(const int frame, const float deltaTime, const float sourceDistance) override
@@ -74,7 +76,7 @@ public:
 			{
 				pixelnumber = j;
 			}
-			gLeds[pixelnumber] = color;
+			leds[pixelnumber] = color;
 		}
 	}
 };

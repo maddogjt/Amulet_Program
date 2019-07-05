@@ -10,12 +10,12 @@ public:
 	{
 		LOG_LV1("LED", "SolidHue::init( %d, %d )", params_.extra_[0], params_.extra_[1]);
 		hue = params_.color1_;
-		fill_solid(gLeds, RGB_LED_COUNT, CHSV(hue, 255, 192));
+		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 192));
 	}
 
 	virtual void step(const int frame, const float deltaTime, const float sourceDistance) override
 	{
-		hue += params_.extra_[0];
-		fill_solid(gLeds, RGB_LED_COUNT, CHSV(hue, 255, 192));
+		hue += params_.speed_ / 16;
+		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 192));
 	}
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Animation.h"
+
 #include "RasterHelper.h"
 
 class AnimBallRaster : public Animation
@@ -14,7 +15,7 @@ public:
 
 		for (int i = 0; i < RGB_LED_COUNT; i++)
 		{
-			gLeds[i] = CHSV(hue, 255, 255);
+			leds[i] = CHSV(hue, 255, 255);
 		}
 	}
 
@@ -26,9 +27,9 @@ public:
 		hue++;
 		for (int i = 0; i < RGB_LED_COUNT; i++)
 		{
-			float_t dist = distance(led_positions[i].x, (float_t)xval, led_positions[i].y, (float_t)yval);
+			float_t dist = distance(led_positions()[i].x, (float_t)xval, led_positions()[i].y, (float_t)yval);
 			dist = max(0, min(255, dist * 1.5 - 35));
-			gLeds[i] = CHSV(hue, 255, (int)dist);
+			leds[i] = CHSV(hue, 255, (int)dist);
 		}
 	}
 };

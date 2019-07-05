@@ -131,9 +131,9 @@ void colorCycle(bool next, uint8_t idx)
 }
 void extraCycle(bool next, uint8_t idx)
 {
-	uint8_t extra = (idx == 1) ? ambient.params.extra_[0] : ambient.params.extra_[1];
+	uint8_t extra = (idx == 7) ? ambient.params.extra_[0] : ambient.params.extra_[1];
 	extra = (extra + 255 + (next ? 16 : -16)) % 255;
-	if (idx == 0)
+	if (idx == 7)
 	{
 		Serial.printf("Setting extra[0]'s value to %d\n", extra);
 		ambient.params.extra_[0] = extra;
@@ -155,11 +155,6 @@ void speedCycle(bool next, uint8_t unused)
 
 void flagCycle(bool next, uint8_t idx)
 {
-	if (idx == 5)
-	{
-		Serial.printf("Setting mods is not currently supported\n");
-		return;
-	}
 	uint8_t flags_idx = 0;
 	uint8_t flags[] = {0, ANIMATION_FLAG_FOLD, ANIMATION_FLAG_MIRROR, ANIMATION_FLAG_LOOP};
 	const char *flag_names[] = {"None", "Fold", "Mirror", "Loop"};
@@ -174,6 +169,26 @@ void flagCycle(bool next, uint8_t idx)
 	flags_idx = (flags_idx + 4 + (next ? 1 : -1)) % 4;
 	Serial.printf("Setting flags to %s\n", flag_names[flags_idx]);
 	ambient.params.flags_ = flags[flags_idx];
+}
+
+void modCycle(bool next, uint8_t idx)
+{
+	uint8_t mod_alpha = ambient.params.mods_ & 0x0F;
+	uint8_t mod_blend = ambient.params.mods_ & 0xF0;
+	mod_blend = mod_blend >> 4;
+	if (idx == 5)
+	{
+		mod_alpha = (mod_alpha + 16 + (next ? 1 : -1)) % 16;
+		Serial.printf("Setting Mod alpha to %d\n", mod_alpha);
+	}
+	else
+	{
+		mod_blend = (mod_blend + 16 + (next ? 1 : -1)) % 16;
+		Serial.printf("Setting Mod blend to %d\n", mod_blend);
+	}
+	mod_blend = mod_blend << 4;
+	Serial.printf("Setting Mod combined value to %d\n", mod_alpha | mod_blend);
+	ambient.params.mods_ = mod_alpha | mod_blend;
 }
 
 void animCycle(bool next, uint8_t unused)
@@ -191,7 +206,8 @@ ParameterCycleList gCyclers = {
 	colorCycle,
 	speedCycle,
 	flagCycle,
-	flagCycle,
+	modCycle,
+	modCycle,
 	extraCycle,
 	extraCycle,
 };
@@ -201,7 +217,8 @@ const char *parameterNames[] = {
 	"color 2",
 	"speed",
 	"flag",
-	"mods",
+	"mods alpha",
+	"mods blend",
 	"extra 1",
 	"extra 2",
 };
