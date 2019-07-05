@@ -116,20 +116,100 @@ void start_advertising_uart()
 	Bluefruit.Advertising.start(0);				// 0 = Don't stop advertising after n seconds
 }
 
-uint8_t speedForButton(bool up)
+animPattern ambient = {.name = Anim::AnimSinelon, .params = {}};
+
+void colorCycle(bool next, uint8_t idx)
 {
-	static uint8_t speeds[] = {3, 7, 11, 14, 20, 44, 78, 120, 200};
-	static uint8_t speed_idx = 5;
-	speed_idx = min(8, max(0, speed_idx + (up ? 1 : -1)));
-	return speeds[speed_idx];
+	uint8_t hue = (idx == 1) ? ambient.params.color1_ : ambient.params.color2_;
+	hue = (hue + 255 + (next ? 16 : -16)) % 255;
+	if (idx == 1)
+	{
+		Serial.printf("Setting color 1's hue to %d\n", hue);
+		ambient.params.color1_ = hue;
+	}
+	else
+	{
+		Serial.printf("Setting color 2's hue to %d\n", hue);
+		ambient.params.color2_ = hue;
+	}
+}
+void extraCycle(bool next, uint8_t idx)
+{
+	uint8_t extra = (idx == 1) ? ambient.params.extra_[0] : ambient.params.extra_[1];
+	extra = (extra + 255 + (next ? 16 : -16)) % 255;
+	if (idx == 0)
+	{
+		Serial.printf("Setting extra[0]'s value to %d\n", extra);
+		ambient.params.extra_[0] = extra;
+	}
+	else
+	{
+		Serial.printf("Setting extra[0]'s value to %d\n", extra);
+		ambient.params.extra_[1] = extra;
+	}
 }
 
-Anim animForButton(bool right)
+void speedCycle(bool next, uint8_t unused)
 {
-	static uint8_t anim_idx = 0;
-	anim_idx = (anim_idx + 12 + (right ? 1 : -1)) % 12;
-	return (Anim)anim_idx;
+	uint8_t speed = ambient.params.speed_;
+	speed = (speed + 255 + (next ? 16 : -16)) % 255;
+	Serial.printf("Setting speed to %d\n", speed);
+	ambient.params.speed_ = speed;
 }
+
+void flagCycle(bool next, uint8_t idx)
+{
+	if (idx == 5)
+	{
+		Serial.printf("Setting mods is not currently supported\n");
+		return;
+	}
+	uint8_t flags_idx = 0;
+	uint8_t flags[] = {0, ANIMATION_FLAG_FOLD, ANIMATION_FLAG_MIRROR, ANIMATION_FLAG_LOOP};
+	const char *flag_names[] = {"None", "Fold", "Mirror", "Loop"};
+	for (int i = 0; i < 4; i++)
+	{
+		if (flags[i] == ambient.params.flags_)
+		{
+			flags_idx = i;
+			break;
+		}
+	}
+	flags_idx = (flags_idx + 4 + (next ? 1 : -1)) % 4;
+	Serial.printf("Setting flags to %s\n", flag_names[flags_idx]);
+	ambient.params.flags_ = flags[flags_idx];
+}
+
+void animCycle(bool next, uint8_t unused)
+{
+	uint8_t anim_idx = (uint8_t)ambient.name;
+	anim_idx = (anim_idx + 12 + (next ? 1 : -1)) % 12;
+	Serial.printf("Setting anim to %d\n", anim_idx);
+	ambient.name = (Anim)anim_idx;
+}
+
+typedef void (*ParameterCycleList[])(bool next, uint8_t idx);
+ParameterCycleList gCyclers = {
+	animCycle,
+	colorCycle,
+	colorCycle,
+	speedCycle,
+	flagCycle,
+	flagCycle,
+	extraCycle,
+	extraCycle,
+};
+const char *parameterNames[] = {
+	"animation",
+	"color 1",
+	"color 2",
+	"speed",
+	"flag",
+	"mods",
+	"extra 1",
+	"extra 2",
+};
+uint8_t gCyclersIndex = 0;
 
 void prph_bleuart_rx_callback(uint16_t conn_handle)
 {
@@ -140,15 +220,13 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 	char str[20 + 1] = {0};
 	uint8_t len = bleuart.read(str, 20);
 
-	Serial.print("[Prph] RX: ");
-	Serial.println(str);
+	// Serial.print("[Prph] RX: ");
+	// Serial.println(str);
 
 	if (len == 0 || str[0] != '!')
 	{
 		return;
 	}
-
-	static animPattern ambient = {.name = Anim::AnimSinelon, .params = {}};
 
 	// Color
 	if (str[1] == 'C')
@@ -179,7 +257,7 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 	{
 		uint8_t button = str[2];
 		uint8_t press = str[3];
-		uint8_t unknown = str[4];
+		// uint8_t unknown = str[4];
 		if (press != '0')
 		{
 			// Only do things on button release
@@ -187,20 +265,19 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		}
 		if (button == '5') // up
 		{
-			Serial.print("[Prph] Up");
-			ambient.params.speed_ = speedForButton(true);
+			gCyclersIndex = (gCyclersIndex + 7) % 8;
+			Serial.printf("Now editing %s\n", parameterNames[gCyclersIndex]);
+			// ambient.params.speed_ = speedForButton(true);
 		}
 		else if (button == '6') // down
 		{
-			ambient.params.speed_ = speedForButton(false);
+			gCyclersIndex = (gCyclersIndex + 1) % 8;
+			Serial.printf("Now editing %s\n", parameterNames[gCyclersIndex]);
+			// ambient.params.speed_ = speedForButton(false);
 		}
-		else if (button == '7') // left
+		else if (button == '7' || button == '8') // left or right
 		{
-			ambient.name = animForButton(false);
-		}
-		else if (button == '8') // right
-		{
-			ambient.name = animForButton(true);
+			gCyclers[gCyclersIndex](button == '8', gCyclersIndex);
 		}
 		else if (button == '1') // 1
 		{

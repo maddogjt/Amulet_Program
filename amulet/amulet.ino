@@ -58,7 +58,8 @@ void loop()
 	signal_loop(step);
 
 	dfuButton.read();
-	if (!devEnabled) {
+	if (!devEnabled)
+	{
 		resetButton.read();
 
 		static int dfuLastReleased = 0;
@@ -76,7 +77,8 @@ void loop()
 		}
 	}
 
-	if (dfuButton.pressedFor(5000)) {
+	if (dfuButton.pressedFor(5000))
+	{
 		systemSleep();
 	}
 	if (dfuButton.wasReleased() || (!devEnabled && resetButton.wasReleased()))
@@ -150,6 +152,9 @@ void setMode(amulet_mode_t mode)
 void systemSleep()
 {
 	Serial.println("Going to sleep now");
+
+	digitalWrite(LED_BUILTIN, LED_STATE_ON);
+	delay(500);
 
 	digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
 	digitalWrite(LED_BUILTIN, !LED_STATE_ON);

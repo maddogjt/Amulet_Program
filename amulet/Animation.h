@@ -11,14 +11,14 @@ struct animParams
 {
 	uint8_t color1_;
 	uint8_t color2_;
-	uint8_t color3_;
 	uint8_t speed_;
 	uint8_t flags_;
+	uint8_t mods_;
 	uint8_t extra_[ANIM_EXTRAS_SIZE];
 	bool operator==(const animParams &p) const
 	{
 		bool extrasMatch = !memcmp(extra_, p.extra_, ANIM_EXTRAS_SIZE);
-		return color1_ == p.color1_ && color2_ == p.color2_ && color3_ == p.color3_ &&
+		return color1_ == p.color1_ && color2_ == p.color2_ && mods_ == p.mods_ &&
 			   speed_ == p.speed_ && flags_ == p.flags_ && extrasMatch;
 	};
 };

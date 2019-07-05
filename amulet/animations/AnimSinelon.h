@@ -18,6 +18,6 @@ public:
 		fadeToBlackBy(gLeds, RGB_LED_COUNT, 20);
 		int pos = beatsin16(params_.speed_, 0, RGB_LED_COUNT - 1);
 		gLeds[pos] += CHSV(gHue, 255, 192);
-		gHue += params_.extra_[1];
+		gHue += params_.extra_[0];
 	}
 };

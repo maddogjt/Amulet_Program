@@ -73,7 +73,7 @@ void startAsBeacon()
 
 	ble_setup(true, true);
 
-	animPattern beaconPattern = {.name = Anim::AnimBallRaster,
+	animPattern beaconPattern = {.name = Anim::AnimTwister,
 								 .params = {}};
 
 	// Anim name is 4 bytes - could shrink

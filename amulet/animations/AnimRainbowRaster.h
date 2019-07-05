@@ -25,7 +25,7 @@ public:
 	virtual void init()
 	{
 		LOG_LV1("LED", "AnimRainbowRaster::init( %d, %d )", params_.extra_[0], params_.extra_[1]);
-		gHue = params_.extra_[0];
+		gHue = params_.color1_;
 		fHue = gHue;
 		for (int i = 0; i < RGB_LED_COUNT; i++)
 		{
