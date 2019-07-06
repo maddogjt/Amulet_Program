@@ -18,30 +18,33 @@ public:
 	}
 
 	virtual void step(const int frame, const float deltaTime, const float sourceDistance) override
-	{ //This does there and back
-		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
-		if (extra1 == 0)
+	{
+		EVERY_N_MILLISECONDS(100)
 		{
-			leds[extra0] = CHSV(params_.color2_, 255, 192);
-			extra0++;
-			if (extra0 == 8)
+			//This does there and back
+			fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
+			if (extra1 == 0)
 			{
-				extra0 = 7;
-				extra1 = 1;
-			}
-		}
-		else
-		{
-			leds[extra0] = CHSV(params_.color2_, 255, 192);
-			if (extra0 == 0)
-			{
-				extra1 = 0;
+				leds[extra0] = CHSV(params_.color2_, 255, 192);
+				extra0++;
+				if (extra0 == 8)
+				{
+					extra0 = 7;
+					extra1 = 1;
+				}
 			}
 			else
 			{
-				extra0--;
+				leds[extra0] = CHSV(params_.color2_, 255, 192);
+				if (extra0 == 0)
+				{
+					extra1 = 0;
+				}
+				else
+				{
+					extra0--;
+				}
 			}
 		}
-		delay(100);
 	}
 };

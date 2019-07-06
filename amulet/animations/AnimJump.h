@@ -70,28 +70,31 @@ public:
 		//This goes around back and forth
 		//counter clockwise
 		// p.extra0_ needs to start as 8
-		fadeToBlackBy(leds, RGB_LED_COUNT, 140);
-		if ((extra1 % 48) >= 24)
+		fadeToBlackBy(leds, RGB_LED_COUNT, 10);
+		EVERY_N_MILLISECONDS(100 - extra1 / 5)
 		{
-			leds[extra0] = CHSV((params_.color2_ += 30), 255, 192);
-			extra0++;
-			if (extra0 == 8)
+			if ((extra1 % 48) >= 24)
 			{
-				extra0 = 0;
+				leds[extra0] = CHSV((params_.color2_ += 30), 255, 192);
+				extra0++;
+				if (extra0 == 8)
+				{
+					extra0 = 0;
+				}
 			}
-		}
-		else
-		{
-			//clockwise
-			leds[extra0] = CHSV((params_.color2_ += 30), 255, 192);
-			if (extra0 == 0)
+			else
 			{
-				extra0 = 8;
+				//clockwise
+				leds[extra0] = CHSV((params_.color2_ += 30), 255, 192);
+				if (extra0 == 0)
+				{
+					extra0 = 8;
+				}
+				extra0--;
 			}
-			extra0--;
+
+			extra1++;
 		}
-		delay(100 - extra1 / 5);
-		extra1++;
 		/* 
  		//This does around the world with a tail
  		fadeToBlackBy(leds, RGB_LED_COUNT, 140);

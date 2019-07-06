@@ -138,9 +138,7 @@ void step_animation()
 			gLeds[i] = currentAnim->leds[i];
 		}
 
-		float mask[RGB_LED_COUNT];
-		getMask(mask, RGB_LED_COUNT, currentAnim->params_.mask_, frame_counter);
-		filterLEDs(gLeds, mask, RGB_LED_COUNT, currentAnim->params_.filter_);
+		maskAndFilter(gLeds, RGB_LED_COUNT, currentAnim->params_.filter_, frame_counter);
 
 		if (currentAnim->params_.flags_ & ANIMATION_FLAG_FOLD)
 		{

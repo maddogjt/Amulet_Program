@@ -8,7 +8,6 @@ public:
 	int hue;
 	uint8_t extra0;
 	uint8_t extra1;
-
 	virtual void init()
 	{
 		LOG_LV1("LED", "Twinkle::init");
@@ -31,11 +30,12 @@ public:
 
 	virtual void step(const int frame, const float deltaTime, const float sourceDistance) override
 	{
-		fadeToBlackBy(leds, RGB_LED_COUNT, 110);
-		leds[random8(0, 4)] = CHSV((params_.color2_ += 30), 255, 192);
-		leds[random8(5, 8)] = CHSV((params_.color2_ += 30), 255, 192);
-
-		//addGlitter(80);
-		delay(100);
+		EVERY_N_MILLISECONDS(100)
+		{
+			fadeToBlackBy(leds, RGB_LED_COUNT, 110);
+			leds[random8(0, 4)] = CHSV((params_.color2_ += 30), 255, 192);
+			leds[random8(4, 8)] = CHSV((params_.color2_ += 30), 255, 192);
+			//addGlitter(80);
+		}
 	}
 };

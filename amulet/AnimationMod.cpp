@@ -7,19 +7,13 @@
 
 Anim animForMask(const int mask_number)
 {
-	return (Anim)((mask_number / 2) % get_animations_count());
+	return (Anim)((mask_number) % get_animations_count());
 }
 
 int getMaskName(char *buf, const uint8_t mask_number)
 {
-	if (mask_number < get_animations_count() * 2)
-	{
-		sprintf(buf, mask_number % 2 ? "H:" : "V:");
-		sprintf(buf + 2, "%s", get_animation_name(animForMask(mask_number)));
-		return strlen(buf);
-	}
-	buf = "End";
-	return 3;
+	sprintf(buf, "%s", get_animation_name(animForMask(mask_number)));
+	return strlen(buf);
 }
 
 Animation *maskAnimation = nullptr;
@@ -52,45 +46,28 @@ void initMask(const uint8_t mask_number)
 	}
 }
 
-void getMask(float *mask, const uint8_t len, const uint8_t mask_number, int frame)
+const int FILTER_COUNT = 9;
+int getFilterName(char *buf, const uint8_t filter_number)
+{
+	const char *filterNames[] = {"None", "Left", "Right", "Across", "Darken", "Lighten", "MaskOnTop", "MaskUnder", "blend"};
+	return sprintf(buf, "%s", filterNames[filter_number % FILTER_COUNT]);
+}
+
+void modLED(CRGB &led, const CRGB &overlay, const uint8_t alpha, const uint8_t mod);
+void maskAndFilter(CRGB *leds, const uint8_t len, const uint8_t filter_number, int frame)
 {
 	if (maskAnimation == nullptr)
 	{
 		return;
 	}
 	maskAnimation->step(frame, 0, 1.f);
-	for (int i = 0; i < len; i++)
-	{
-		if (mask_number % 2)
-		{
-			mask[i] = 255.f * rgb2hsv_approximate(maskAnimation->leds[i]).hue;
-		}
-		else
-		{
-			mask[i] = 255.f * rgb2hsv_approximate(maskAnimation->leds[i]).value;
-		}
-	}
-}
 
-int getFilterName(char *buf, const uint8_t filter_number)
-{
-	const char *filterNames[] = {"None", "Left", "Right", "Across", "Stencil", "InvStencil"};
-	if (filter_number < 6)
-	{
-		return sprintf(buf, "%s", filterNames[filter_number]);
-	}
-	return sprintf(buf, "%s", "None - end");
-}
+	CHSV color = rgb2hsv_approximate(maskAnimation->leds[0]);
 
-void modLED(CRGB &led, const CRGB &overlay, const float_t alpha, const uint8_t mod);
-void filterLEDs(CRGB *leds, float *mask, const uint8_t len, const uint8_t filter)
-{
-	// Clamp alphas and apply mods
 	for (int i = 0; i < RGB_LED_COUNT; i++)
 	{
-		mask[i] = max(0, min(1.0, mask[i]));
-		CRGB overlay = CRGB(0, 0, 0);
-		modLED(leds[i], overlay, mask[i], filter);
+		CHSV color = rgb2hsv_approximate(maskAnimation->leds[i]);
+		modLED(leds[i], maskAnimation->leds[i], color.value, filter_number % FILTER_COUNT);
 	}
 }
 
@@ -127,8 +104,11 @@ void rotateColorAcross(CRGB &led, const float_t alpha)
 	led.b = b * same + (r / 2 + g / 2) * alpha;
 }
 
-void modLED(CRGB &led, const CRGB &overlay, const float_t alpha, const uint8_t mod)
+void modLED(CRGB &led, const CRGB &overlay, const uint8_t alpha, const uint8_t mod)
 {
+	float_t fAlpha = alpha;
+	fAlpha /= 255.f;
+
 	if (mod == 0)
 	{
 		// no mod
@@ -137,107 +117,42 @@ void modLED(CRGB &led, const CRGB &overlay, const float_t alpha, const uint8_t m
 	else if (mod == 1)
 	{
 		// Shift the hue around the RGB wheel
-		rotateColorLeft(led, alpha);
+		rotateColorLeft(led, fAlpha);
 	}
 	else if (mod == 2)
 	{
 		// Shift the hue around the RGB wheel
-		rotateColorRight(led, alpha);
+		rotateColorRight(led, fAlpha);
 	}
 	else if (mod == 3)
 	{
 		// Shift the hue around the RGB wheel
-		rotateColorAcross(led, alpha);
+		rotateColorAcross(led, fAlpha);
 	}
 	else if (mod == 4)
 	{
-		// Only alpha is visible
-		led.nscale8(alpha * 255);
+		// DARKEN
+		led &= overlay;
 	}
 	else if (mod == 5)
 	{
-		// Darken by alpha
-		led = blend(led, overlay, alpha * 255);
+		// LIGHTEN
+		led |= overlay;
 	}
 	else if (mod == 6)
 	{
-		// difference blend ??? not visible
-		led = led - overlay * (uint8_t)(alpha * 255);
+		// MASK ON TOP
+		led = blend(led, overlay, alpha);
 	}
 	else if (mod == 7)
 	{
-		// additive blend
-		led = led + overlay * (uint8_t)(alpha * 255);
+		// MASK UNDER
+		CHSV ledcolor = rgb2hsv_approximate(led);
+		led = blend(overlay, led, ledcolor.value);
 	}
-}
-
-float_t alphas[RGB_LED_COUNT];
-
-void setRasterAngleAlphas(float_t angle, bool wave)
-{
-	float x;
-	float y;
-	for (int i = 0; i < RGB_LED_COUNT; i++)
+	else if (mod == 8)
 	{
-		x = led_positions()[i].x + 5; // need to offset by 5 to avoid 0s mucking up math
-		y = led_positions()[i].y + 5;
-		float alpha = atanf(y / x);
-		// Serial.printf("alpha: %f  (y:%f / x:%f)\n", alpha, y, x);
-		float c = distance(0, x, 0, y);
-		// Serial.printf("c: %f     angle: %f\n", c, angle);
-
-		float hue = c * cosf(alpha - angle);
-		alphas[i] = !wave ? (hue / 255) : ((1 + cosf(hue * 2 * PI / 255)) / 2);
-	}
-}
-
-void sinelonAlphas()
-{
-	// a colored dot sweeping back and forth, with fading trails
-	for (int i = 0; i < RGB_LED_COUNT; i++)
-	{
-		alphas[i] = alphas[i] - 0.08;
-	}
-	int pos = beatsin16(30, 0, RGB_LED_COUNT - 1);
-	alphas[pos] += 0.75;
-}
-
-void modLEDs(CRGB *leds, const uint8_t len, const uint8_t mod)
-{
-	static bool need_to_clear_alphas = true;
-	if (need_to_clear_alphas)
-	{
-		memset(alphas, 0.f, sizeof(alphas));
-		need_to_clear_alphas = false;
-	}
-
-	static float_t angle = 0;
-
-	uint8_t overlayMod = mod & 0xF0;
-	overlayMod = overlayMod >> 4;
-	uint8_t colorMod = mod & 0x0F;
-	// Serial.printf("Mod %d > overlay %d and color %d\n");
-
-	if (overlayMod == 0)
-	{
-		sinelonAlphas();
-	}
-	else if (overlayMod == 1)
-	{
-		setRasterAngleAlphas(angle, false);
-		angle += 0.05;
-	}
-	else if (overlayMod == 2)
-	{
-		setRasterAngleAlphas(angle, true);
-		angle += 0.05;
-	}
-
-	// Clamp alphas and apply mods
-	for (int i = 0; i < RGB_LED_COUNT; i++)
-	{
-		alphas[i] = max(0, min(1.0, alphas[i]));
-		CRGB overlay = CRGB(0, 0, 0);
-		modLED(leds[i], overlay, alphas[i], colorMod);
+		// EVEN BLEND
+		led = blend(led, overlay, 128);
 	}
 }

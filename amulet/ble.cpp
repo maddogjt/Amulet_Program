@@ -123,8 +123,7 @@ void colorCycle(bool next, uint8_t idx)
 {
 	uint8_t hue = (idx == 1) ? ambient.params.color1_ : ambient.params.color2_;
 	hue = (hue + 255 + (next ? 16 : -16)) % 255;
-	bleuart.printf("P: color%d V: %d\n", idx + 1, hue);
-
+	bleuart.printf("P: color%d V: %d\n", idx, hue);
 	if (idx == 1)
 	{
 		ambient.params.color1_ = hue;
