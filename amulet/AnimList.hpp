@@ -12,7 +12,6 @@
 #include "animations/AnimConfetti.h"
 #include "animations/AnimBallRaster.h"
 #include "animations/AnimRainbowRaster.h"
-#include "animations/AnimJump.h"
 #include "animations/AnimOrbit.h"
 #include "animations/AnimTwinkle.h"
 #include "animations/AnimBounce.h"
@@ -36,7 +35,6 @@ DEFINE_ANIM(AnimBPM)
 DEFINE_ANIM(AnimConfetti)
 DEFINE_ANIM(AnimBallRaster)
 DEFINE_ANIM(AnimRainbowRaster)
-DEFINE_ANIM(AnimJump)
 DEFINE_ANIM(AnimOrbit)
 DEFINE_ANIM(AnimTwinkle)
 DEFINE_ANIM(AnimBounce)
