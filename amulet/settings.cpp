@@ -7,7 +7,7 @@ using namespace Adafruit_LittleFS_Namespace;
 bool settingsValid_ = false;
 
 constexpr int16_t kGlobalSettingsSig = 0x610B;
-constexpr int16_t kLocalSettingsSig = 0x10CA;
+constexpr int16_t kLocalSettingsSig = 0x10CB;
 
 constexpr char kGlobalSettingsFile[] = "globalSettings";
 constexpr char kLocalSettingsFile[] = "localSettings";
@@ -20,23 +20,25 @@ GlobalSettings globalSettings_{
 	.runeSeenCountThreshold_ = 20,
 	.pad_ = {}};
 
-constexpr animPattern kDefaultPattern {
-			.name = Anim::AnimRainbowRaster, 
-			.params = {}
-		};
+constexpr animPattern kDefaultPattern{
+	.name = Anim::AnimRainbowRaster,
+	.params = {}};
 
-LocalSettings localSettings_ {
+LocalSettings localSettings_{
 	.signature_ = kLocalSettingsSig,
 	.version_ = 0,
 	.configSize_ = sizeof(StartupConfig),
-	.startupConfig_ = {}
-};
+	.startupConfig_ = {}};
 
 void settings_init()
 {
 	localSettings_.startupConfig_.mode = AMULET_MODE_CONFIG;
 	localSettings_.startupConfig_.pattern = kDefaultPattern;
-	localSettings_.startupConfig_.ad = {};
+	localSettings_.startupConfig_.ad = {
+		.power = 100,
+		.decay = 128,
+		.range = -80,
+	};
 
 	InternalFS.begin();
 	if (InternalFS.exists(kGlobalSettingsFile))
@@ -73,21 +75,19 @@ void settings_init()
 			LocalSettings tempSettings;
 			if (file.read(&tempSettings, sizeof(LocalSettings)) == sizeof(LocalSettings))
 			{
-				if (tempSettings.signature_ == kLocalSettingsSig 
-					&& tempSettings.configSize_ == sizeof(StartupConfig)
-					&& tempSettings.version_ >= localSettings_.version_) {
+				if (tempSettings.signature_ == kLocalSettingsSig && tempSettings.configSize_ == sizeof(StartupConfig) && tempSettings.version_ >= localSettings_.version_)
+				{
 					localSettings_ = tempSettings;
 					Serial.printf("Read local settings v%d\n", localSettings_.version_);
 					dump_animation_to_console(localSettings_.startupConfig_.pattern);
-				} else {
+				}
+				else
+				{
 					Serial.println("Rejected local settings");
 				}
 			}
-
-			
 		}
 		file.close();
-
 	}
 
 	if (!settingsValid_)
@@ -99,28 +99,33 @@ void settings_init()
 void write_global_settings()
 {
 	Serial.println("Writing global settings");
-	if (InternalFS.exists(kGlobalSettingsFile)) {
+	if (InternalFS.exists(kGlobalSettingsFile))
+	{
 		InternalFS.remove(kGlobalSettingsFile);
 	}
 
-	auto file = InternalFS.open(kGlobalSettingsFile,  FILE_O_WRITE);
-	if (file) {
-		file.write((uint8_t*) &globalSettings_, sizeof(globalSettings_));
+	auto file = InternalFS.open(kGlobalSettingsFile, FILE_O_WRITE);
+	if (file)
+	{
+		file.write((uint8_t *)&globalSettings_, sizeof(globalSettings_));
 		file.close();
 		settingsValid_ = true;
 	}
 }
 
-void write_local_settings() {
-	if (InternalFS.exists(kLocalSettingsFile)) {
+void write_local_settings()
+{
+	if (InternalFS.exists(kLocalSettingsFile))
+	{
 		InternalFS.remove(kLocalSettingsFile);
 	}
 	localSettings_.version_++;
 	Serial.printf("Writing local settings v%d\n", localSettings_.version_);
-	File file(kLocalSettingsFile,  FILE_O_WRITE, InternalFS);
-	if (file) {
-		size_t r = file.write((uint8_t*) &localSettings_, sizeof(localSettings_));
-		Serial.printf("write %d\n",r);
+	File file(kLocalSettingsFile, FILE_O_WRITE, InternalFS);
+	if (file)
+	{
+		size_t r = file.write((uint8_t *)&localSettings_, sizeof(localSettings_));
+		Serial.printf("write %d\n", r);
 		file.close();
 		dump_animation_to_console(localSettings_.startupConfig_.pattern);
 	}

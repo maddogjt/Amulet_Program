@@ -13,6 +13,8 @@ typedef enum
 	AMULET_MODE_COUNT,
 } amulet_mode_t;
 
+const char *get_config_mode_name(amulet_mode_t mode);
+
 struct StartupConfig
 {
 	// Top level mode

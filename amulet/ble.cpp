@@ -16,6 +16,7 @@ const uint16_t BLE_AMULET_MFID = 0x69FF;
 #define BLE_AMULET_DATA_VERSION (1)
 
 int g_rssi = 0;
+StartupConfig config = localSettings_.startupConfig_;
 animPattern ambient = {.name = Anim::AnimSinelon, .params = {}};
 
 typedef struct ATTR_PACKED
@@ -121,9 +122,7 @@ void colorCycle(bool next, uint8_t idx)
 {
 	uint8_t hue = (idx == 1) ? ambient.params.color1_ : ambient.params.color2_;
 	hue = (hue + 255 + (next ? 16 : -16)) % 255;
-
 	bleuart.printf("P: color%d V: %d\n", idx + 1, hue);
-	Serial.printf("Setting color %d's hue to %d\n", idx + 1, hue);
 
 	if (idx == 1)
 	{
@@ -138,7 +137,6 @@ void extraCycle(bool next, uint8_t idx)
 {
 	uint8_t &extra = (idx == 7) ? ambient.params.extra0_ : ambient.params.extra1_;
 	extra = (extra + 255 + (next ? 16 : -16)) % 255;
-	Serial.printf("Setting extra[%d]'s value to %d\n", (idx == 7) ? 0 : 1, extra);
 	bleuart.printf("P: extra[%d] V: %d\n", (idx == 7) ? 0 : 1, extra);
 }
 
@@ -146,7 +144,6 @@ void speedCycle(bool next, uint8_t unused)
 {
 	uint8_t speed = ambient.params.speed_;
 	speed = (speed + 255 + (next ? 16 : -16)) % 255;
-	Serial.printf("Setting speed to %d\n", speed);
 	bleuart.printf("P: speed V: %d\n", speed);
 	ambient.params.speed_ = speed;
 }
@@ -165,7 +162,7 @@ void flagCycle(bool next, uint8_t idx)
 		}
 	}
 	flags_idx = (flags_idx + 4 + (next ? 1 : -1)) % 4;
-	Serial.printf("Setting flags to %s\n", flag_names[flags_idx]);
+	bleuart.printf("P: flag V: %s\n", flag_names[flags_idx]);
 	ambient.params.flags_ = flags[flags_idx];
 }
 
@@ -177,15 +174,15 @@ void modCycle(bool next, uint8_t idx)
 	if (idx == 5)
 	{
 		mod_alpha = (mod_alpha + 16 + (next ? 1 : -1)) % 16;
-		Serial.printf("Setting Mod alpha to %d\n", mod_alpha);
+		bleuart.printf("P: mask V: %d\n", mod_alpha);
 	}
 	else
 	{
 		mod_blend = (mod_blend + 16 + (next ? 1 : -1)) % 16;
-		Serial.printf("Setting Mod blend to %d\n", mod_blend);
+		bleuart.printf("P: mod V: %d\n", mod_blend);
 	}
 	mod_blend = mod_blend << 4;
-	Serial.printf("Setting Mod combined value to %d\n", mod_alpha | mod_blend);
+	bleuart.printf("P: mod V: %d\n", mod_alpha | mod_blend);
 	ambient.params.mods_ = mod_alpha | mod_blend;
 }
 
@@ -193,13 +190,66 @@ void animCycle(bool next, uint8_t unused)
 {
 	uint8_t anim_idx = (uint8_t)ambient.name;
 	anim_idx = (anim_idx + get_animations_count() + (next ? 1 : -1)) % get_animations_count();
-	Serial.printf("Setting anim to %d %s\n", anim_idx, get_animation_name((Anim)anim_idx));
 	bleuart.printf("P:anim V:%.10s\n", get_animation_name((Anim)anim_idx));
 	ambient.name = (Anim)anim_idx;
 }
 
+void modeCycle(bool next, uint8_t unused)
+{
+	uint8_t mode_idx = 0;
+	const amulet_mode_t modes[] = {AMULET_MODE_AMULET, AMULET_MODE_BEACON, AMULET_MODE_RUNE, AMULET_MODE_BEACON_POWER_AMULET};
+	for (int i = 0; i < 4; i++)
+	{
+		if (modes[i] == config.mode)
+		{
+			mode_idx = i;
+			break;
+		}
+	}
+	mode_idx = (mode_idx + 4 + (next ? 1 : -1)) % 4;
+	bleuart.printf("P: mode V: %s\n", get_config_mode_name(modes[mode_idx]));
+	config.mode = modes[mode_idx];
+}
+
+void powerCycle(bool next, uint8_t unused)
+{
+	uint8_t power = config.ad.power;
+	power = (power + 255 + (next ? 16 : -16)) % 255;
+	bleuart.printf("P: power V: %d\n", power);
+	config.ad.power = power;
+}
+
+void decayCycle(bool next, uint8_t unused)
+{
+	uint8_t decay = config.ad.decay;
+	decay = (decay + 255 + (next ? 16 : -16)) % 255;
+	bleuart.printf("P: decay V: %4.2f%%\n", (float)decay * 100.f / 255.f);
+	config.ad.decay = decay;
+}
+
+void rangeCycle(bool next, uint8_t unused)
+{
+	int8_t range = config.ad.range;
+	range = max(-120, min(0, range + (next ? 2 : -2)));
+	bleuart.printf("P: range V: %d\n", range);
+	config.ad.range = range;
+}
+
 typedef void (*ParameterCycleList[])(bool next, uint8_t idx);
-ParameterCycleList gCyclers = {
+ParameterCycleList g_ConfigCyclers = {
+	modeCycle,
+	powerCycle,
+	decayCycle,
+	rangeCycle,
+};
+const char *g_ConfigCyclerNames[] = {
+	"mode",
+	"power",
+	"decay",
+	"range",
+};
+
+ParameterCycleList g_AnimCyclers = {
 	animCycle,
 	colorCycle,
 	colorCycle,
@@ -210,7 +260,7 @@ ParameterCycleList gCyclers = {
 	extraCycle,
 	extraCycle,
 };
-const char *parameterNames[] = {
+const char *g_AnimCyclerNames[] = {
 	"animation",
 	"color 1",
 	"color 2",
@@ -221,7 +271,9 @@ const char *parameterNames[] = {
 	"extra 1",
 	"extra 2",
 };
-uint8_t gCyclersIndex = 0;
+uint8_t g_AnimIdx = 0;
+uint8_t g_ConfigIdx = 0;
+bool g_tweaker_is_modifying_animation = true;
 
 bool g_ble_uart_packet_in_progress = false;
 
@@ -353,67 +405,83 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		}
 		if (button == '5') // up
 		{
-			gCyclersIndex = (gCyclersIndex + 8) % 9;
-			Serial.printf("Now editing %s\n", parameterNames[gCyclersIndex]);
-			bleuart.printf("P: %s\n", parameterNames[gCyclersIndex]);
-
-			// ambient.params.speed_ = speedForButton(true);
+			if (g_tweaker_is_modifying_animation)
+			{
+				g_AnimIdx = (g_AnimIdx + 8) % 9;
+				bleuart.printf("P: %s\n", g_AnimCyclerNames[g_AnimIdx]);
+			}
+			else
+			{
+				g_ConfigIdx = (g_ConfigIdx + 3) % 4;
+				bleuart.printf("P: %s\n", g_ConfigCyclerNames[g_ConfigIdx]);
+			}
 		}
 		else if (button == '6') // down
 		{
-			gCyclersIndex = (gCyclersIndex + 1) % 9;
-			Serial.printf("Now editing %s\n", parameterNames[gCyclersIndex]);
-			bleuart.printf("P: %s\n", parameterNames[gCyclersIndex]);
-			// ambient.params.speed_ = speedForButton(false);
+			if (g_tweaker_is_modifying_animation)
+			{
+				g_AnimIdx = (g_AnimIdx + 1) % 9;
+				bleuart.printf("P: %s\n", g_AnimCyclerNames[g_AnimIdx]);
+			}
+			else
+			{
+				g_ConfigIdx = (g_ConfigIdx + 1) % 4;
+				bleuart.printf("P: %s\n", g_ConfigCyclerNames[g_ConfigIdx]);
+			}
 		}
 		else if (button == '7' || button == '8') // left or right
 		{
-			gCyclers[gCyclersIndex](button == '8', gCyclersIndex);
-		}
-		else if (button == '1') // 1
-		{
-			if (ambient.params.flags_ == ANIMATION_FLAG_FOLD)
+			if (g_tweaker_is_modifying_animation)
 			{
-				ambient.params.flags_ = 0;
-				bleuart.println("toggle flag fold off ");
+				g_AnimCyclers[g_AnimIdx](button == '8', g_AnimIdx);
 			}
 			else
 			{
-				ambient.params.flags_ = ANIMATION_FLAG_FOLD;
-				bleuart.println("toggle flag fold on ");
+				g_ConfigCyclers[g_ConfigIdx](button == '8', g_ConfigIdx);
 			}
 		}
-		else if (button == '2') // 2
+		else if (button == '1') // The Info Button
 		{
-			if (ambient.params.flags_ == ANIMATION_FLAG_MIRROR)
+			if (g_tweaker_is_modifying_animation)
 			{
-				ambient.params.flags_ = 0;
-				bleuart.println("toggle flag mirror off ");
+				bleuart.printf("Anim: %s\n", get_animation_name(ambient.name));
 			}
 			else
 			{
-				ambient.params.flags_ = ANIMATION_FLAG_MIRROR;
-				bleuart.println("toggle flag mirror on ");
+				bleuart.printf("Conf: %s\n", get_config_mode_name(config.mode));
 			}
 		}
-		else if (button == '3') // 3
+		else if (button == '2') // The Info Details Button
 		{
-			if (ambient.params.flags_ == ANIMATION_FLAG_LOOP)
+			if (g_tweaker_is_modifying_animation)
 			{
-				ambient.params.flags_ = 0;
-				bleuart.println("toggle flag loop off ");
+				bleuart.printf("mask: %d\n", ambient.params.mods_ & 0x0F);
 			}
 			else
 			{
-				ambient.params.flags_ = ANIMATION_FLAG_LOOP;
-				bleuart.println("toggle flag loop on ");
+				bleuart.printf(":P\n");
 			}
 		}
-		else if (button == '4') // 4
+		else if (button == '3') // The mode switcher button
 		{
-			localSettings_.startupConfig_.pattern = ambient;
+			if (g_tweaker_is_modifying_animation)
+			{
+				bleuart.printf("Editing config\n");
+				g_tweaker_is_modifying_animation = false;
+			}
+			else
+			{
+				bleuart.printf("Editing anim\n");
+				g_tweaker_is_modifying_animation = true;
+			}
+		}
+		else if (button == '4') // Commit the changes button (after system reset)
+		{
+			bleuart.printf("Saving Config\n");
+
+			config.pattern = ambient;
+			localSettings_.startupConfig_ = config;
 			write_local_settings();
-			ambient.params.flags_ = 0;
 		}
 
 		// Set the ambient animation

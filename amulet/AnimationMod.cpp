@@ -58,17 +58,17 @@ void modLED(CRGB &led, const CRGB &overlay, const float_t alpha, const uint8_t m
 	}
 	else if (mod == 4)
 	{
-		// Darken by alpha
+		// Only alpha is visible
 		led.nscale8(alpha * 255);
 	}
 	else if (mod == 5)
 	{
-		// blend with input
+		// Darken by alpha
 		led = blend(led, overlay, alpha * 255);
 	}
 	else if (mod == 6)
 	{
-		// difference blend
+		// difference blend ??? not visible
 		led = led - overlay * (uint8_t)(alpha * 255);
 	}
 	else if (mod == 7)
