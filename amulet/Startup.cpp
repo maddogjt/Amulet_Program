@@ -54,8 +54,10 @@ void start()
 	// char buffer[200];
 	// serializeAnimPattern(buffer, 200, config.pattern);
 	// testSerialization();
+	StartupConfig config{};
+	startAsRemoteConfig(config);
 
-	startWithConfig(localSettings_.startupConfig_);
+	// startWithConfig(localSettings_.startupConfig_);
 }
 
 void startAsRemoteConfig(const StartupConfig &config)

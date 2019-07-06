@@ -14,6 +14,11 @@
 #include "animations/AnimConfetti.h"
 #include "animations/AnimBallRaster.h"
 #include "animations/AnimRainbowRaster.h"
+#include "animations/AnimBounce.h"
+#include "animations/AnimInNOut.h"
+#include "animations/AnimJump.h"
+#include "animations/AnimOrbit.h"
+#include "animations/AnimTwinkle.h"
 #else
 
 #ifndef DEFINE_ANIM
@@ -24,8 +29,14 @@
 DEFINE_ANIM(AnimSolidHue)
 DEFINE_ANIM(AnimRainbow)
 DEFINE_ANIM(AnimTwister)
-DEFINE_ANIM(AnimFlame)
 DEFINE_ANIM(AnimBurn)
+
+DEFINE_ANIM(AnimJump)
+DEFINE_ANIM(AnimOrbit)
+DEFINE_ANIM(AnimTwinkle)
+DEFINE_ANIM(AnimBounce)
+DEFINE_ANIM(AnimInNOut)
+
 DEFINE_ANIM(AnimDebugInfo)
 DEFINE_ANIM(AnimCylon)
 DEFINE_ANIM(AnimJuggle)
