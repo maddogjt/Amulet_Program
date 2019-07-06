@@ -52,6 +52,11 @@ void start()
 	StartupConfig config{};
 	config.mode = AMULET_MODE_STARTUP;
 	config.pattern = {.name = Anim::AnimRainbowRaster, .params = {}};
+
+	// char buffer[200];
+	// serializeAnimPattern(buffer, 200, config.pattern);
+	// testSerialization();
+
 	startWithConfig(config);
 }
 

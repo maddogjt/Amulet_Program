@@ -225,23 +225,49 @@ const char *parameterNames[] = {
 };
 uint8_t gCyclersIndex = 0;
 
+bool g_ble_uart_packet_in_progress = false;
+
 void prph_bleuart_rx_callback(uint16_t conn_handle)
 {
 	(void)conn_handle;
 
 	// Wait for new data to arrive
 #define MAX_BLE_UART_PACKET 200
-	char str[MAX_BLE_UART_PACKET] = {0};
+	static char str[MAX_BLE_UART_PACKET] = {0};
+	static uint8_t len = 0;
+
 	int avail = bleuart.available();
 	if (avail <= 0)
 	{
 		return;
 	}
 
-	uint8_t len = bleuart.read(str, min(MAX_BLE_UART_PACKET, avail));
+	if (avail + len > MAX_BLE_UART_PACKET)
+	{
+		Serial.println("ERROR: Buffer Overflow");
+	}
 
-	// Serial.print("[Prph] RX: ");
-	// Serial.println(str);
+	if (g_ble_uart_packet_in_progress)
+	{
+		if (bleuart.peek() == '!')
+		{
+			LOG_LV1("BLE", "Old packet incomplete, starting new one.");
+			memset(str, 0, MAX_BLE_UART_PACKET);
+			len = bleuart.read(str, avail);
+		}
+		else
+		{
+			len += bleuart.read(str + strlen(str), avail);
+		}
+	}
+	else
+	{
+		memset(str, 0, MAX_BLE_UART_PACKET);
+		len = bleuart.read(str, avail);
+	}
+
+	Serial.print("[Prph] RX: ");
+	Serial.println(str);
 
 	if (str[0] != '!')
 	{
@@ -253,8 +279,17 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 	// StartupConfig
 	if (str[1] == 'S')
 	{
+		if (str[strlen(str) - 1] != '#')
+		{
+			g_ble_uart_packet_in_progress = true;
+			return;
+		}
+		g_ble_uart_packet_in_progress = false;
 		char *configStr = &str[2];
+
 		StartupConfig config = deserializeStartupConfig(configStr, len - 2);
+		Serial.println("Setting startup config from BLE service");
+		Serial.printf("%s", configStr);
 		startWithConfig(config);
 		return;
 	}
@@ -262,8 +297,17 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 	// Set Ambient Animatoin
 	if (str[1] == 'A')
 	{
+		if (str[strlen(str) - 1] != '#')
+		{
+			g_ble_uart_packet_in_progress = true;
+			return;
+		}
+		g_ble_uart_packet_in_progress = false;
+
 		char *animStr = &str[2];
 		animPattern pattern = deserializeAnimPattern(animStr, len - 2);
+		Serial.println("Setting animation pattern from BLE service");
+		Serial.printf("%s", animStr);
 		led_set_ambient_animation(pattern);
 		return;
 	}
@@ -289,7 +333,9 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 
 		ambient.params.color1_ = color.hue;
 
-		// Set the initial ambient animation
+		// Set the ambient animation
+		led_set_ambient_animation(ambient);
+		return;
 	}
 
 	// Button
@@ -336,10 +382,13 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 			ambient.params.flags_ = 0;
 		}
 
-		// Set the initial ambient animation
+		// Set the ambient animation
+		led_set_ambient_animation(ambient);
+		return;
 	}
 
-	led_set_ambient_animation(ambient);
+	Serial.print("[Prph] Unknown BLE Uart command RX: ");
+	Serial.println(str);
 }
 
 void start_advertising_with_data(amulet_mfd_t &data)

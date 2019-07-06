@@ -28,6 +28,22 @@ animPattern deserializeAnimPattern(char *str, uint8_t len)
 	return pattern;
 }
 
+uint8_t serializeAnimPattern(char *buffer, const uint8_t len, const animPattern &pattern)
+{
+	memset(buffer, 0, len);
+	append_int_comma(buffer, (int)pattern.name);
+	append_int_comma(buffer, pattern.params.color1_);
+	append_int_comma(buffer, pattern.params.color2_);
+	append_int_comma(buffer, pattern.params.speed_);
+	append_int_comma(buffer, pattern.params.flags_);
+	append_int_comma(buffer, pattern.params.mods_);
+	append_int_comma(buffer, pattern.params.extra0_);
+	append_int_comma(buffer, pattern.params.extra1_);
+	buffer[strlen(buffer) - 1] = '\0'; // delete last comma
+	Serial.printf("Anim Pattern (len: %d): %s\n", strlen(buffer), buffer);
+	return strlen(buffer);
+}
+
 void start_animation(Anim name, int p1, int p2)
 {
 	animPattern pattern{};
