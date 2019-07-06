@@ -7,6 +7,7 @@
 #include "animations/AnimDebugInfo.h"
 #include "animations/AnimCylon.h"
 #include "animations/AnimJuggle.h"
+#include "animations/AnimPsyco.h"
 #include "animations/AnimSinelon.h"
 #include "animations/AnimBPM.h"
 #include "animations/AnimConfetti.h"
@@ -26,6 +27,7 @@ DEFINE_ANIM(AnimFlame)
 DEFINE_ANIM(AnimDebugInfo)
 DEFINE_ANIM(AnimCylon)
 DEFINE_ANIM(AnimJuggle)
+DEFINE_ANIM(AnimPsyco)
 DEFINE_ANIM(AnimSinelon)
 DEFINE_ANIM(AnimBPM)
 DEFINE_ANIM(AnimConfetti)

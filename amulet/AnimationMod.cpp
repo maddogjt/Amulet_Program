@@ -71,7 +71,7 @@ void modLED(CRGB &led, const CRGB &overlay, const float_t alpha, const uint8_t m
 		// difference blend
 		led = led - overlay * (uint8_t)(alpha * 255);
 	}
-	else if (mod == 6)
+	else if (mod == 7)
 	{
 		// additive blend
 		led = led + overlay * (uint8_t)(alpha * 255);

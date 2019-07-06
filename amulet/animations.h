@@ -15,6 +15,7 @@ enum class Anim
 #define DEFINE_ANIM(name) name,
 #include "AnimList.hpp"
 #undef DEFINE_ANIM
+	Count,
 };
 
 struct animPattern
