@@ -7,7 +7,6 @@
 #include "signal.h"
 #include "globals.h"
 #include "Startup.h"
-#include "settings.h"
 
 FASTLED_USING_NAMESPACE
 
@@ -32,13 +31,9 @@ void set_animation_from_signal(Signal *s)
 		memcpy(&pattern, s->_scan._data, sizeof(animPattern));
 		if (!matches_current_animation(pattern))
 		{
-			// Todo: Pull the seen count threshold from settings
-			if (s->_scan.signal_type == (uint8_t)AdvertisementType::Runic &&
-				s->_seenCount >= globalSettings_.runeSeenCountThreshold_)
+			if (s->_scan.signal_type == (uint8_t)AdvertisementType::Rune)
 			{
 				LOG_LV1("LED", "Setting Ambient Animation from rune");
-				localSettings_.startupConfig_.pattern = pattern;
-				write_local_settings();
 				led_set_ambient_animation(pattern);
 			}
 			LOG_LV1("LED", "Starting Animation from scan");
@@ -63,12 +58,6 @@ void led_set_ambient_animation(const animPattern &anim)
 	set_animation_from_signal(nullptr);
 }
 
-animPattern led_get_ambient_animation()
-{
-	return ambientAnimation;
-}
-
-
 void led_setup()
 {
 	FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(gLeds, RGB_LED_COUNT).setCorrection(TypicalLEDStrip);
@@ -84,7 +73,7 @@ void choose_pattern_by_signal()
 void led_loop(int step)
 {
 	// Update the LED pattern based on bluetooth signals every 500ms
-	if (isAmulet() && !led_test_mode && step % 12 == 0)
+	if ((mode == AMULET_MODE_AMULET || mode == AMULET_MODE_POWER_AMULET) && !led_test_mode && step % 12 == 0)
 	{
 		choose_pattern_by_signal();
 	}
@@ -92,4 +81,95 @@ void led_loop(int step)
 	// Step the currentAnimation
 	step_animation();
 	FastLED.show();
+}
+
+// -----------------------
+//
+// TEST PATTERN CODE
+//
+// -----------------------
+int test_pattern_idx = 0;
+const int test_pattern_count = 12;
+
+void led_show_test_pattern_by_index(int idx)
+{
+	switch (idx)
+	{
+	case 0:
+		start_animation(Anim::AnimSolidHue, 0, 5);
+		break;
+	case 1:
+		start_animation(Anim::AnimRainbow, 0, 2);
+		break;
+	case 2:
+		start_animation(Anim::AnimTwister, 0, 0);
+		break;
+	case 3:
+		start_animation(Anim::AnimFlame, 0, 0);
+		break;
+	case 4:
+		start_animation(Anim::AnimDebugInfo, 5, 0);
+		break;
+	case 5:
+		start_animation(Anim::AnimCylon, 5, 0);
+		break;
+	case 6:
+		start_animation(Anim::AnimJuggle, 5, 0);
+		break;
+	case 7:
+		start_animation(Anim::AnimSinelon, 5, 2);
+		break;
+	case 8:
+		start_animation(Anim::AnimBPM, 5, 2);
+		break;
+	case 9:
+		start_animation(Anim::AnimConfetti, 0, 0);
+		break;
+	case 10:
+		start_animation(Anim::AnimBallRaster, 0, 0);
+		break;
+	case 11:
+		start_animation(Anim::AnimRainbowRaster, 0, 0);
+		break;
+  case 12:
+    start_animation(Anim::AnimJump, 0, 0);
+    break;
+  case 13:
+    start_animation(Anim::AnimOrbit, 0, 0);
+    break;
+  case 14:
+    start_animation(Anim::AnimTwinkle, 0, 0);
+    break;
+  case 15:
+    start_animation(Anim::AnimBounce, 0, 0);
+    break;
+  case 16:
+    start_animation(Anim::AnimInNOut, 0, 0);
+    break;
+	default:
+		break;
+	}
+
+	led_test_mode = true;
+}
+
+void led_show_test_pattern(bool show)
+{
+	led_test_mode = show;
+	if (led_test_mode)
+	{
+		test_pattern_idx = 0;
+		led_show_test_pattern_by_index(0);
+	}
+}
+
+bool led_test_has_next_pattern()
+{
+	return test_pattern_idx + 1 < test_pattern_count;
+}
+
+void led_show_next_test_pattern()
+{
+	test_pattern_idx = (test_pattern_idx + 1) % test_pattern_count;
+	led_show_test_pattern_by_index(test_pattern_idx);
 }
