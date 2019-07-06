@@ -6,10 +6,15 @@ class AnimOrbit : public Animation
 {
 public:
 	int hue;
+	uint8_t extra0;
+	uint8_t extra1;
 	virtual void init()
 	{
-		LOG_LV1("LED", "Orbit::init( %d, %d )", params_.extra0_, params_.extra1_);
+		LOG_LV1("LED", "Orbit::init");
 		hue = params_.color1_;
+		extra0 = params_.extra0_;
+		extra1 = params_.extra1_;
+
 		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
 	}
 
@@ -19,7 +24,7 @@ public:
 		fadeToBlackBy(leds, RGB_LED_COUNT, 180);
 		//This does corners
 
-		switch (params_.extra0_)
+		switch (extra0)
 		{
 		case 0:
 			break;
@@ -41,10 +46,10 @@ public:
 		leds[5] = CHSV((params_.color1_), 255, 192);
 		leds[6] = CHSV((params_.color1_), 255, 192);
 
-		params_.extra0_++;
-		if (params_.extra0_ == 4)
+		extra0++;
+		if (extra0 == 4)
 		{
-			params_.extra0_ = 0;
+			extra0 = 0;
 			params_.color1_ += 11;
 		}
 

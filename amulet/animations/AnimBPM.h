@@ -8,7 +8,7 @@ public:
 	int hue;
 	virtual void init()
 	{
-		LOG_LV1("LED", "Bpm::init( %d, %d )", params_.extra0_, params_.extra1_);
+		LOG_LV1("LED", "Bpm::init");
 		hue = params_.color1_;
 	}
 

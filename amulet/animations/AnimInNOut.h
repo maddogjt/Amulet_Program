@@ -6,10 +6,16 @@ class AnimInNOut : public Animation
 {
 public:
 	int hue;
+	uint8_t extra0;
+	uint8_t extra1;
+
 	virtual void init()
 	{
-		LOG_LV1("LED", "InNOut::init( %d, %d )", params_.extra0_, params_.extra1_);
+		LOG_LV1("LED", "InNOut::init");
 		hue = params_.color1_;
+		extra0 = params_.extra0_;
+		extra1 = params_.extra1_;
+
 		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
 	}
 
@@ -21,20 +27,20 @@ public:
 		fadeToBlackBy(leds, RGB_LED_COUNT, 60);
 		// Want to alternate turning off outer 4, then inner 4
 
-		if (params_.extra0_ == 150)
+		if (extra0 == 150)
 		{
-			if (params_.extra1_ == 0)
+			if (extra1 == 0)
 			{
-				params_.extra1_ = 1;
+				extra1 = 1;
 			}
 			else
 			{
-				params_.extra1_ = 0;
+				extra1 = 0;
 			}
-			params_.extra0_ = 0;
+			extra0 = 0;
 		}
 
-		if (params_.extra1_ == 0)
+		if (extra1 == 0)
 		{
 			for (int i = 0; i < 4; i++)
 			{
@@ -48,7 +54,7 @@ public:
 				leds[inner[i]] = CHSV((params_.color1_), 255, 192);
 			}
 		}
-		params_.extra0_++;
+		extra0++;
 		params_.color1_ += 2;
 	}
 };

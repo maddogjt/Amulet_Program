@@ -14,7 +14,7 @@ public:
 	uint8_t sparking; // try 180
 	virtual void init()
 	{
-		LOG_LV1("LED", "Flame::init( %d, %d )", params_.extra0_, params_.extra1_);
+		LOG_LV1("LED", "Flame::init");
 		gPal = HeatColors_p;
 		cooling = params_.extra0_;
 		sparking = params_.extra1_;

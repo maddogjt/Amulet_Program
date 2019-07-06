@@ -12,7 +12,7 @@ public:
 		twisterColors[2] = CRGB::Blue;
 		twisterColors[3] = CRGB::Red;
 
-		LOG_LV1("LED", "Twister::init( %d, %d )", params_.extra0_, params_.extra1_);
+		LOG_LV1("LED", "Twister::init");
 
 		for (int i = 0; i < RGB_LED_COUNT; i++)
 		{

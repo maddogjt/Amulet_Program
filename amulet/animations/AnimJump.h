@@ -6,10 +6,16 @@ class AnimJump : public Animation
 {
 public:
 	int hue;
+	uint8_t extra0;
+	uint8_t extra1;
+
 	virtual void init()
 	{
-		LOG_LV1("LED", "Jump::init( %d, %d )", params_.extra0_, params_.extra1_);
+		LOG_LV1("LED", "Jump::init");
 		hue = params_.color1_;
+		extra0 = params_.extra0_;
+		extra1 = params_.extra1_;
+
 		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
 	}
 
@@ -21,29 +27,29 @@ public:
 		/*
  		//This does there and back
  		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
- 		if( params_.extra1_ == 0 ) {
- 			leds[params_.extra0_] = CHSV(params_.color2_, 255, 192);
- 			params_.extra0_++;
- 			if( params_.extra0_ == 8 ) {
- 				params_.extra0_ = 7;
- 				params_.extra1_ = 1;
+ 		if( extra1 == 0 ) {
+ 			leds[extra0] = CHSV(params_.color2_, 255, 192);
+ 			extra0++;
+ 			if( extra0 == 8 ) {
+ 				extra0 = 7;
+ 				extra1 = 1;
  			}
  		} else {
- 			leds[params_.extra0_] = CHSV(params_.color2_, 255, 192);
- 			if( params_.extra0_ == 0 ) {
- 				params_.extra1_ = 0;
+ 			leds[extra0] = CHSV(params_.color2_, 255, 192);
+ 			if( extra0 == 0 ) {
+ 				extra1 = 0;
  			} else {
- 				params_.extra0_--;
+ 				extra0--;
  			}
  		}*/
 
 		/*
  		//This does around the world counter clockwise
  		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
- 		leds[params_.extra0_] = CHSV((params_.color2_ += 30), 255, 192);
- 		params_.extra0_++;
- 		if( params_.extra0_ == 8 ) {
- 				params_.extra0_ = 0;
+ 		leds[extra0] = CHSV((params_.color2_ += 30), 255, 192);
+ 		extra0++;
+ 		if( extra0 == 8 ) {
+ 				extra0 = 0;
  		}
  		
  		delay(100);
@@ -52,11 +58,11 @@ public:
 		/*
  		//This does around the world clockwise
  		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
- 		leds[params_.extra0_] = CHSV((params_.color2_ += 30), 255, 192);
- 		if( params_.extra0_ == 0 ) {
- 				params_.extra0_ = 8;
+ 		leds[extra0] = CHSV((params_.color2_ += 30), 255, 192);
+ 		if( extra0 == 0 ) {
+ 				extra0 = 8;
  		}
- 		params_.extra0_--;
+ 		extra0--;
  		
  		delay(100);
  		*/
@@ -65,34 +71,34 @@ public:
 		//counter clockwise
 		// p.extra0_ needs to start as 8
 		fadeToBlackBy(leds, RGB_LED_COUNT, 140);
-		if ((params_.extra1_ % 48) >= 24)
+		if ((extra1 % 48) >= 24)
 		{
-			leds[params_.extra0_] = CHSV((params_.color2_ += 30), 255, 192);
-			params_.extra0_++;
-			if (params_.extra0_ == 8)
+			leds[extra0] = CHSV((params_.color2_ += 30), 255, 192);
+			extra0++;
+			if (extra0 == 8)
 			{
-				params_.extra0_ = 0;
+				extra0 = 0;
 			}
 		}
 		else
 		{
 			//clockwise
-			leds[params_.extra0_] = CHSV((params_.color2_ += 30), 255, 192);
-			if (params_.extra0_ == 0)
+			leds[extra0] = CHSV((params_.color2_ += 30), 255, 192);
+			if (extra0 == 0)
 			{
-				params_.extra0_ = 8;
+				extra0 = 8;
 			}
-			params_.extra0_--;
+			extra0--;
 		}
-		delay(100 - params_.extra1_ / 5);
-		params_.extra1_++;
+		delay(100 - extra1 / 5);
+		extra1++;
 		/* 
  		//This does around the world with a tail
  		fadeToBlackBy(leds, RGB_LED_COUNT, 140);
- 		leds[params_.extra0_] = CHSV((params_.color2_ += 30), 255, 192);
- 		params_.extra0_++;
- 		if( params_.extra0_ == 8 ) {
- 				params_.extra0_ = 0;
+ 		leds[extra0] = CHSV((params_.color2_ += 30), 255, 192);
+ 		extra0++;
+ 		if( extra0 == 8 ) {
+ 				extra0 = 0;
  		}
  		delay(100);
  		*/

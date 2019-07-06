@@ -8,7 +8,7 @@ public:
 	int hue;
 	virtual void init()
 	{
-		LOG_LV1("LED", "SolidHue::init( %d, %d )", params_.extra0_, params_.extra1_);
+		LOG_LV1("LED", "SolidHue::init");
 		hue = params_.color1_;
 		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 192));
 	}

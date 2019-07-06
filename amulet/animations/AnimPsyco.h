@@ -10,7 +10,7 @@ public:
 
 	virtual void init()
 	{
-		LOG_LV1("LED", "Psyco::init( %d, %d )", params_.extra0_, params_.extra1_);
+		LOG_LV1("LED", "Psyco::init");
 		fill_solid(leds, RGB_LED_COUNT, CHSV(params_.color1_, 255, 0));
 	}
 

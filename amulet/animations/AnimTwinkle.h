@@ -6,10 +6,15 @@ class AnimTwinkle : public Animation
 {
 public:
 	int hue;
+	uint8_t extra0;
+	uint8_t extra1;
+
 	virtual void init()
 	{
-		LOG_LV1("LED", "Twinkle::init( %d, %d )", params_.extra0_, params_.extra1_);
+		LOG_LV1("LED", "Twinkle::init");
 		hue = params_.color1_;
+		extra0 = params_.extra0_;
+		extra1 = params_.extra1_;
 		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
 	}
 

@@ -25,7 +25,7 @@ class AnimRainbowRaster : public Animation
 public:
 	virtual void init()
 	{
-		LOG_LV1("LED", "AnimRainbowRaster::init( %d, %d )", params_.extra0_, params_.extra1_);
+		LOG_LV1("LED", "AnimRainbowRaster::init");
 		fHue = (float_t)params_.color1_;
 		for (int i = 0; i < RGB_LED_COUNT; i++)
 		{

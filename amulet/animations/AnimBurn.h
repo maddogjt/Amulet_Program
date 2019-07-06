@@ -12,7 +12,7 @@ class AnimBurn : public Animation
 public:
 	virtual void init()
 	{
-		LOG_LV1("LED", "Burn::init( %d, %d )", params_.extra0_, params_.extra1_);
+		LOG_LV1("LED", "Burn::init");
 		gPal = HeatColors_p;
 		fill_solid(leds, RGB_LED_COUNT, CHSV(0, 255, 0));
 	}

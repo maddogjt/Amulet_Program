@@ -8,7 +8,7 @@ public:
 	int hue;
 	virtual void init()
 	{
-		LOG_LV1("LED", "Rainbow::init( %d, %d )", params_.extra0_, params_.extra1_);
+		LOG_LV1("LED", "Rainbow::init");
 		hue = params_.color1_;
 		fill_rainbow(leds, RGB_LED_COUNT, hue, 20);
 	}
