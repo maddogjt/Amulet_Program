@@ -12,7 +12,34 @@ CRGB gLeds[NUM_LEDS];
 Animation *currentAnim = nullptr;
 Anim currentAnimName = Anim::Unknown;
 
+
+
 int frame_counter = 0;
+
+const char* animNames_[] {
+#define DEFINE_ANIM(name) #name,
+#include "AnimList.hpp"
+#undef DEFINE_ANIM
+};
+
+const char *get_animation_name(Anim anim) {
+	if ((int)anim >=0 && anim < Anim::Count) {
+		// offset by 4 to trim off "Anim" prefix
+		return animNames_[(int)anim]+4;
+	}
+	return "unknown";
+}
+int get_animations_count() {
+	return (int)Anim::Count;
+}
+
+void dump_animation_to_console(const animPattern &anim)
+{
+	Serial.printf("A: %d c1: %d c2: %d", 
+		anim.name, 
+		anim.params.color1_,
+		anim.params.color2_);
+}
 
 animPattern deserializeAnimPattern(char *str, uint8_t len)
 {

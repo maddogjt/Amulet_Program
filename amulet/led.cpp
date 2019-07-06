@@ -37,6 +37,8 @@ void set_animation_from_signal(Signal *s)
 				s->_seenCount >= globalSettings_.runeSeenCountThreshold_)
 			{
 				LOG_LV1("LED", "Setting Ambient Animation from rune");
+				localSettings_.startupConfig_.pattern = pattern;
+				write_local_settings();
 				led_set_ambient_animation(pattern);
 			}
 			LOG_LV1("LED", "Starting Animation from scan");
@@ -60,6 +62,12 @@ void led_set_ambient_animation(const animPattern &anim)
 	ambientAnimation = anim;
 	set_animation_from_signal(nullptr);
 }
+
+animPattern led_get_ambient_animation()
+{
+	return ambientAnimation;
+}
+
 
 void led_setup()
 {

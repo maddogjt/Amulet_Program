@@ -2,6 +2,8 @@
 #include <Arduino.h>
 #include <InternalFileSystem.h>
 
+using namespace Adafruit_LittleFS_Namespace;
+
 bool settingsValid_ = false;
 
 constexpr int16_t kGlobalSettingsSig = 0x610B;
@@ -18,13 +20,24 @@ GlobalSettings globalSettings_{
 	.runeSeenCountThreshold_ = 20,
 	.pad_ = {}};
 
-LocalSettings localSettings_{
+constexpr animPattern kDefaultPattern {
+			.name = Anim::AnimRainbowRaster, 
+			.params = {}
+		};
+
+LocalSettings localSettings_ {
 	.signature_ = kLocalSettingsSig,
 	.version_ = 0,
-	.pad_ = {}};
+	.configSize_ = sizeof(StartupConfig),
+	.startupConfig_ = {}
+};
 
 void settings_init()
 {
+	localSettings_.startupConfig_.mode = AMULET_MODE_CONFIG;
+	localSettings_.startupConfig_.pattern = kDefaultPattern;
+	localSettings_.startupConfig_.ad = {};
+
 	InternalFS.begin();
 	if (InternalFS.exists(kGlobalSettingsFile))
 	{
@@ -60,19 +73,21 @@ void settings_init()
 			LocalSettings tempSettings;
 			if (file.read(&tempSettings, sizeof(LocalSettings)) == sizeof(LocalSettings))
 			{
-				if (tempSettings.signature_ == kLocalSettingsSig && tempSettings.version_ >= localSettings_.version_)
-				{
+				if (tempSettings.signature_ == kLocalSettingsSig 
+					&& tempSettings.configSize_ == sizeof(StartupConfig)
+					&& tempSettings.version_ >= localSettings_.version_) {
 					localSettings_ = tempSettings;
-					Serial.println("Read local settings");
-				}
-				else
-				{
+					Serial.printf("Read local settings v%d\n", localSettings_.version_);
+					dump_animation_to_console(localSettings_.startupConfig_.pattern);
+				} else {
 					Serial.println("Rejected local settings");
 				}
 			}
 
-			file.close();
+			
 		}
+		file.close();
+
 	}
 
 	if (!settingsValid_)
@@ -84,22 +99,29 @@ void settings_init()
 void write_global_settings()
 {
 	Serial.println("Writing global settings");
-	auto file = InternalFS.open(kGlobalSettingsFile, Adafruit_LittleFS_Namespace::FILE_O_WRITE);
-	if (file)
-	{
-		file.write((uint8_t *)&globalSettings_, sizeof(globalSettings_));
+	if (InternalFS.exists(kGlobalSettingsFile)) {
+		InternalFS.remove(kGlobalSettingsFile);
+	}
+
+	auto file = InternalFS.open(kGlobalSettingsFile,  FILE_O_WRITE);
+	if (file) {
+		file.write((uint8_t*) &globalSettings_, sizeof(globalSettings_));
 		file.close();
 		settingsValid_ = true;
 	}
 }
 
-void write_local_settings()
-{
-	Serial.println("Writing local settings");
-	auto file = InternalFS.open(kLocalSettingsFile, Adafruit_LittleFS_Namespace::FILE_O_WRITE);
-	if (file)
-	{
-		file.write((uint8_t *)&localSettings_, sizeof(localSettings_));
+void write_local_settings() {
+	if (InternalFS.exists(kLocalSettingsFile)) {
+		InternalFS.remove(kLocalSettingsFile);
+	}
+	localSettings_.version_++;
+	Serial.printf("Writing local settings v%d\n", localSettings_.version_);
+	File file(kLocalSettingsFile,  FILE_O_WRITE, InternalFS);
+	if (file) {
+		size_t r = file.write((uint8_t*) &localSettings_, sizeof(localSettings_));
+		Serial.printf("write %d\n",r);
 		file.close();
+		dump_animation_to_console(localSettings_.startupConfig_.pattern);
 	}
 }

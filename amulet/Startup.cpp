@@ -1,4 +1,5 @@
 #include "Startup.h"
+#include "settings.h"
 
 #include <Arduino.h>
 
@@ -7,7 +8,7 @@
 #include "animations.h"
 #include "BrightnessMode.h"
 
-amulet_mode_t mode = AMULET_MODE_STARTUP;
+amulet_mode_t mode = AMULET_MODE_AMULET;
 
 bool isAmulet()
 {
@@ -24,7 +25,7 @@ void startWithConfig(const StartupConfig &config)
 {
 	switch (config.mode)
 	{
-	case AMULET_MODE_STARTUP:
+	case AMULET_MODE_CONFIG:
 		startAsRemoteConfig(config);
 		break;
 	case AMULET_MODE_AMULET:
@@ -49,19 +50,19 @@ void startWithConfig(const StartupConfig &config)
 
 void start()
 {
-	StartupConfig config{};
-	config.mode = AMULET_MODE_STARTUP;
-	config.pattern = {.name = Anim::AnimRainbowRaster, .params = {}};
+
 
 	// char buffer[200];
 	// serializeAnimPattern(buffer, 200, config.pattern);
 	// testSerialization();
 
-	startWithConfig(config);
+	startWithConfig(localSettings_.startupConfig_);
 }
 
 void startAsRemoteConfig(const StartupConfig &config)
 {
+	Serial.println("Start config mode");
+	mode = AMULET_MODE_CONFIG;
 	// digitalWrite(LED_BUILTIN, LED_STATE_ON);
 	led_setup();
 	ble_setup(false, true, true);
@@ -75,6 +76,7 @@ void startAsRemoteConfig(const StartupConfig &config)
 
 void startAsAmulet(const StartupConfig &config)
 {
+	Serial.println("Start amulet mode");
 	mode = AMULET_MODE_AMULET;
 	led_setup();
 	ble_setup(true, true);
@@ -88,6 +90,7 @@ void startAsAmulet(const StartupConfig &config)
 
 void startAsBeacon(const StartupConfig &config)
 {
+	Serial.println("Start beacon mode");
 	mode = AMULET_MODE_BEACON;
 
 	// Final config should be no LEDs but for now I'm turning on the LEDs and LED_BUILTIN
@@ -104,6 +107,7 @@ void startAsBeacon(const StartupConfig &config)
 
 void startAsRune(const StartupConfig &config)
 {
+	Serial.println("Start rune mode");
 	mode = AMULET_MODE_RUNE;
 
 	// Final config should be no LEDs but for now I'm turning on the LEDs and LED_BUILTIN
@@ -120,6 +124,7 @@ void startAsRune(const StartupConfig &config)
 
 void startAsPowerAmulet(const StartupConfig &config)
 {
+	Serial.println("Start power amulet mode");
 	mode = config.mode;
 	led_setup();
 	ble_setup(false, true, true);

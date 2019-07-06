@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include "Adafruit_LittleFS.h"
+#include "StartupConfig.h"
 
 typedef struct __attribute__((packed))
 {
@@ -20,10 +21,9 @@ typedef struct __attribute__((packed))
 {
 	int16_t signature_;
 	uint8_t version_;
-	uint8_t pad_[61];
+	size_t configSize_;
+	StartupConfig startupConfig_;
 } LocalSettings;
-
-static_assert(sizeof(LocalSettings) == 64, "");
 
 void write_global_settings();
 void write_local_settings();
