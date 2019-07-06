@@ -113,6 +113,8 @@ void start_animation(const animPattern &pattern)
 	{
 		currentAnim->setParams(pattern.params);
 
+		initMask(currentAnim->params_.mask_);
+
 		LOG_LV1("ANIM", "Current Anim changed to %d", currentAnimName);
 		LOG_LV1("ANIM", "Param 0:	%d", pattern.params.extra0_);
 		LOG_LV1("ANIM", "Param 1:	%d", pattern.params.extra1_);
@@ -136,8 +138,9 @@ void step_animation()
 			gLeds[i] = currentAnim->leds[i];
 		}
 
-		modLEDs(gLeds, RGB_LED_COUNT, currentAnim->params_.mask_);
-		// void modLEDs(CRGB *leds, const uint8_t len, const uint8_t mod);
+		float mask[RGB_LED_COUNT];
+		getMask(mask, RGB_LED_COUNT, currentAnim->params_.mask_, frame_counter);
+		filterLEDs(gLeds, mask, RGB_LED_COUNT, currentAnim->params_.filter_);
 
 		if (currentAnim->params_.flags_ & ANIMATION_FLAG_FOLD)
 		{

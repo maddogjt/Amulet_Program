@@ -9,6 +9,7 @@
 #include "signal.h"
 #include "settings.h"
 #include "Startup.h"
+#include "AnimationMod.h"
 
 // You are supposed to get manufacturer ids from the bluetooth consortium but I made one up
 const uint16_t BLE_AMULET_MFID = 0x69FF;
@@ -170,7 +171,9 @@ void maskCycle(bool next, uint8_t unused)
 {
 	uint8_t mask = ambient.params.mask_;
 	mask = (mask + 256 + (next ? 1 : -1)) % 256;
-	bleuart.printf("P: mask V: %d\n", mask);
+	char buf[32];
+	getMaskName(buf, mask);
+	bleuart.printf("P: mask V: %s\n", buf);
 	ambient.params.mask_ = mask;
 }
 
@@ -178,7 +181,9 @@ void filterCycle(bool next, uint8_t unused)
 {
 	uint8_t filter = ambient.params.filter_;
 	filter = (filter + 256 + (next ? 1 : -1)) % 256;
-	bleuart.printf("P: filter V: %d\n", filter);
+	char buf[32];
+	getFilterName(buf, filter);
+	bleuart.printf("P: filter V: %s\n", buf);
 	ambient.params.filter_ = filter;
 }
 
