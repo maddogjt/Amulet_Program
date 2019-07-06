@@ -131,21 +131,18 @@ void led_show_test_pattern_by_index(int idx)
 	case 11:
 		start_animation(Anim::AnimRainbowRaster, 0, 0);
 		break;
-  case 12:
-    start_animation(Anim::AnimJump, 0, 0);
-    break;
-  case 13:
-    start_animation(Anim::AnimOrbit, 0, 0);
-    break;
-  case 14:
-    start_animation(Anim::AnimTwinkle, 0, 0);
-    break;
-  case 15:
-    start_animation(Anim::AnimBounce, 0, 0);
-    break;
-  case 16:
-    start_animation(Anim::AnimInNOut, 0, 0);
-    break;
+  	case 12:
+    		start_animation(Anim::AnimOrbit, 0, 0);
+    		break;
+  	case 13:
+    		start_animation(Anim::AnimTwinkle, 0, 0);
+    		break;
+  	case 14:
+    		start_animation(Anim::AnimBounce, 0, 0);
+    		break;
+  	case 15:
+    		start_animation(Anim::AnimInNOut, 0, 0);
+    		break;
 	default:
 		break;
 	}
