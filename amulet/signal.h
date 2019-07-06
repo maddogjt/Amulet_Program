@@ -29,6 +29,7 @@ public:
 	Scan _scan;
 	float_t _strength;
 	float_t _nextStrength;
+	int _seenCount;
 };
 
 void signal_loop(int step);

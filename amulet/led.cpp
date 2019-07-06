@@ -7,6 +7,7 @@
 #include "signal.h"
 #include "globals.h"
 #include "Startup.h"
+#include "settings.h"
 
 FASTLED_USING_NAMESPACE
 
@@ -31,7 +32,9 @@ void set_animation_from_signal(Signal *s)
 		memcpy(&pattern, s->_scan._data, sizeof(animPattern));
 		if (!matches_current_animation(pattern))
 		{
-			if (s->_scan.signal_type == (uint8_t)AdvertisementType::Runic)
+			// Todo: Pull the seen count threshold from settings
+			if (s->_scan.signal_type == (uint8_t)AdvertisementType::Runic &&
+				s->_seenCount >= globalSettings_.runeSeenCountThreshold_)
 			{
 				LOG_LV1("LED", "Setting Ambient Animation from rune");
 				led_set_ambient_animation(pattern);

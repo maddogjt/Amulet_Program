@@ -33,6 +33,7 @@ void add_scan_data(Scan &s)
 		{
 			LOG_LV1("SIG", "add_scan_data : Updating existing record");
 			signals[i]->_nextStrength = max(signals[i]->_nextStrength, s.power);
+			signals[i]->_seenCount++;
 			found = true;
 			break;
 		}
@@ -52,6 +53,7 @@ void insert_new_scan(Scan &s)
 		if (signals[i] == nullptr)
 		{
 			signals[i] = new Signal(s);
+			signals[i]->_seenCount = 1;
 			inserted = true;
 			break;
 		}
@@ -134,12 +136,12 @@ Signal *current_top_signal()
 
 	if (current_index >= 0 && current_index < SIGNALS_MAX_LEN)
 	{
-		LOG_LV1("SIG", "Current (%d) top signal strength %f. Num signals %d", current_index, signals[current_index]->_strength, dbg_signal_count);
+		LOG_LV2("SIG", "Current (%d) top signal strength %f. Num signals %d", current_index, signals[current_index]->_strength, dbg_signal_count);
 		return signals[current_index];
 	}
 	else
 	{
-		LOG_LV1("SIG", "No current top signal. Num signals %d", dbg_signal_count);
+		LOG_LV2("SIG", "No current top signal. Num signals %d", dbg_signal_count);
 		return nullptr;
 	}
 }
