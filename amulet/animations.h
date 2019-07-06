@@ -27,6 +27,7 @@ struct animPattern
 	}
 };
 
+animPattern deserializeAnimPattern(char *str, uint8_t len);
 void start_animation(const animPattern &pattern);
 void start_animation(Anim name, int p1, int p2);
 bool matches_current_animation(Anim name, int p1, int p2);

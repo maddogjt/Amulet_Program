@@ -4,6 +4,7 @@
 #include "animations.h"
 #include "globals.h"
 #include "AnimationMod.h"
+#include "CSVHelpers.hpp"
 
 #define NUM_LEDS RGB_LED_COUNT
 CRGB gLeds[NUM_LEDS];
@@ -12,6 +13,20 @@ Animation *currentAnim = nullptr;
 Anim currentAnimName = Anim::Unknown;
 
 int frame_counter = 0;
+
+animPattern deserializeAnimPattern(char *str, uint8_t len)
+{
+	animPattern pattern;
+	pattern.name = (Anim)first_tok(str);
+	pattern.params.color1_ = next_tok();
+	pattern.params.color2_ = next_tok();
+	pattern.params.speed_ = next_tok();
+	pattern.params.flags_ = next_tok();
+	pattern.params.mods_ = next_tok();
+	pattern.params.extra0_ = next_tok();
+	pattern.params.extra1_ = next_tok();
+	return pattern;
+}
 
 void start_animation(Anim name, int p1, int p2)
 {

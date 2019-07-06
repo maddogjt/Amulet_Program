@@ -1,22 +1,6 @@
 #include "StartupConfig.h"
 
-int first_tok(char *str)
-{
-	return atoi(strtok(str, ","));
-}
-int next_tok()
-{
-	char *pch = strtok(NULL, ",");
-	if (pch)
-	{
-		return atoi(pch);
-	}
-	else
-	{
-		LOG_LV1("CONFIG", "ERROR: Expected valid token, got null");
-		return 0;
-	}
-}
+#include "CSVHelpers.hpp"
 
 StartupConfig deserializeStartupConfig(char *str, uint8_t len)
 {
@@ -34,10 +18,6 @@ StartupConfig deserializeStartupConfig(char *str, uint8_t len)
 	config.pattern.params.extra0_ = next_tok();
 	config.pattern.params.extra1_ = next_tok();
 	return config;
-}
-
-void append_uint8_t(char *str, int x)
-{
 }
 
 // returns len

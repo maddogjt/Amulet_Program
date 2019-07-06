@@ -8,6 +8,7 @@
 #include "led.h"
 #include "signal.h"
 #include "settings.h"
+#include "Startup.h"
 
 // You are supposed to get manufacturer ids from the bluetooth consortium but I made one up
 const uint16_t BLE_AMULET_MFID = 0x69FF;
@@ -229,15 +230,41 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 	(void)conn_handle;
 
 	// Wait for new data to arrive
-	// uint8_t len = readPacket(&bleuart, 500);
-	char str[20 + 1] = {0};
-	uint8_t len = bleuart.read(str, 20);
+#define MAX_BLE_UART_PACKET 200
+	char str[MAX_BLE_UART_PACKET] = {0};
+	int avail = bleuart.available();
+	if (avail <= 0)
+	{
+		return;
+	}
+
+	uint8_t len = bleuart.read(str, min(MAX_BLE_UART_PACKET, avail));
 
 	// Serial.print("[Prph] RX: ");
 	// Serial.println(str);
 
-	if (len == 0 || str[0] != '!')
+	if (str[0] != '!')
 	{
+		Serial.println("BLEUart service got rogue packet");
+		Serial.printBuffer(str, len);
+		return;
+	}
+
+	// StartupConfig
+	if (str[1] == 'S')
+	{
+		char *configStr = &str[2];
+		StartupConfig config = deserializeStartupConfig(configStr, len - 2);
+		startWithConfig(config);
+		return;
+	}
+
+	// Set Ambient Animatoin
+	if (str[1] == 'A')
+	{
+		char *animStr = &str[2];
+		animPattern pattern = deserializeAnimPattern(animStr, len - 2);
+		led_set_ambient_animation(pattern);
 		return;
 	}
 
