@@ -195,7 +195,7 @@ void modCycle(bool next, uint8_t idx)
 void animCycle(bool next, uint8_t unused)
 {
 	uint8_t anim_idx = (uint8_t)ambient.name;
-	anim_idx = (anim_idx + 12 + (next ? 1 : -1)) % 12;
+	anim_idx = (anim_idx + (uint8_t)Anim::Count + (next ? 1 : -1)) % (uint8_t)Anim::Count;
 	Serial.printf("Setting anim to %d\n", anim_idx);
 	ambient.name = (Anim)anim_idx;
 }
@@ -351,13 +351,13 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		}
 		if (button == '5') // up
 		{
-			gCyclersIndex = (gCyclersIndex + 7) % 8;
+			gCyclersIndex = (gCyclersIndex + 8) % 9;
 			Serial.printf("Now editing %s\n", parameterNames[gCyclersIndex]);
 			// ambient.params.speed_ = speedForButton(true);
 		}
 		else if (button == '6') // down
 		{
-			gCyclersIndex = (gCyclersIndex + 1) % 8;
+			gCyclersIndex = (gCyclersIndex + 1) % 9;
 			Serial.printf("Now editing %s\n", parameterNames[gCyclersIndex]);
 			// ambient.params.speed_ = speedForButton(false);
 		}

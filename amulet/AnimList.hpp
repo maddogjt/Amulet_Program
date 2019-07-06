@@ -4,6 +4,7 @@
 #include "animations/AnimRainbow.h"
 #include "animations/AnimTwister.h"
 #include "animations/AnimFlame.h"
+#include "animations/AnimBurn.h"
 #include "animations/AnimDebugInfo.h"
 #include "animations/AnimCylon.h"
 #include "animations/AnimJuggle.h"
@@ -24,6 +25,7 @@ DEFINE_ANIM(AnimSolidHue)
 DEFINE_ANIM(AnimRainbow)
 DEFINE_ANIM(AnimTwister)
 DEFINE_ANIM(AnimFlame)
+DEFINE_ANIM(AnimBurn)
 DEFINE_ANIM(AnimDebugInfo)
 DEFINE_ANIM(AnimCylon)
 DEFINE_ANIM(AnimJuggle)
