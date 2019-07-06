@@ -16,6 +16,7 @@ const uint16_t BLE_AMULET_MFID = 0x69FF;
 #define BLE_AMULET_DATA_VERSION (1)
 
 int g_rssi = 0;
+animPattern ambient = {.name = Anim::AnimSinelon, .params = {}};
 
 typedef struct ATTR_PACKED
 {
@@ -68,6 +69,9 @@ void ble_setup(bool advertise, bool scan, bool uart)
 	if (uart)
 	{
 		Bluefruit.setName("Amulet");
+
+		// populate with ambient
+		ambient = led_get_ambient_animation();
 		// Configure and start the BLE Uart service
 		bleuart.begin();
 		bleuart.setRxCallback(prph_bleuart_rx_callback);
@@ -113,37 +117,29 @@ void start_advertising_uart()
 	Bluefruit.Advertising.start(0);				// 0 = Don't stop advertising after n seconds
 }
 
-animPattern ambient = {.name = Anim::AnimSinelon, .params = {}};
-
 void colorCycle(bool next, uint8_t idx)
 {
 	uint8_t hue = (idx == 1) ? ambient.params.color1_ : ambient.params.color2_;
 	hue = (hue + 255 + (next ? 16 : -16)) % 255;
+
+	bleuart.printf("P: color%d V: %d\n", idx + 1, hue);
+	Serial.printf("Setting color %d's hue to %d\n", idx + 1, hue);
+
 	if (idx == 1)
 	{
-		Serial.printf("Setting color 1's hue to %d\n", hue);
 		ambient.params.color1_ = hue;
 	}
 	else
 	{
-		Serial.printf("Setting color 2's hue to %d\n", hue);
 		ambient.params.color2_ = hue;
 	}
 }
 void extraCycle(bool next, uint8_t idx)
 {
-	uint8_t extra = (idx == 7) ? ambient.params.extra0_ : ambient.params.extra1_;
+	uint8_t &extra = (idx == 7) ? ambient.params.extra0_ : ambient.params.extra1_;
 	extra = (extra + 255 + (next ? 16 : -16)) % 255;
-	if (idx == 7)
-	{
-		Serial.printf("Setting extra[0]'s value to %d\n", extra);
-		ambient.params.extra0_ = extra;
-	}
-	else
-	{
-		Serial.printf("Setting extra[0]'s value to %d\n", extra);
-		ambient.params.extra1_ = extra;
-	}
+	Serial.printf("Setting extra[%d]'s value to %d\n", (idx == 7) ? 0 : 1, extra);
+	bleuart.printf("P: extra[%d] V: %d\n", (idx == 7) ? 0 : 1, extra);
 }
 
 void speedCycle(bool next, uint8_t unused)
@@ -151,6 +147,7 @@ void speedCycle(bool next, uint8_t unused)
 	uint8_t speed = ambient.params.speed_;
 	speed = (speed + 255 + (next ? 16 : -16)) % 255;
 	Serial.printf("Setting speed to %d\n", speed);
+	bleuart.printf("P: speed V: %d\n", speed);
 	ambient.params.speed_ = speed;
 }
 
@@ -195,8 +192,9 @@ void modCycle(bool next, uint8_t idx)
 void animCycle(bool next, uint8_t unused)
 {
 	uint8_t anim_idx = (uint8_t)ambient.name;
-	anim_idx = (anim_idx + (uint8_t)Anim::Count + (next ? 1 : -1)) % (uint8_t)Anim::Count;
-	Serial.printf("Setting anim to %d\n", anim_idx);
+	anim_idx = (anim_idx + get_animations_count() + (next ? 1 : -1)) % get_animations_count();
+	Serial.printf("Setting anim to %d %s\n", anim_idx, get_animation_name((Anim)anim_idx));
+	bleuart.printf("P:anim V:%.10s\n", get_animation_name((Anim)anim_idx));
 	ambient.name = (Anim)anim_idx;
 }
 
@@ -290,6 +288,8 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		StartupConfig config = deserializeStartupConfig(configStr, len - 2);
 		Serial.println("Setting startup config from BLE service");
 		Serial.printf("%s", configStr);
+		localSettings_.startupConfig_ = config;
+		write_local_settings();
 		startWithConfig(config);
 		return;
 	}
@@ -308,6 +308,8 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		animPattern pattern = deserializeAnimPattern(animStr, len - 2);
 		Serial.println("Setting animation pattern from BLE service");
 		Serial.printf("%s", animStr);
+		localSettings_.startupConfig_.pattern = pattern;
+		//write_local_settings();
 		led_set_ambient_animation(pattern);
 		return;
 	}
@@ -353,12 +355,15 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		{
 			gCyclersIndex = (gCyclersIndex + 8) % 9;
 			Serial.printf("Now editing %s\n", parameterNames[gCyclersIndex]);
+			bleuart.printf("P: %s\n", parameterNames[gCyclersIndex]);
+
 			// ambient.params.speed_ = speedForButton(true);
 		}
 		else if (button == '6') // down
 		{
 			gCyclersIndex = (gCyclersIndex + 1) % 9;
 			Serial.printf("Now editing %s\n", parameterNames[gCyclersIndex]);
+			bleuart.printf("P: %s\n", parameterNames[gCyclersIndex]);
 			// ambient.params.speed_ = speedForButton(false);
 		}
 		else if (button == '7' || button == '8') // left or right
@@ -367,18 +372,47 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		}
 		else if (button == '1') // 1
 		{
-			ambient.params.flags_ = ANIMATION_FLAG_FOLD;
+			if (ambient.params.flags_ == ANIMATION_FLAG_FOLD)
+			{
+				ambient.params.flags_ = 0;
+				bleuart.println("toggle flag fold off ");
+			}
+			else
+			{
+				ambient.params.flags_ = ANIMATION_FLAG_FOLD;
+				bleuart.println("toggle flag fold on ");
+			}
 		}
 		else if (button == '2') // 2
 		{
-			ambient.params.flags_ = ANIMATION_FLAG_MIRROR;
+			if (ambient.params.flags_ == ANIMATION_FLAG_MIRROR)
+			{
+				ambient.params.flags_ = 0;
+				bleuart.println("toggle flag mirror off ");
+			}
+			else
+			{
+				ambient.params.flags_ = ANIMATION_FLAG_MIRROR;
+				bleuart.println("toggle flag mirror on ");
+			}
 		}
 		else if (button == '3') // 3
 		{
-			ambient.params.flags_ = ANIMATION_FLAG_LOOP;
+			if (ambient.params.flags_ == ANIMATION_FLAG_LOOP)
+			{
+				ambient.params.flags_ = 0;
+				bleuart.println("toggle flag loop off ");
+			}
+			else
+			{
+				ambient.params.flags_ = ANIMATION_FLAG_LOOP;
+				bleuart.println("toggle flag loop on ");
+			}
 		}
 		else if (button == '4') // 4
 		{
+			localSettings_.startupConfig_.pattern = ambient;
+			write_local_settings();
 			ambient.params.flags_ = 0;
 		}
 
