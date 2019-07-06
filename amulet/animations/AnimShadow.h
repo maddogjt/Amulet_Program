@@ -4,13 +4,13 @@
 
 #include "RasterHelper.h"
 
-class AnimBallRaster : public Animation
+class AnimShadow : public Animation
 {
 public:
 	uint8_t hue;
 	virtual void init()
 	{
-		LOG_LV1("LED", "AnimBallRaster::init");
+		LOG_LV1("LED", "AnimShadow::init");
 		hue = params_.color1_;
 
 		for (int i = 0; i < RGB_LED_COUNT; i++)

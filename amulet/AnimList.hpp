@@ -12,8 +12,8 @@
 #include "animations/AnimSinelon.h"
 #include "animations/AnimBPM.h"
 #include "animations/AnimConfetti.h"
-#include "animations/AnimBallRaster.h"
-#include "animations/AnimRainbowRaster.h"
+#include "animations/AnimShadow.h"
+#include "animations/AnimPrism.h"
 #include "animations/AnimBounce.h"
 #include "animations/AnimInNOut.h"
 #include "animations/AnimJump.h"
@@ -44,8 +44,8 @@ DEFINE_ANIM(AnimPsyco)
 DEFINE_ANIM(AnimSinelon)
 DEFINE_ANIM(AnimBPM)
 DEFINE_ANIM(AnimConfetti)
-DEFINE_ANIM(AnimBallRaster)
-DEFINE_ANIM(AnimRainbowRaster)
+DEFINE_ANIM(AnimShadow)
+DEFINE_ANIM(AnimPrism)
 
 #ifdef CLEAR_DEFINE_ANIM
 #undef DEFINE_ANIM

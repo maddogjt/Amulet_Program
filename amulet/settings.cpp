@@ -21,7 +21,7 @@ GlobalSettings globalSettings_{
 	.pad_ = {}};
 
 constexpr animPattern kDefaultPattern{
-	.name = Anim::AnimRainbowRaster,
+	.name = Anim::AnimPrism,
 	.params = {}};
 
 LocalSettings localSettings_{

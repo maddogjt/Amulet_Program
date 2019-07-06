@@ -5,7 +5,7 @@
 class AnimRainbow : public Animation
 {
 public:
-	int hue;
+	float hue;
 	virtual void init()
 	{
 		LOG_LV1("LED", "Rainbow::init");
@@ -15,7 +15,8 @@ public:
 
 	virtual void step(const int frame, const float deltaTime, const float sourceDistance) override
 	{
-		hue += params_.speed_ / 16;
-		fill_rainbow(leds, RGB_LED_COUNT, hue, 20);
+		hue += params_.speed_ / 100.f;
+		uint8_t iHue = (int)hue % 256;
+		fill_rainbow(leds, RGB_LED_COUNT, iHue, 20);
 	}
 };

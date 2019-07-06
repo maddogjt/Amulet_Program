@@ -12,33 +12,34 @@ CRGB gLeds[NUM_LEDS];
 Animation *currentAnim = nullptr;
 Anim currentAnimName = Anim::Unknown;
 
-
-
 int frame_counter = 0;
 
-const char* animNames_[] {
+const char *animNames_[]{
 #define DEFINE_ANIM(name) #name,
 #include "AnimList.hpp"
 #undef DEFINE_ANIM
 };
 
-const char *get_animation_name(Anim anim) {
-	if ((int)anim >=0 && anim < Anim::Count) {
+const char *get_animation_name(Anim anim)
+{
+	if ((int)anim >= 0 && anim < Anim::Count)
+	{
 		// offset by 4 to trim off "Anim" prefix
-		return animNames_[(int)anim]+4;
+		return animNames_[(int)anim] + 4;
 	}
 	return "unknown";
 }
-int get_animations_count() {
+int get_animations_count()
+{
 	return (int)Anim::Count;
 }
 
 void dump_animation_to_console(const animPattern &anim)
 {
-	Serial.printf("A: %d c1: %d c2: %d", 
-		anim.name, 
-		anim.params.color1_,
-		anim.params.color2_);
+	Serial.printf("A: %d c1: %d c2: %d\n",
+				  anim.name,
+				  anim.params.color1_,
+				  anim.params.color2_);
 }
 
 animPattern deserializeAnimPattern(char *str, uint8_t len)
@@ -49,7 +50,8 @@ animPattern deserializeAnimPattern(char *str, uint8_t len)
 	pattern.params.color2_ = next_tok();
 	pattern.params.speed_ = next_tok();
 	pattern.params.flags_ = next_tok();
-	pattern.params.mods_ = next_tok();
+	pattern.params.mask_ = next_tok();
+	pattern.params.filter_ = next_tok();
 	pattern.params.extra0_ = next_tok();
 	pattern.params.extra1_ = next_tok();
 	return pattern;
@@ -63,7 +65,8 @@ uint8_t serializeAnimPattern(char *buffer, const uint8_t len, const animPattern 
 	append_int_comma(buffer, pattern.params.color2_);
 	append_int_comma(buffer, pattern.params.speed_);
 	append_int_comma(buffer, pattern.params.flags_);
-	append_int_comma(buffer, pattern.params.mods_);
+	append_int_comma(buffer, pattern.params.mask_);
+	append_int_comma(buffer, pattern.params.filter_);
 	append_int_comma(buffer, pattern.params.extra0_);
 	append_int_comma(buffer, pattern.params.extra1_);
 	buffer[strlen(buffer) - 1] = '\0'; // delete last comma
@@ -133,7 +136,7 @@ void step_animation()
 			gLeds[i] = currentAnim->leds[i];
 		}
 
-		modLEDs(gLeds, RGB_LED_COUNT, currentAnim->params_.mods_);
+		modLEDs(gLeds, RGB_LED_COUNT, currentAnim->params_.mask_);
 		// void modLEDs(CRGB *leds, const uint8_t len, const uint8_t mod);
 
 		if (currentAnim->params_.flags_ & ANIMATION_FLAG_FOLD)

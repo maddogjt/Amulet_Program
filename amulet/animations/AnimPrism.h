@@ -20,12 +20,12 @@
 
 static float angle = PI / 2; //0.2; //0; //PI / 4;
 static float fHue = 0;
-class AnimRainbowRaster : public Animation
+class AnimPrism : public Animation
 {
 public:
 	virtual void init()
 	{
-		LOG_LV1("LED", "AnimRainbowRaster::init");
+		LOG_LV1("LED", "AnimPrism::init");
 		fHue = (float_t)params_.color1_;
 		for (int i = 0; i < RGB_LED_COUNT; i++)
 		{

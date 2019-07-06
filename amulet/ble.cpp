@@ -166,24 +166,20 @@ void flagCycle(bool next, uint8_t idx)
 	ambient.params.flags_ = flags[flags_idx];
 }
 
-void modCycle(bool next, uint8_t idx)
+void maskCycle(bool next, uint8_t unused)
 {
-	uint8_t mod_alpha = ambient.params.mods_ & 0x0F;
-	uint8_t mod_blend = ambient.params.mods_ & 0xF0;
-	mod_blend = mod_blend >> 4;
-	if (idx == 5)
-	{
-		mod_alpha = (mod_alpha + 16 + (next ? 1 : -1)) % 16;
-		bleuart.printf("P: mask V: %d\n", mod_alpha);
-	}
-	else
-	{
-		mod_blend = (mod_blend + 16 + (next ? 1 : -1)) % 16;
-		bleuart.printf("P: mod V: %d\n", mod_blend);
-	}
-	mod_blend = mod_blend << 4;
-	bleuart.printf("P: mod V: %d\n", mod_alpha | mod_blend);
-	ambient.params.mods_ = mod_alpha | mod_blend;
+	uint8_t mask = ambient.params.mask_;
+	mask = (mask + 256 + (next ? 1 : -1)) % 256;
+	bleuart.printf("P: mask V: %d\n", mask);
+	ambient.params.mask_ = mask;
+}
+
+void filterCycle(bool next, uint8_t unused)
+{
+	uint8_t filter = ambient.params.filter_;
+	filter = (filter + 256 + (next ? 1 : -1)) % 256;
+	bleuart.printf("P: filter V: %d\n", filter);
+	ambient.params.filter_ = filter;
 }
 
 void animCycle(bool next, uint8_t unused)
@@ -255,8 +251,8 @@ ParameterCycleList g_AnimCyclers = {
 	colorCycle,
 	speedCycle,
 	flagCycle,
-	modCycle,
-	modCycle,
+	maskCycle,
+	filterCycle,
 	extraCycle,
 	extraCycle,
 };
@@ -266,8 +262,8 @@ const char *g_AnimCyclerNames[] = {
 	"color 2",
 	"speed",
 	"flag",
-	"mods alpha",
-	"mods blend",
+	"mask",
+	"filter",
 	"extra 1",
 	"extra 2",
 };
@@ -455,7 +451,7 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		{
 			if (g_tweaker_is_modifying_animation)
 			{
-				bleuart.printf("mask: %d\n", ambient.params.mods_ & 0x0F);
+				bleuart.printf("mask: %d filter: %d\n", ambient.params.mask_, ambient.params.filter_);
 			}
 			else
 			{
