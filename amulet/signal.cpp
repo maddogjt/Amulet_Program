@@ -10,7 +10,7 @@
 #include "Startup.h"
 #include "settings.h"
 
-Signal *topSignal;
+Signal *topSignal = nullptr;
 
 // Precise method, which guarantees v = v1 when t = 1.
 float lerp(float v0, float v1, float t)
@@ -33,7 +33,7 @@ void add_scan_data(Scan &s)
 		return;
 	}
 
-	if (topSignal->_scan == s)
+	if (topSignal != nullptr && topSignal->_scan == s)
 	{
 		// Update the top signal
 		topSignal->_nextStrength = max(topSignal->_nextStrength, s.power);
@@ -100,7 +100,9 @@ void signal_loop(int step)
 	if (isAmulet() || mode == AMULET_MODE_RUNE)
 	{
 		EVERY_N_SECONDS(1)
-		decay_signals();
+		{
+			decay_signals();
+		}
 	}
 }
 
