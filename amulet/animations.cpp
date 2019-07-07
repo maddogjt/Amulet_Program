@@ -148,7 +148,7 @@ void step_animation(Signal *topSignal)
 			{
 				signalPower = normalizeRSSI(topSignal->_scan.rssi);
 			}
-			maskAndFilter(gLeds, RGB_LED_COUNT, currentAnim->params_.filter_, frame_counter, signalPower);
+			maskAndFilter(gLeds, RGB_LED_COUNT, currentAnim->params_.filter_, frame_counter, (int)(signalPower * 255));
 		}
 		else
 		{
@@ -182,7 +182,13 @@ void step_animation(Signal *topSignal)
 		case ANIMATION_EFFECT_SCRAMBLE:
 			scramble_leds();
 			break;
+		default:
+			break;
 		}
+	}
+	else
+	{
+		LOG_LV1("ERROR", "Current anim is null during step");
 	}
 }
 
