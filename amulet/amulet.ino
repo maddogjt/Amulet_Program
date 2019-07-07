@@ -127,7 +127,16 @@ void loop()
 
 		write_local_settings();
 
-		sd_nvic_SystemReset();
+		uint8_t sd_en = 0;
+		(void) sd_softdevice_is_enabled(&sd_en);
+
+		if ( sd_en )
+		{
+			sd_nvic_SystemReset();
+		}else
+		{
+			NVIC_SystemReset();
+		}
 	}
 
 	if (dfuButton.wasReleased() || (!devEnabled && resetButton.wasReleased()))
