@@ -106,7 +106,12 @@ void startPowerAmuletSuperpower()
 	Bluefruit.Advertising.stop();
 	Bluefruit.Advertising.clearData();
 	Bluefruit.ScanResponse.clearData();
-	ble_set_advertisement_data(AdvertisementType::Beacon, localSettings_.startupConfig_.ad, (uint8_t *)&localSettings_.powerPattern_, sizeof(localSettings_.powerPattern_));
+	animPattern power = localSettings_.powerPattern_;
+
+	// char buf[120];
+	// serializeAnimPattern(buf, 120, power); // Serializing just for the Serial log
+
+	ble_set_advertisement_data(AdvertisementType::Beacon, localSettings_.startupConfig_.ad, (uint8_t *)&power, sizeof(power));
 }
 
 void scan_callback(ble_gap_evt_adv_report_t *report);
@@ -448,11 +453,6 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		Serial.println("Setting startup config from BLE service");
 		Serial.printf("%s", configStr);
 		localSettings_.startupConfig_ = config;
-		if (config.mode == AMULET_MODE_BEACON_POWER_AMULET)
-		{
-			// Save this separate so its never overwritten (such as ambient patterns)
-			localSettings_.powerPattern_ = config.pattern;
-		}
 		write_local_settings();
 		startWithConfig(config);
 		return;
@@ -596,9 +596,18 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 
 			// char buf[120];
 			// serializeAnimPattern(buf, 120, config.pattern); // Serializing just for the Serial log
-
 			localSettings_.startupConfig_ = config;
+			if (config.mode == AMULET_MODE_BEACON_POWER_AMULET)
+			{
+				// Save this separate so its never overwritten (such as ambient patterns)
+				localSettings_.powerPattern_ = config.pattern;
+			}
+
 			write_local_settings();
+
+			delay(500);
+			bleuart.printf("Restarting\n");
+			NVIC_SystemReset();
 		}
 
 		// Set the ambient animation

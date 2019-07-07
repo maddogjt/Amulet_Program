@@ -22,7 +22,7 @@ public:
 
 	virtual void step(const int frame, const float deltaTime, const float sourceDistance) override
 	{
-		fadeToBlackBy(leds, RGB_LED_COUNT, 30);
+		fadeToBlackBy(leds, RGB_LED_COUNT, 12);
 		// Re-light center square
 		leds[1] = CHSV(hue, 255, 192);
 		leds[2] = CHSV(hue, 255, 192);

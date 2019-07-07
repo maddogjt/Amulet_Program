@@ -6,8 +6,8 @@ using namespace Adafruit_LittleFS_Namespace;
 
 bool settingsValid_ = false;
 
-constexpr int16_t kGlobalSettingsSig = 0x610F;
-constexpr int16_t kLocalSettingsSig = 0x10D0;
+constexpr int16_t kGlobalSettingsSig = 0x6111;
+constexpr int16_t kLocalSettingsSig = 0x10D2;
 
 constexpr char kGlobalSettingsFile[] = "globalSettings";
 constexpr char kLocalSettingsFile[] = "localSettings";
