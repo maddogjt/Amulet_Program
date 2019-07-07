@@ -136,6 +136,7 @@ void loop()
 			(!devEnabled && resetButton.wasReleased() && resetPrevPressedFor2k))
 		{
 			Serial.println("Possibly trigger superpower here");
+			startPowerAmuletSuperpower();
 		}
 		else
 		{

@@ -54,7 +54,8 @@ int getFilterName(char *buf, const uint8_t filter_number)
 }
 
 void modLED(CRGB &led, const CRGB &overlay, const uint8_t alpha, const uint8_t mod);
-void maskAndFilter(CRGB *leds, const uint8_t len, const uint8_t filter_number, int frame)
+
+void maskAndFilter(CRGB *leds, const uint8_t len, const uint8_t filter_number, int frame, bool use_custom_alpha, int alpha)
 {
 	if (maskAnimation == nullptr)
 	{
@@ -65,8 +66,16 @@ void maskAndFilter(CRGB *leds, const uint8_t len, const uint8_t filter_number, i
 	for (int i = 0; i < RGB_LED_COUNT; i++)
 	{
 		CHSV color = rgb2hsv_approximate(maskAnimation->leds[i]);
-		modLED(leds[i], maskAnimation->leds[i], color.value, filter_number % FILTER_COUNT);
+		modLED(leds[i], maskAnimation->leds[i], use_custom_alpha ? alpha : color.value, filter_number % FILTER_COUNT);
 	}
+}
+void maskAndFilter(CRGB *leds, const uint8_t len, const uint8_t filter_number, int frame)
+{
+	maskAndFilter(leds, len, filter_number, frame, false, 0);
+}
+void maskAndFilter(CRGB *leds, const uint8_t len, const uint8_t filter_number, int frame, int alpha)
+{
+	maskAndFilter(leds, len, filter_number, frame, true, alpha);
 }
 
 void rotateColorLeft(CRGB &led, const float_t alpha)

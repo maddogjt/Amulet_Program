@@ -86,6 +86,14 @@ void led_loop(int step)
 		}
 	}
 
+	if (mode == AMULET_MODE_RUNE)
+	{
+		signal = current_top_signal();
+		int topRSSI = signal == nullptr ? -128 : signal->_scan.rssi;
+		float strength = normalizeRSSI(topRSSI);
+		FastLED.setBrightness(10 + strength * 180);
+	}
+
 	// Step the currentAnimation
 	step_animation(signal);
 	FastLED.show();

@@ -84,7 +84,11 @@ void ble_loop()
 		if (millis() > powerActivatedTimestamp + powerAdvertisingWindow)
 		{
 			powerIsAdvertising = false;
-			ble_set_advertisement_data(AdvertisementType::Amulet, localSettings_.startupConfig_.ad, nullptr, 0);
+			Bluefruit.Advertising.stop();
+			Bluefruit.Advertising.clearData();
+			Bluefruit.ScanResponse.clearData();
+			animPattern ap = ambient;
+			ble_set_advertisement_data(AdvertisementType::Amulet, localSettings_.startupConfig_.ad, (uint8_t *)&ap, sizeof(ap));
 		}
 	}
 }
@@ -93,10 +97,15 @@ void startPowerAmuletSuperpower()
 {
 	if (mode != AMULET_MODE_BEACON_POWER_AMULET)
 	{
+		Serial.println("Need to be a power amulet to have superpowers");
 		return;
 	}
 	powerIsAdvertising = true;
 	powerActivatedTimestamp = millis();
+
+	Bluefruit.Advertising.stop();
+	Bluefruit.Advertising.clearData();
+	Bluefruit.ScanResponse.clearData();
 	ble_set_advertisement_data(AdvertisementType::Beacon, localSettings_.startupConfig_.ad, (uint8_t *)&localSettings_.powerPattern_, sizeof(localSettings_.powerPattern_));
 }
 
@@ -271,9 +280,34 @@ void modeCycle(bool next, uint8_t unused)
 			break;
 		}
 	}
+
 	mode_idx = (mode_idx + 4 + (next ? 1 : -1)) % 4;
 	bleuart.printf("P: mode V: %s\n", get_config_mode_name(modes[mode_idx]));
 	config.mode = modes[mode_idx];
+	if (config.mode == AMULET_MODE_BEACON)
+	{
+		config.ad.power = 80;
+		config.ad.decay = 128;
+		config.ad.range = -80;
+	}
+	if (config.mode == AMULET_MODE_RUNE)
+	{
+		config.ad.power = 150;
+		config.ad.decay = 96;
+		config.ad.range = -90;
+	}
+	if (config.mode == AMULET_MODE_BEACON_POWER_AMULET)
+	{
+		config.ad.power = 180;
+		config.ad.decay = 160;
+		config.ad.range = -70;
+	}
+	if (config.mode == AMULET_MODE_AMULET)
+	{
+		config.ad.power = 80;
+		config.ad.decay = 64;
+		config.ad.range = -70;
+	}
 }
 
 void powerCycle(bool next, uint8_t unused)
@@ -295,7 +329,7 @@ void decayCycle(bool next, uint8_t unused)
 void rangeCycle(bool next, uint8_t unused)
 {
 	int8_t range = config.ad.range;
-	range = max(-120, min(0, range + (next ? 2 : -2)));
+	range = max(-120, min(0, range + (next ? -2 : 2)));
 	bleuart.printf("P: range V: %d\n", range);
 	config.ad.range = range;
 }
@@ -424,7 +458,7 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		return;
 	}
 
-	// Set Ambient Animatoin
+	// Set Ambient Animation
 	if (str[1] == 'A')
 	{
 		if (str[strlen(str) - 1] != '#')
@@ -558,7 +592,6 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		else if (button == '4') // Commit the changes button (after system reset)
 		{
 			bleuart.printf("Saving Config\n");
-
 			config.pattern = ambient;
 
 			// char buf[120];
@@ -600,12 +633,6 @@ void start_advertising_with_data(amulet_mfd_t &data)
 
 void ble_set_advertisement_data(const AdvertisementType type, const advertisementParams &params, const uint8_t *data, const uint8_t len)
 {
-	// I don't know if this is necessary shrug
-	if (Bluefruit.Advertising.isRunning())
-	{
-		Bluefruit.Advertising.clearData();
-	}
-
 	LOG_LV2("BLE", "ble_set_advertisement_data");
 	if (len > MAX_MFD_DATA_LEN)
 	{

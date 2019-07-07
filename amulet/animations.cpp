@@ -126,19 +126,6 @@ void start_animation(const animPattern &pattern)
 	}
 }
 
-float normalizeRSSI(int8_t rssi)
-{
-	// max strength is RSSI >= -64. min strength at -128
-	float normalizedRSSI = min(64.f, max(0.f, (float)rssi + 128.f));
-	normalizedRSSI /= 64.f;
-	return normalizedRSSI;
-
-	// Tested and works! Examples:
-	// Test RSSI: 2 => 1.00
-	// Test RSSI: -70 => 0.91
-	// Test RSSI: -99 => 0.45
-	// Test RSSI: -128 => 0.00
-}
 void cycle_leds(int msPerCycle);
 void blur_leds();
 void flip_leds();
@@ -148,19 +135,25 @@ void step_animation(Signal *topSignal)
 {
 	if (currentAnim != nullptr)
 	{
-		float signalPower = 1.f;
-		if (currentAnim->params_.flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER && topSignal != nullptr)
-		{
-			signalPower = normalizeRSSI(topSignal->_scan.rssi);
-		}
-
-		currentAnim->step(frame_counter++, 0.f, signalPower);
+		currentAnim->step(frame_counter++, 0.f, 1.f);
 		for (int i = 0; i < RGB_LED_COUNT; i++)
 		{
 			gLeds[i] = currentAnim->leds[i];
 		}
 
-		maskAndFilter(gLeds, RGB_LED_COUNT, currentAnim->params_.filter_, frame_counter);
+		if (currentAnim->params_.flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER)
+		{
+			float signalPower = 1.f;
+			if (currentAnim->params_.flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER && topSignal != nullptr)
+			{
+				signalPower = normalizeRSSI(topSignal->_scan.rssi);
+			}
+			maskAndFilter(gLeds, RGB_LED_COUNT, currentAnim->params_.filter_, frame_counter, signalPower);
+		}
+		else
+		{
+			maskAndFilter(gLeds, RGB_LED_COUNT, currentAnim->params_.filter_, frame_counter);
+		}
 
 		int effect = currentAnim->params_.flags_ & 0x0F;
 		switch (effect)

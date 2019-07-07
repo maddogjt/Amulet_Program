@@ -31,3 +31,4 @@ void ble_setup_uart();
 void ble_setup(bool advertise, bool scan, bool uart = false);
 void ble_set_advertisement_data(const AdvertisementType type, const advertisementParams &params, const uint8_t *data, const uint8_t len);
 void ble_loop();
+void startPowerAmuletSuperpower();
