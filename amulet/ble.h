@@ -11,6 +11,8 @@ enum class AdvertisementType
 	Special, // undefined
 };
 
+const char *get_advertisement_type_name(AdvertisementType adType);
+
 struct advertisementParams
 {
 	uint8_t power;

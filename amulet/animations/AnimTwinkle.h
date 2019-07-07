@@ -6,12 +6,14 @@ class AnimTwinkle : public Animation
 {
 public:
 	int hue;
+	int hue2;
 	uint8_t extra0;
 	uint8_t extra1;
 	virtual void init()
 	{
 		LOG_LV1("LED", "Twinkle::init");
 		hue = params_.color1_;
+		hue2 = params_.color2_;
 		extra0 = params_.extra0_;
 		extra1 = params_.extra1_;
 		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
@@ -33,8 +35,8 @@ public:
 		EVERY_N_MILLISECONDS(100)
 		{
 			fadeToBlackBy(leds, RGB_LED_COUNT, 110);
-			leds[random8(0, 4)] = CHSV((params_.color2_ += 30), 255, 192);
-			leds[random8(4, 8)] = CHSV((params_.color2_ += 30), 255, 192);
+			leds[random8(0, 4)] = CHSV((hue2 += 30), 255, 192);
+			leds[random8(4, 8)] = CHSV((hue2 += 30), 255, 192);
 			//addGlitter(80);
 		}
 	}

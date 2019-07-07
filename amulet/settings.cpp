@@ -6,8 +6,8 @@ using namespace Adafruit_LittleFS_Namespace;
 
 bool settingsValid_ = false;
 
-constexpr int16_t kGlobalSettingsSig = 0x610B;
-constexpr int16_t kLocalSettingsSig = 0x10CB;
+constexpr int16_t kGlobalSettingsSig = 0x610D;
+constexpr int16_t kLocalSettingsSig = 0x10CE;
 
 constexpr char kGlobalSettingsFile[] = "globalSettings";
 constexpr char kLocalSettingsFile[] = "localSettings";
@@ -19,6 +19,8 @@ GlobalSettings globalSettings_{
 	.txPower_ = 4,
 	.runeSeenCountThreshold_ = 20,
 	.ambientPowerThreshold_ = 10,
+	.animationUpdateTimer_ = 2000, // in milliseconds. This determines how often we check a new top signal and change anims.
+
 	.pad_ = {}};
 
 constexpr animPattern kDefaultPattern{

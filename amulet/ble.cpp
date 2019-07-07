@@ -31,6 +31,27 @@ typedef struct ATTR_PACKED
 	uint8_t data[MAX_MFD_DATA_LEN];
 } amulet_mfd_t;
 
+const char *get_advertisement_type_name(AdvertisementType adType)
+{
+	switch (adType)
+	{
+	case AdvertisementType::Amulet:
+		return "Amulet";
+		break;
+	case AdvertisementType::Beacon:
+		return "Beacon";
+		break;
+	case AdvertisementType::Runic:
+		return "Rune";
+		break;
+	case AdvertisementType::Unknown:
+	default:
+		return "Unknown";
+		break;
+	}
+	return "err";
+}
+
 void debug_print_amulet_mfd(const amulet_mfd_t &mfd)
 {
 	Serial.println("-- Amulet Manufacturer Data --");
@@ -333,8 +354,8 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		len = bleuart.read(str, avail);
 	}
 
-	Serial.print("[Prph] RX: ");
-	Serial.println(str);
+	// Serial.print("[Prph] RX: ");
+	// Serial.println(str);
 
 	if (str[0] != '!')
 	{
@@ -497,6 +518,10 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 			bleuart.printf("Saving Config\n");
 
 			config.pattern = ambient;
+
+			// char buf[120];
+			// serializeAnimPattern(buf, 120, config.pattern); // Serializing just for the Serial log
+
 			localSettings_.startupConfig_ = config;
 			write_local_settings();
 		}

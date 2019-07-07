@@ -12,8 +12,9 @@ typedef struct __attribute__((packed))
 	int8_t txPower_;
 	int8_t runeSeenCountThreshold_; // how long do we have to hang around a rune for its pattern to stick
 	int8_t ambientPowerThreshold_;  // If top signal is lower power than this, show ambient
+	int16_t animationUpdateTimer_;  // in milliseconds. This determines how often we check a new top signal and change anims.
 
-	uint8_t pad_[10];
+	uint8_t pad_[8];
 } GlobalSettings;
 
 static_assert(sizeof(GlobalSettings) == 19, "");

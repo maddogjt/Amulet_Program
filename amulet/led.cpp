@@ -16,7 +16,6 @@ FASTLED_USING_NAMESPACE
 #define COLOR_ORDER GRB
 #define BRIGHTNESS 8
 
-bool show_ambient = true;
 bool led_test_mode = false;
 animPattern ambientAnimation = {};
 
@@ -32,7 +31,13 @@ void set_animation_from_signal(Signal *s)
 		memcpy(&pattern, s->_scan._data, sizeof(animPattern));
 		if (!matches_current_animation(pattern))
 		{
-			// Todo: Pull the seen count threshold from settings
+			LOG_LV1("LED", "Starting Animation from scan (%s)", get_advertisement_type_name((AdvertisementType)s->_scan.signal_type));
+			start_animation(pattern);
+		}
+		else if (!(ambientAnimation == pattern))
+		{
+			// It is our current pattern, but it is not our ambient pattern,
+			// Maybe it should become our ambient pattern
 			if (s->_scan.signal_type == (uint8_t)AdvertisementType::Runic &&
 				s->_seenCount >= globalSettings_.runeSeenCountThreshold_)
 			{
@@ -41,17 +46,12 @@ void set_animation_from_signal(Signal *s)
 				write_local_settings();
 				led_set_ambient_animation(pattern);
 			}
-			LOG_LV1("LED", "Starting Animation from scan");
-			start_animation(pattern);
 		}
 	}
 	else
 	{
-		show_ambient = true;
-		LOG_LV1("LED", "Going to show new ambient if not same");
 		if (!matches_current_animation(ambientAnimation))
 		{
-			LOG_LV1("LED", "Starting Ambient Animation");
 			start_animation(ambientAnimation);
 		}
 	}
@@ -73,22 +73,14 @@ void led_setup()
 	FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(gLeds, RGB_LED_COUNT).setCorrection(TypicalLEDStrip);
 }
 
-void choose_pattern_by_signal()
-{
-	LOG_LV1("LED", "choose_pattern_by_signal");
-	Signal *signal = current_top_signal();
-	set_animation_from_signal(signal);
-}
-
 void led_loop(int step)
 {
 	Signal *signal = nullptr;
 	// Update the LED pattern based on bluetooth signals every 500ms
-	EVERY_N_MILLISECONDS(500)
+	EVERY_N_MILLISECONDS(globalSettings_.animationUpdateTimer_)
 	{
 		if (isAmulet() && !led_test_mode)
 		{
-			LOG_LV1("LED", "choose_pattern_by_signal");
 			signal = current_top_signal();
 			set_animation_from_signal(signal);
 		}

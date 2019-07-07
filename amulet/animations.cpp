@@ -87,6 +87,9 @@ void start_animation(Anim name, int p1, int p2)
 
 void start_animation(const animPattern &pattern)
 {
+	// char buf[120];
+	// serializeAnimPattern(buf, 120, pattern); // Serializing just for the Serial log
+
 	if (currentAnim != nullptr)
 	{
 		delete currentAnim;
@@ -115,9 +118,8 @@ void start_animation(const animPattern &pattern)
 
 		initMask(currentAnim->params_.mask_);
 
-		LOG_LV1("ANIM", "Current Anim changed to %d", currentAnimName);
-		LOG_LV1("ANIM", "Param 0:	%d", pattern.params.extra0_);
-		LOG_LV1("ANIM", "Param 1:	%d", pattern.params.extra1_);
+		LOG_LV1("ANIM", "New Current Anim %s", get_animation_name(currentAnimName));
+		LOG_LV1("ANIM", "  F: %d M %d F: %d", currentAnim->params_.flags_, currentAnim->params_.mask_, currentAnim->params_.filter_);
 
 		frame_counter = 0;
 		currentAnim->init();

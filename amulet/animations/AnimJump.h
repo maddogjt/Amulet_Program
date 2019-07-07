@@ -6,6 +6,7 @@ class AnimJump : public Animation
 {
 public:
 	int hue;
+	int hue2;
 	uint8_t extra0;
 	uint8_t extra1;
 
@@ -13,6 +14,7 @@ public:
 	{
 		LOG_LV1("LED", "Jump::init");
 		hue = params_.color1_;
+		hue2 = params_.color2_;
 		extra0 = params_.extra0_;
 		extra1 = params_.extra1_;
 
@@ -28,14 +30,14 @@ public:
  		//This does there and back
  		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
  		if( extra1 == 0 ) {
- 			leds[extra0] = CHSV(params_.color2_, 255, 192);
+ 			leds[extra0] = CHSV(hue2, 255, 192);
  			extra0++;
  			if( extra0 == 8 ) {
  				extra0 = 7;
  				extra1 = 1;
  			}
  		} else {
- 			leds[extra0] = CHSV(params_.color2_, 255, 192);
+ 			leds[extra0] = CHSV(hue2, 255, 192);
  			if( extra0 == 0 ) {
  				extra1 = 0;
  			} else {
@@ -46,7 +48,7 @@ public:
 		/*
  		//This does around the world counter clockwise
  		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
- 		leds[extra0] = CHSV((params_.color2_ += 30), 255, 192);
+ 		leds[extra0] = CHSV((hue2 += 30), 255, 192);
  		extra0++;
  		if( extra0 == 8 ) {
  				extra0 = 0;
@@ -58,7 +60,7 @@ public:
 		/*
  		//This does around the world clockwise
  		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
- 		leds[extra0] = CHSV((params_.color2_ += 30), 255, 192);
+ 		leds[extra0] = CHSV((hue2 += 30), 255, 192);
  		if( extra0 == 0 ) {
  				extra0 = 8;
  		}
@@ -75,7 +77,7 @@ public:
 		{
 			if ((extra1 % 48) >= 24)
 			{
-				leds[extra0] = CHSV((params_.color2_ += 30), 255, 192);
+				leds[extra0] = CHSV((hue2 += 30), 255, 192);
 				extra0++;
 				if (extra0 == 8)
 				{
@@ -85,7 +87,7 @@ public:
 			else
 			{
 				//clockwise
-				leds[extra0] = CHSV((params_.color2_ += 30), 255, 192);
+				leds[extra0] = CHSV((hue2 += 30), 255, 192);
 				if (extra0 == 0)
 				{
 					extra0 = 8;
@@ -98,7 +100,7 @@ public:
 		/* 
  		//This does around the world with a tail
  		fadeToBlackBy(leds, RGB_LED_COUNT, 140);
- 		leds[extra0] = CHSV((params_.color2_ += 30), 255, 192);
+ 		leds[extra0] = CHSV((hue2 += 30), 255, 192);
  		extra0++;
  		if( extra0 == 8 ) {
  				extra0 = 0;

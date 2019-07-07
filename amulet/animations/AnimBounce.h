@@ -6,12 +6,14 @@ class AnimBounce : public Animation
 {
 public:
 	uint8_t hue;
+	uint8_t hue2;
 	uint8_t extra0;
 	uint8_t extra1;
 	virtual void init()
 	{
 		LOG_LV1("LED", "Bounce::init");
 		hue = params_.color1_;
+		hue2 = params_.color2_;
 		extra0 = params_.extra0_;
 		extra1 = params_.extra1_;
 		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
@@ -25,7 +27,7 @@ public:
 			fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
 			if (extra1 == 0)
 			{
-				leds[extra0] = CHSV(params_.color2_, 255, 192);
+				leds[extra0] = CHSV(hue2, 255, 192);
 				extra0++;
 				if (extra0 == 8)
 				{
@@ -35,7 +37,7 @@ public:
 			}
 			else
 			{
-				leds[extra0] = CHSV(params_.color2_, 255, 192);
+				leds[extra0] = CHSV(hue2, 255, 192);
 				if (extra0 == 0)
 				{
 					extra1 = 0;

@@ -6,6 +6,7 @@ class AnimInNOut : public Animation
 {
 public:
 	int hue;
+	int hue2;
 	uint8_t extra0;
 	uint8_t extra1;
 
@@ -13,6 +14,7 @@ public:
 	{
 		LOG_LV1("LED", "InNOut::init");
 		hue = params_.color1_;
+		hue2 = params_.color2_;
 		extra0 = params_.extra0_;
 		extra1 = params_.extra1_;
 
@@ -44,17 +46,17 @@ public:
 		{
 			for (int i = 0; i < 4; i++)
 			{
-				leds[outer[i]] = CHSV((params_.color1_), 255, 192);
+				leds[outer[i]] = CHSV((hue), 255, 192);
 			}
 		}
 		else
 		{
 			for (int i = 0; i < 4; i++)
 			{
-				leds[inner[i]] = CHSV((params_.color1_), 255, 192);
+				leds[inner[i]] = CHSV((hue), 255, 192);
 			}
 		}
 		extra0++;
-		params_.color1_ += 2;
+		hue += 2;
 	}
 };

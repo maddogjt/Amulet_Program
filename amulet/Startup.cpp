@@ -96,7 +96,7 @@ void startAsBeacon(const StartupConfig &config)
 
 	// Final config should be no LEDs but for now I'm turning on the LEDs and LED_BUILTIN
 	digitalWrite(LED_BUILTIN, LED_STATE_ON);
-	// digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
+	digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
 	led_setup();
 	FastLED.setBrightness(g_led_brightness_medium);
 
