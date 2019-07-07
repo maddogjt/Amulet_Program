@@ -65,6 +65,41 @@ void debug_print_amulet_mfd(const amulet_mfd_t &mfd)
 	Serial.println();
 }
 
+uint32_t powerActivatedTimestamp = 0;
+bool powerIsAdvertising = false;
+void ble_loop()
+{
+	EVERY_N_SECONDS(60)
+	{
+		// turn back on the blue light if we are in config mode and the user snoozed it.
+		if (mode == AMULET_MODE_CONFIG)
+		{
+			digitalWrite(LED_BUILTIN, LED_STATE_ON);
+		}
+	}
+
+	if (powerIsAdvertising && mode == AMULET_MODE_BEACON_POWER_AMULET)
+	{
+		const uint32_t powerAdvertisingWindow = 15000;
+		if (millis() > powerActivatedTimestamp + powerAdvertisingWindow)
+		{
+			powerIsAdvertising = false;
+			ble_set_advertisement_data(AdvertisementType::Amulet, localSettings_.startupConfig_.ad, nullptr, 0);
+		}
+	}
+}
+
+void startPowerAmuletSuperpower()
+{
+	if (mode != AMULET_MODE_BEACON_POWER_AMULET)
+	{
+		return;
+	}
+	powerIsAdvertising = true;
+	powerActivatedTimestamp = millis();
+	ble_set_advertisement_data(AdvertisementType::Beacon, localSettings_.startupConfig_.ad, (uint8_t *)&localSettings_.powerPattern_, sizeof(localSettings_.powerPattern_));
+}
+
 void scan_callback(ble_gap_evt_adv_report_t *report);
 void start_advertising_with_data(amulet_mfd_t &data);
 
@@ -379,6 +414,11 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		Serial.println("Setting startup config from BLE service");
 		Serial.printf("%s", configStr);
 		localSettings_.startupConfig_ = config;
+		if (config.mode == AMULET_MODE_BEACON_POWER_AMULET)
+		{
+			// Save this separate so its never overwritten (such as ambient patterns)
+			localSettings_.powerPattern_ = config.pattern;
+		}
 		write_local_settings();
 		startWithConfig(config);
 		return;
@@ -491,6 +531,8 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		}
 		else if (button == '2') // The Info Details Button
 		{
+			// Turn off the harsh blue light for animation configuration
+			digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 			if (g_tweaker_is_modifying_animation)
 			{
 				bleuart.printf("mask: %d filter: %d\n", ambient.params.mask_, ambient.params.filter_);
@@ -558,6 +600,12 @@ void start_advertising_with_data(amulet_mfd_t &data)
 
 void ble_set_advertisement_data(const AdvertisementType type, const advertisementParams &params, const uint8_t *data, const uint8_t len)
 {
+	// I don't know if this is necessary shrug
+	if (Bluefruit.Advertising.isRunning())
+	{
+		Bluefruit.Advertising.clearData();
+	}
+
 	LOG_LV2("BLE", "ble_set_advertisement_data");
 	if (len > MAX_MFD_DATA_LEN)
 	{

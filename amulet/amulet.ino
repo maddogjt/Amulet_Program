@@ -60,6 +60,7 @@ void loop()
 	// LOG_LV2("LOOP", "Loop start");
 	led_loop(step);
 	signal_loop(step);
+	ble_loop();
 
 	dfuButton.read();
 	if (!devEnabled)
@@ -92,24 +93,27 @@ void loop()
 		digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
 		digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 
-		while(millis() - start < 10000) {
+		while (millis() - start < 10000)
+		{
 			dfuButton.read();
 			// User released DFU button, before 10 seconds, so don't go to programming mode.
-			if (dfuButton.isReleased()) {
+			if (dfuButton.isReleased())
+			{
 				systemOff(21, 0);
 			}
 			FastLED.delay(5);
 		}
-		
+
 		// Turn on blue LED to signal timer tripped and let user should release button
 		digitalWrite(LED_BUILTIN, LED_STATE_ON);
-		while(dfuButton.isPressed()) {
+		while (dfuButton.isPressed())
+		{
 			FastLED.delay(5);
 			dfuButton.read();
 		}
 
 		// Didn't relase mode, guess it's time to go to config mode
-		localSettings_.startupConfig_.mode= AMULET_MODE_CONFIG;
+		localSettings_.startupConfig_.mode = AMULET_MODE_CONFIG;
 		write_local_settings();
 
 		sd_nvic_SystemReset();

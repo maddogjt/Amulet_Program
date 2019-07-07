@@ -64,7 +64,9 @@ void startAsRemoteConfig(const StartupConfig &config)
 {
 	Serial.println("Start config mode");
 	mode = AMULET_MODE_CONFIG;
-	// digitalWrite(LED_BUILTIN, LED_STATE_ON);
+
+	// Turn the light hard on to indicate config mode
+	digitalWrite(LED_BUILTIN, LED_STATE_ON);
 	led_setup();
 	ble_setup(false, true, true);
 
@@ -87,6 +89,8 @@ void startAsAmulet(const StartupConfig &config)
 
 	// Set the initial ambient animation
 	led_set_ambient_animation(config.pattern);
+
+	ble_set_advertisement_data(AdvertisementType::Amulet, config.ad, nullptr, 0);
 }
 
 void startAsBeacon(const StartupConfig &config)

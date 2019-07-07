@@ -31,7 +31,8 @@ LocalSettings localSettings_{
 	.signature_ = kLocalSettingsSig,
 	.version_ = 0,
 	.configSize_ = sizeof(StartupConfig),
-	.startupConfig_ = {}};
+	.startupConfig_ = {},
+	.powerPattern_ = {}};
 
 void settings_init()
 {

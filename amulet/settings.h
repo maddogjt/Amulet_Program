@@ -25,6 +25,7 @@ typedef struct __attribute__((packed))
 	uint8_t version_;
 	size_t configSize_;
 	StartupConfig startupConfig_;
+	animPattern powerPattern_;
 } LocalSettings;
 
 void write_global_settings();
