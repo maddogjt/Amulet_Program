@@ -106,7 +106,7 @@ void loop()
 			// User released DFU button, before 10 seconds, so don't go to programming mode.
 			if (dfuButton.isReleased())
 			{
-				systemOff(PIN_RESET, 0);
+				power_off();
 			}
 			FastLED.delay(5);
 		}
@@ -233,7 +233,7 @@ void systemSleep()
 	digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
 	digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 
-	systemOff(PIN_RESET, 0);
+	power_off();
 }
 
 
@@ -263,4 +263,16 @@ void run_first_boot() {
 
 	
 	systemSleep();
+}
+
+void power_off()
+{
+#define DFU_MAGIC_IGNORE_PIN			0xC6
+
+
+    nrf_gpio_cfg_sense_input(PIN_DFU, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
+	nrf_gpio_cfg_sense_input(PIN_RESET, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
+
+	NRF_POWER->GPREGRET = DFU_MAGIC_IGNORE_PIN;
+    NRF_POWER->SYSTEMOFF = 1;
 }
