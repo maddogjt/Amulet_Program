@@ -36,7 +36,7 @@ LocalSettings localSettings_{
 
 void settings_init()
 {
-	localSettings_.startupConfig_.mode = AMULET_MODE_CONFIG;
+	localSettings_.startupConfig_.mode = AMULET_MODE_FIRSTBOOT;
 	localSettings_.startupConfig_.pattern = kDefaultPattern;
 	localSettings_.startupConfig_.ad = {
 		.power = 100,

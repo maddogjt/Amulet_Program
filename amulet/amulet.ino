@@ -41,6 +41,10 @@ void setup()
 	pinMode(PIN_RGB_LED_PWR, OUTPUT);
 	digitalWrite(PIN_RGB_LED_PWR, RGB_LED_PWR_ON);
 
+	if (localSettings_.startupConfig_.mode==AMULET_MODE_FIRSTBOOT) {
+		run_first_boot();
+	}
+
 	// Start reading the DFU button so we can trigger off long and short presses
 	dfuButton.begin();
 
@@ -102,7 +106,7 @@ void loop()
 			// User released DFU button, before 10 seconds, so don't go to programming mode.
 			if (dfuButton.isReleased())
 			{
-				systemOff(21, 0);
+				systemOff(PIN_RESET, 0);
 			}
 			FastLED.delay(5);
 		}
@@ -229,5 +233,34 @@ void systemSleep()
 	digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
 	digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 
-	systemOff(21, 0);
+	systemOff(PIN_RESET, 0);
+}
+
+
+void run_first_boot() {
+	led_setup();
+	FastLED.setBrightness(20);
+	for (auto i =0; i < 10; i++) {
+		gLeds[i] = CRGB::Red;
+	}
+	FastLED.show();
+	delay(1000);
+
+	for (auto i =0; i < 10; i++) {
+		gLeds[i] = CRGB::Green;
+	}
+	FastLED.show();
+	delay(1000);
+
+		for (auto i =0; i < 10; i++) {
+		gLeds[i] = CRGB::Blue;
+	}
+	FastLED.show();
+	delay(1000);
+
+	localSettings_.startupConfig_.mode = AMULET_MODE_AMULET;
+	write_local_settings();
+
+	
+	systemSleep();
 }
