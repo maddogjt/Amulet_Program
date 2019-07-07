@@ -8,9 +8,9 @@
 #undef ARDUINO_GENERIC
 
 #include "Startup.h"
+#include "settings.h"
 
-#define SIGNALS_MAX_LEN 20
-Signal *signals[SIGNALS_MAX_LEN];
+Signal *topSignal;
 
 // Precise method, which guarantees v = v1 when t = 1.
 float lerp(float v0, float v1, float t)
@@ -22,92 +22,60 @@ void insert_new_scan(Scan &s);
 void add_scan_data(Scan &s)
 {
 	LOG_LV1("SIG", "add_scan_data");
-	bool found = false;
-	for (int i = 0; i < SIGNALS_MAX_LEN; i++)
-	{
-		if (signals[i] == nullptr)
-		{
-			continue;
-		}
-		if (signals[i]->_scan == s)
-		{
-			LOG_LV1("SIG", "add_scan_data : Updating existing record");
-			signals[i]->_nextStrength = max(signals[i]->_nextStrength, s.power);
-			signals[i]->_seenCount++;
-			found = true;
-			break;
-		}
-	}
-	if (!found)
-	{
-		insert_new_scan(s);
-	}
-}
+	int topRunePower = topSignal != nullptr ? topSignal->_strength : 0;
 
-void insert_new_scan(Scan &s)
-{
-	LOG_LV1("SIG", "insert_new_scan");
-	bool inserted = false;
-	for (int i = 0; i < SIGNALS_MAX_LEN; i++)
+	if (s.power > topRunePower)
 	{
-		if (signals[i] == nullptr)
+		if (topSignal != nullptr)
 		{
-			signals[i] = new Signal(s);
-			signals[i]->_seenCount = 1;
-			inserted = true;
-			break;
+			delete topSignal;
+			topSignal = nullptr;
 		}
-	}
-	if (!inserted)
-	{
-		LOG_LV1("Scan", "Scan array full, scan not inserted.");
+		topSignal = new Signal(s);
+		topSignal->_seenCount = 1;
 	}
 }
 
 void decay_signals()
 {
 	LOG_LV1("SIG", "decay_signals");
-	for (int i = 0; i < SIGNALS_MAX_LEN; i++)
+	if (topSignal == nullptr)
 	{
-		Signal *s = signals[i];
-		if (s == nullptr)
-		{
-			continue;
-		}
+		return;
+	}
 
-		if (s->_nextStrength > s->_strength)
-		{
-			LOG_LV1("SIG", "decay_signals : New strength was equal %f -> %f", s->_strength, s->_nextStrength);
-		}
-		if (s->_nextStrength > s->_strength)
-		{
-			LOG_LV1("SIG", "decay_signals : New strength was greater %f -> %f", s->_strength, s->_nextStrength);
-			s->_strength = s->_nextStrength;
-		}
-		else
-		{
-			float_t decay = min(1.f, max(0.05, s->_scan.decayRate));
-			LOG_LV1("SIG", "decay_signals : Decaying lerp( %f, %f %f ) -> %f", s->_strength, s->_nextStrength, decay, lerp(s->_strength, s->_nextStrength, decay));
-			s->_strength = lerp(s->_strength, s->_nextStrength, decay);
-		}
+	if (topSignal->_nextStrength > topSignal->_strength)
+	{
+		LOG_LV1("SIG", "decay_signals : New strength was equal %f -> %f", topSignal->_strength, topSignal->_nextStrength);
+	}
+	if (topSignal->_nextStrength > topSignal->_strength)
+	{
+		LOG_LV1("SIG", "decay_signals : New strength was greater %f -> %f", topSignal->_strength, topSignal->_nextStrength);
+		topSignal->_strength = topSignal->_nextStrength;
+	}
+	else
+	{
+		float_t decay = min(1.f, max(0.05, topSignal->_scan.decayRate));
+		LOG_LV1("SIG", "decay_signals : Decaying lerp( %f, %f %f ) -> %f", topSignal->_strength, topSignal->_nextStrength, decay, lerp(topSignal->_strength, topSignal->_nextStrength, decay));
+		topSignal->_strength = lerp(topSignal->_strength, topSignal->_nextStrength, decay);
+	}
 
-		// If the signal is too weak, cull it.
-		if (s->_strength <= 10)
-		{
-			LOG_LV1("SIG", "decay_signals :Culling strength less than 1");
-			delete s;
-			signals[i] = nullptr;
-		}
-		else
-		{
-			s->_nextStrength = 0;
-		}
+	// If the signal is too weak, cull it.
+	if (topSignal->_strength <= globalSettings_.ambientPowerThreshold_)
+	{
+		LOG_LV1("SIG", "decay_signals :Culling strength less than %d", globalSettings_.ambientPowerThreshold_);
+		delete topSignal;
+		topSignal = nullptr;
+	}
+	else
+	{
+		topSignal->_nextStrength = 0;
 	}
 }
 
 void signal_loop(int step)
 {
-	if (isAmulet())
+	if (isAmulet() || mode == AMULET_MODE_RUNE)
 	{
 		EVERY_N_SECONDS(1)
 		decay_signals();
@@ -116,32 +84,5 @@ void signal_loop(int step)
 
 Signal *current_top_signal()
 {
-	float current_strength = 0;
-	int current_index = -1;
-	int dbg_signal_count = 0;
-	for (int i = 0; i < SIGNALS_MAX_LEN; i++)
-	{
-		Signal *s = signals[i];
-		if (s == nullptr)
-		{
-			continue;
-		}
-		dbg_signal_count++;
-		if (s->_strength > current_strength)
-		{
-			current_strength = s->_strength;
-			current_index = i;
-		}
-	}
-
-	if (current_index >= 0 && current_index < SIGNALS_MAX_LEN)
-	{
-		LOG_LV2("SIG", "Current (%d) top signal strength %f. Num signals %d", current_index, signals[current_index]->_strength, dbg_signal_count);
-		return signals[current_index];
-	}
-	else
-	{
-		LOG_LV2("SIG", "No current top signal. Num signals %d", dbg_signal_count);
-		return nullptr;
-	}
+	return topSignal;
 }

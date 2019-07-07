@@ -11,8 +11,9 @@ typedef struct __attribute__((packed))
 	uint8_t brightness_[3];
 	int8_t txPower_;
 	int8_t runeSeenCountThreshold_; // how long do we have to hang around a rune for its pattern to stick
+	int8_t ambientPowerThreshold_;  // If top signal is lower power than this, show ambient
 
-	uint8_t pad_[11];
+	uint8_t pad_[10];
 } GlobalSettings;
 
 static_assert(sizeof(GlobalSettings) == 19, "");

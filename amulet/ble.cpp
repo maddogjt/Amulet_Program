@@ -17,8 +17,8 @@ const uint16_t BLE_AMULET_MFID = 0x69FF;
 #define BLE_AMULET_DATA_VERSION (1)
 
 int g_rssi = 0;
-StartupConfig config = localSettings_.startupConfig_;
-animPattern ambient = {.name = Anim::AnimSinelon, .params = {}};
+StartupConfig config = defaultConfigForRemoteSetup();
+animPattern ambient = config.pattern;
 
 typedef struct ATTR_PACKED
 {
@@ -587,10 +587,9 @@ void scan_callback(ble_gap_evt_adv_report_t *report)
 			signalIsValid = false;
 		}
 
-		const int8_t AMBIENT_CUTOFF = 10; // Need to put this in a better place.
-		if (mfd.power < AMBIENT_CUTOFF)
+		if (mfd.power < globalSettings_.ambientPowerThreshold_)
 		{
-			LOG_LV2("Scan", "Invalid signal. Power (%d) is weaker than cutoff (%d)", mfd.power, AMBIENT_CUTOFF);
+			LOG_LV2("Scan", "Invalid signal. Power (%d) is weaker than cutoff (%d)", mfd.power, globalSettings_.ambientPowerThreshold_);
 			signalIsValid = false;
 		}
 

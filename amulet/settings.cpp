@@ -18,6 +18,7 @@ GlobalSettings globalSettings_{
 	.brightness_ = {4, 8, 20},
 	.txPower_ = 4,
 	.runeSeenCountThreshold_ = 20,
+	.ambientPowerThreshold_ = 10,
 	.pad_ = {}};
 
 constexpr animPattern kDefaultPattern{

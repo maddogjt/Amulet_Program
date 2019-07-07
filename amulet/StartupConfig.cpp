@@ -31,6 +31,17 @@ const char *get_config_mode_name(amulet_mode_t mode)
 	return "err";
 }
 
+StartupConfig defaultConfigForRemoteSetup()
+{
+	StartupConfig c{};
+	c.mode = AMULET_MODE_BEACON;
+	c.ad.power = 80;
+	c.ad.decay = 128;
+	c.ad.range = -80;
+	c.pattern.name = Anim::AnimPrism;
+	return c;
+}
+
 StartupConfig deserializeStartupConfig(char *str, uint8_t len)
 {
 	StartupConfig config;
