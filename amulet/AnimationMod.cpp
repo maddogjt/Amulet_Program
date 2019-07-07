@@ -62,8 +62,6 @@ void maskAndFilter(CRGB *leds, const uint8_t len, const uint8_t filter_number, i
 	}
 	maskAnimation->step(frame, 0, 1.f);
 
-	CHSV color = rgb2hsv_approximate(maskAnimation->leds[0]);
-
 	for (int i = 0; i < RGB_LED_COUNT; i++)
 	{
 		CHSV color = rgb2hsv_approximate(maskAnimation->leds[i]);

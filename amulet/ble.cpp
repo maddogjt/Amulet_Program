@@ -151,9 +151,18 @@ void speedCycle(bool next, uint8_t unused)
 void flagCycle(bool next, uint8_t idx)
 {
 	uint8_t flags_idx = 0;
-	uint8_t flags[] = {0, ANIMATION_FLAG_FOLD, ANIMATION_FLAG_MIRROR, ANIMATION_FLAG_LOOP};
-	const char *flag_names[] = {"None", "Fold", "Mirror", "Loop"};
-	for (int i = 0; i < 4; i++)
+	uint8_t flags[] = {0,
+					   ANIMATION_EFFECT_FOLD,
+					   ANIMATION_EFFECT_MIRROR,
+					   ANIMATION_EFFECT_LOOP,
+					   ANIMATION_EFFECT_CYCLE,
+					   ANIMATION_EFFECT_SHIFT,
+					   ANIMATION_EFFECT_BLUR,
+					   ANIMATION_EFFECT_FLIP,
+					   ANIMATION_EFFECT_SCRAMBLE};
+	const char *flag_names[] = {"None", "Fold", "Mirror", "Loop", "Cycle", "Shift", "Blur", "Flip", "Scramble"};
+	const int effectCount = 9;
+	for (int i = 0; i < effectCount; i++)
 	{
 		if (flags[i] == ambient.params.flags_)
 		{
@@ -161,7 +170,7 @@ void flagCycle(bool next, uint8_t idx)
 			break;
 		}
 	}
-	flags_idx = (flags_idx + 4 + (next ? 1 : -1)) % 4;
+	flags_idx = (flags_idx + effectCount + (next ? 1 : -1)) % effectCount;
 	bleuart.printf("P: flag V: %s\n", flag_names[flags_idx]);
 	ambient.params.flags_ = flags[flags_idx];
 }
@@ -235,18 +244,26 @@ void rangeCycle(bool next, uint8_t unused)
 	config.ad.range = range;
 }
 
+void animRSSICycle(bool next, uint8_t unused)
+{
+	ambient.params.flags_ ^= ANIMATION_FLAG_USE_SIGNAL_POWER;
+	bleuart.printf("P: anim rssi V: %d\n", ambient.params.flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER);
+}
+
 typedef void (*ParameterCycleList[])(bool next, uint8_t idx);
 ParameterCycleList g_ConfigCyclers = {
 	modeCycle,
 	powerCycle,
 	decayCycle,
 	rangeCycle,
+	animRSSICycle,
 };
 const char *g_ConfigCyclerNames[] = {
 	"mode",
 	"power",
 	"decay",
 	"range",
+	"AnimRSSI",
 };
 
 ParameterCycleList g_AnimCyclers = {
@@ -412,7 +429,7 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 			}
 			else
 			{
-				g_ConfigIdx = (g_ConfigIdx + 3) % 4;
+				g_ConfigIdx = (g_ConfigIdx + 4) % 5;
 				bleuart.printf("P: %s\n", g_ConfigCyclerNames[g_ConfigIdx]);
 			}
 		}
@@ -425,7 +442,7 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 			}
 			else
 			{
-				g_ConfigIdx = (g_ConfigIdx + 1) % 4;
+				g_ConfigIdx = (g_ConfigIdx + 1) % 5;
 				bleuart.printf("P: %s\n", g_ConfigCyclerNames[g_ConfigIdx]);
 			}
 		}

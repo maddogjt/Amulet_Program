@@ -68,7 +68,6 @@ animPattern led_get_ambient_animation()
 	return ambientAnimation;
 }
 
-
 void led_setup()
 {
 	FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(gLeds, RGB_LED_COUNT).setCorrection(TypicalLEDStrip);
@@ -83,13 +82,19 @@ void choose_pattern_by_signal()
 
 void led_loop(int step)
 {
+	Signal *signal = nullptr;
 	// Update the LED pattern based on bluetooth signals every 500ms
-	if (isAmulet() && !led_test_mode && step % 12 == 0)
+	EVERY_N_MILLISECONDS(500)
 	{
-		choose_pattern_by_signal();
+		if (isAmulet() && !led_test_mode)
+		{
+			LOG_LV1("LED", "choose_pattern_by_signal");
+			signal = current_top_signal();
+			set_animation_from_signal(signal);
+		}
 	}
 
 	// Step the currentAnimation
-	step_animation();
+	step_animation(signal);
 	FastLED.show();
 }

@@ -118,21 +118,41 @@ void start_animation(const animPattern &pattern)
 		LOG_LV1("ANIM", "Current Anim changed to %d", currentAnimName);
 		LOG_LV1("ANIM", "Param 0:	%d", pattern.params.extra0_);
 		LOG_LV1("ANIM", "Param 1:	%d", pattern.params.extra1_);
-		LOG_LV1("ANIM", "Fold: %d, Mirror: %d, Loop: %d",
-				currentAnim->params_.flags_ & ANIMATION_FLAG_FOLD,
-				currentAnim->params_.flags_ & ANIMATION_FLAG_MIRROR,
-				currentAnim->params_.flags_ & ANIMATION_FLAG_LOOP);
 
 		frame_counter = 0;
 		currentAnim->init();
 	}
 }
 
-void step_animation()
+float normalizeRSSI(int8_t rssi)
+{
+	// max strength is RSSI >= -64. min strength at -128
+	float normalizedRSSI = min(64.f, max(0.f, (float)rssi + 128.f));
+	normalizedRSSI /= 64.f;
+	return normalizedRSSI;
+
+	// Tested and works! Examples:
+	// Test RSSI: 2 => 1.00
+	// Test RSSI: -70 => 0.91
+	// Test RSSI: -99 => 0.45
+	// Test RSSI: -128 => 0.00
+}
+void cycle_leds(int msPerCycle);
+void blur_leds();
+void flip_leds();
+void scramble_leds();
+
+void step_animation(Signal *topSignal)
 {
 	if (currentAnim != nullptr)
 	{
-		currentAnim->step(frame_counter++, 0.f, 1.f);
+		float signalPower = 1.f;
+		if (currentAnim->params_.flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER && topSignal != nullptr)
+		{
+			signalPower = normalizeRSSI(topSignal->_scan.rssi);
+		}
+
+		currentAnim->step(frame_counter++, 0.f, signalPower);
 		for (int i = 0; i < RGB_LED_COUNT; i++)
 		{
 			gLeds[i] = currentAnim->leds[i];
@@ -140,17 +160,33 @@ void step_animation()
 
 		maskAndFilter(gLeds, RGB_LED_COUNT, currentAnim->params_.filter_, frame_counter);
 
-		if (currentAnim->params_.flags_ & ANIMATION_FLAG_FOLD)
+		int effect = currentAnim->params_.flags_ & 0x0F;
+		switch (effect)
 		{
+		case ANIMATION_EFFECT_FOLD:
 			fold();
-		}
-		if (currentAnim->params_.flags_ & ANIMATION_FLAG_MIRROR)
-		{
+			break;
+		case ANIMATION_EFFECT_MIRROR:
 			mirror();
-		}
-		if (currentAnim->params_.flags_ & ANIMATION_FLAG_LOOP)
-		{
+			break;
+		case ANIMATION_EFFECT_LOOP:
+			loop_leds();
+			break;
+		case ANIMATION_EFFECT_CYCLE:
+			cycle_leds(500);
+			break;
+		case ANIMATION_EFFECT_SHIFT:
 			mirror_invert();
+			break;
+		case ANIMATION_EFFECT_BLUR:
+			blur_leds();
+			break;
+		case ANIMATION_EFFECT_FLIP:
+			flip_leds();
+			break;
+		case ANIMATION_EFFECT_SCRAMBLE:
+			scramble_leds();
+			break;
 		}
 	}
 }
@@ -194,6 +230,87 @@ void fold()
 	gLeds[3] = gLeds[0];
 	gLeds[4] = gLeds[7];
 	gLeds[5] = gLeds[6];
+}
+
+void swap(CRGB &c1, CRGB &c2)
+{
+	CRGB swap = c1;
+	c1 = c2;
+	c2 = swap;
+}
+
+void blur_leds()
+{
+	CRGB rows[RGB_LED_COUNT];
+	rows[0] = gLeds[7];
+	rows[1] = gLeds[0];
+	rows[2] = gLeds[6];
+	rows[3] = gLeds[1];
+	rows[4] = gLeds[5];
+	rows[5] = gLeds[2];
+	rows[6] = gLeds[4];
+	rows[7] = gLeds[3];
+	blurRows(gLeds, 4, 2, 40);
+	gLeds[7] = rows[0];
+	gLeds[0] = rows[1];
+	gLeds[6] = rows[2];
+	gLeds[1] = rows[3];
+	gLeds[5] = rows[4];
+	gLeds[2] = rows[5];
+	gLeds[4] = rows[6];
+	gLeds[3] = rows[7];
+}
+
+void scramble_leds()
+{
+	CRGB scramble[RGB_LED_COUNT];
+	scramble[0] = gLeds[3];
+	scramble[1] = gLeds[1];
+	scramble[2] = gLeds[0];
+	scramble[3] = gLeds[6];
+	scramble[4] = gLeds[5];
+	scramble[5] = gLeds[4];
+	scramble[6] = gLeds[7];
+	scramble[7] = gLeds[2];
+	for (int i = 0; i < RGB_LED_COUNT; i++)
+	{
+		gLeds[i] = scramble[i];
+	}
+}
+
+void flip_leds()
+{
+	swap(gLeds[7], gLeds[4]);
+	swap(gLeds[6], gLeds[5]);
+}
+
+void loop_leds()
+{
+	// bottom right => top left, top right => bottom left
+	for (int i = 0; i < 4; i++)
+	{
+		gLeds[i + 4] = gLeds[i];
+	}
+}
+
+int cycleStart = 0;
+void cycle_leds(int msPerCycle)
+{
+	EVERY_N_MILLISECONDS(msPerCycle)
+	{
+		cycleStart = (cycleStart + 1) % RGB_LED_COUNT;
+	}
+	// Need a copy of gLeds so we don't overwrite before cycle;
+	CRGB temp[RGB_LED_COUNT];
+	for (int i = 0; i < RGB_LED_COUNT; i++)
+	{
+		temp[i] = gLeds[i];
+	}
+
+	for (int i = 0; i < RGB_LED_COUNT; i++)
+	{
+		gLeds[i] = temp[(i + cycleStart) % RGB_LED_COUNT];
+	}
 }
 
 void mirror_invert()

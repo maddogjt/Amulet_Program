@@ -4,6 +4,7 @@
 #include <FastLED.h>
 #undef ARDUINO_GENERIC
 #include "Animation.h"
+#include "signal.h"
 
 FASTLED_USING_NAMESPACE
 
@@ -17,8 +18,6 @@ enum class Anim
 #undef DEFINE_ANIM
 	Count,
 };
-
-
 
 struct animPattern
 {
@@ -39,11 +38,10 @@ void start_animation(Anim name, int p1, int p2);
 bool matches_current_animation(Anim name, int p1, int p2);
 bool matches_current_animation(const animPattern &pattern);
 
-void step_animation();
+void step_animation(Signal *topSignal);
 
 const char *get_animation_name(Anim anim);
 int get_animations_count();
-
 
 // Functions that should be adapted to animations or removed
 void fold();
@@ -51,3 +49,4 @@ void mirror_invert();
 void confetti();
 void sinelon();
 void mirror();
+void loop_leds();
