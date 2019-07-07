@@ -26,6 +26,7 @@ bool devEnabled = false;
 
 void setup()
 {
+	sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
 	// Set pin modes
 	pinMode(LED_BUILTIN, OUTPUT);
 
@@ -82,8 +83,38 @@ void loop()
 
 	if (dfuButton.pressedFor(5000))
 	{
-		systemSleep();
+		auto start = millis();
+		Serial.println("Going to sleep soon");
+
+		digitalWrite(LED_BUILTIN, LED_STATE_ON);
+		delay(500);
+
+		digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
+		digitalWrite(LED_BUILTIN, !LED_STATE_ON);
+
+		while(millis() - start < 10000) {
+			dfuButton.read();
+			// User released DFU button, before 10 seconds, so don't go to programming mode.
+			if (dfuButton.isReleased()) {
+				systemOff(21, 0);
+			}
+			FastLED.delay(5);
+		}
+		
+		// Turn on blue LED to signal timer tripped and let user should release button
+		digitalWrite(LED_BUILTIN, LED_STATE_ON);
+		while(dfuButton.isPressed()) {
+			FastLED.delay(5);
+			dfuButton.read();
+		}
+
+		// Didn't relase mode, guess it's time to go to config mode
+		localSettings_.startupConfig_.mode= AMULET_MODE_CONFIG;
+		write_local_settings();
+
+		sd_nvic_SystemReset();
 	}
+
 	if (dfuButton.wasReleased() || (!devEnabled && resetButton.wasReleased()))
 	{
 		nextBrightnessMode();
@@ -152,6 +183,7 @@ void setMode(amulet_mode_t mode)
 	// digitalWrite(LED_BUILTIN, mode == AMULET_MODE_AMULET ? !LED_STATE_ON : LED_STATE_ON);
 }
 */
+
 void systemSleep()
 {
 	Serial.println("Going to sleep now");
