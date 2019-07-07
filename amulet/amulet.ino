@@ -55,6 +55,9 @@ void setup()
 
 int step = 0;
 
+bool dfuPrevPressedFor2k = false;
+bool resetPrevPressedFor2k = false;
+
 void loop()
 {
 	// LOG_LV2("LOOP", "Loop start");
@@ -108,8 +111,13 @@ void loop()
 			dfuButton.read();
 		}
 
-		// Didn't relase mode, guess it's time to go to config mode
-		localSettings_.startupConfig_.mode= AMULET_MODE_CONFIG;
+		// Didn't relase mode, guess it's time to go to config mode (or reset to amulet mode if already in config)
+		if (localSettings_.startupConfig_.mode== AMULET_MODE_CONFIG) {
+			localSettings_.startupConfig_.mode= AMULET_MODE_RUNE;
+		} else {
+			localSettings_.startupConfig_.mode= AMULET_MODE_CONFIG;
+		}
+
 		write_local_settings();
 
 		sd_nvic_SystemReset();
@@ -117,9 +125,16 @@ void loop()
 
 	if (dfuButton.wasReleased() || (!devEnabled && resetButton.wasReleased()))
 	{
-		nextBrightnessMode();
+		if ((dfuButton.wasReleased() && dfuPrevPressedFor2k) || 
+		(!devEnabled && resetButton.wasReleased() && resetPrevPressedFor2k)) {
+			Serial.println("Possibly trigger superpower here");
+		} else {
+			nextBrightnessMode();
+		}
 	}
 
+	dfuPrevPressedFor2k = dfuButton.pressedFor(2000);
+	resetPrevPressedFor2k =  (!devEnabled) ? resetButton.pressedFor(2000) : false;
 	FastLED.delay(1000 / FRAMERATE);
 	step++;
 }
