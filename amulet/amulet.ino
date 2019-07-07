@@ -41,6 +41,10 @@ void setup()
 	pinMode(PIN_RGB_LED_PWR, OUTPUT);
 	digitalWrite(PIN_RGB_LED_PWR, RGB_LED_PWR_ON);
 
+	if (localSettings_.startupConfig_.mode==AMULET_MODE_FIRSTBOOT) {
+		run_first_boot();
+	}
+
 	// Start reading the DFU button so we can trigger off long and short presses
 	dfuButton.begin();
 
@@ -102,7 +106,7 @@ void loop()
 			// User released DFU button, before 10 seconds, so don't go to programming mode.
 			if (dfuButton.isReleased())
 			{
-				systemOff(21, 0);
+				power_off();
 			}
 			FastLED.delay(5);
 		}
@@ -229,5 +233,62 @@ void systemSleep()
 	digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
 	digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 
-	systemOff(21, 0);
+	power_off();
+}
+
+
+void run_first_boot() {
+	led_setup();
+	FastLED.setBrightness(20);
+	for (auto i =0; i < 10; i++) {
+		gLeds[i] = CRGB::Red;
+	}
+	FastLED.show();
+	delay(1000);
+
+	for (auto i =0; i < 10; i++) {
+		gLeds[i] = CRGB::Green;
+	}
+	FastLED.show();
+	delay(1000);
+
+		for (auto i =0; i < 10; i++) {
+		gLeds[i] = CRGB::Blue;
+	}
+	FastLED.show();
+	delay(1000);
+
+	localSettings_.startupConfig_.mode = AMULET_MODE_AMULET;
+	write_local_settings();
+
+	
+	systemSleep();
+}
+
+void power_off()
+{
+//  for(int i=0; i<8; i++)
+//  {
+//    NRF_POWER->RAM[i].POWERCLR = 0x03UL;
+//  }
+
+#define DFU_MAGIC_IGNORE_PIN			0xC6
+
+
+    nrf_gpio_cfg_sense_input(PIN_DFU, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
+	nrf_gpio_cfg_sense_input(PIN_RESET, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
+
+	NRF_POWER->GPREGRET = DFU_MAGIC_IGNORE_PIN;
+
+	// uint8_t sd_en;
+	// (void)sd_softdevice_is_enabled(&sd_en);
+
+	// Enter System OFF state
+// 	if (sd_en)
+// 	{
+// 		sd_power_system_off();
+//   }else
+//   {
+    NRF_POWER->SYSTEMOFF = 1;
+//   }
 }
