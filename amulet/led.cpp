@@ -57,6 +57,13 @@ void set_animation_from_signal(Signal *s)
 	}
 }
 
+void run_power_animation() {
+	if (!matches_current_animation(localSettings_.powerPattern_))
+	{
+		start_animation(localSettings_.powerPattern_);
+	}
+}
+
 void led_set_ambient_animation(const animPattern &anim)
 {
 	ambientAnimation = anim;
@@ -73,13 +80,19 @@ void led_setup()
 	FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(gLeds, RGB_LED_COUNT).setCorrection(TypicalLEDStrip);
 }
 
+extern bool powerIsAdvertising;
+void run_power_animation();
+
 void led_loop(int step)
 {
 	Signal *signal = nullptr;
 	// Update the LED pattern based on bluetooth signals every 500ms
 	EVERY_N_MILLISECONDS(globalSettings_.animationUpdateTimer_)
 	{
-		if (isAmulet() && !led_test_mode)
+		if (powerIsAdvertising) {
+			run_power_animation();
+		}
+		else if (isAmulet() && !led_test_mode)
 		{
 			signal = current_top_signal();
 			set_animation_from_signal(signal);
