@@ -21,7 +21,7 @@ float lerp(float v0, float v1, float t)
 void insert_new_scan(Scan &s);
 void add_scan_data(Scan &s)
 {
-	if (mode == AMULET_MODE_RUNE && s.signal_type != (uint8_t)AdvertisementType::Amulet)
+	if (gMode == AMULET_MODE_RUNE && s.signal_type != (uint8_t)AdvertisementType::Amulet)
 	{
 		// Runes only care about amulets;
 		return;
@@ -97,7 +97,7 @@ void decay_signals()
 
 void signal_loop(int step)
 {
-	if (isAmulet() || mode == AMULET_MODE_RUNE)
+	if (isAmulet() || gMode == AMULET_MODE_RUNE)
 	{
 		EVERY_N_SECONDS(1)
 		{

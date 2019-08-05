@@ -1,7 +1,7 @@
 
 #include "StartupConfig.h"
 
-extern amulet_mode_t mode;
+extern amulet_mode_t gMode;
 bool isAmulet();
 
 void start();

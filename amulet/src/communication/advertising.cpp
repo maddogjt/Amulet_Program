@@ -1,12 +1,9 @@
 #include "advertising.h"
 #include "parameters.h"
 #include "packet_types.h"
+#include "uart.h"
 
 #include <bluefruit.h>
-
-// Uart over BLE service
-BLEUart gUartService;
-void prph_bleuart_rx_callback(uint16_t conn_handle);
 
 static void debug_print_amulet_mfd(const amulet_mfg_data_t &mfd)
 {
@@ -27,7 +24,7 @@ static void start_advertising_uart()
 	Bluefruit.Advertising.addTxPower();
 
 	// Include the BLE UART (AKA 'NUS') 128-bit UUID
-	Bluefruit.Advertising.addService(gUartService);
+	Bluefruit.Advertising.addService(uart_get_service());
 
 	// Secondary Scan Response packet (optional)
 	// Since there is no room for 'Name' in Advertising packet
@@ -79,10 +76,7 @@ void advertising_setup(bool advertise, bool uart)
 	if (uart)
 	{
 		Bluefruit.setName("Amulet");
-
-		// Configure and start the BLE Uart service
-		gUartService.begin();
-		gUartService.setRxCallback(prph_bleuart_rx_callback);
+		uart_setup();
 		start_advertising_uart();
 	}
 }

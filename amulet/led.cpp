@@ -99,7 +99,7 @@ void led_loop(int step)
 		}
 	}
 
-	if (mode == AMULET_MODE_RUNE)
+	if (gMode == AMULET_MODE_RUNE)
 	{
 		signal = current_top_signal();
 		int topRSSI = signal == nullptr ? -128 : signal->_scan.rssi;

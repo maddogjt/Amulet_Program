@@ -10,16 +10,16 @@
 #include "animations.h"
 #include "BrightnessMode.h"
 
-amulet_mode_t mode = AMULET_MODE_AMULET;
+amulet_mode_t gMode = AMULET_MODE_AMULET;
 
 bool isPowerAmulet()
 {
-	return mode == AMULET_MODE_BEACON_POWER_AMULET || mode == AMULET_MODE_RUNIC_POWER_AMULET;
+	return gMode == AMULET_MODE_BEACON_POWER_AMULET || gMode == AMULET_MODE_RUNIC_POWER_AMULET;
 }
 
 bool isAmulet()
 {
-	return mode == AMULET_MODE_AMULET || isPowerAmulet();
+	return gMode == AMULET_MODE_AMULET || isPowerAmulet();
 }
 
 void startAsRemoteConfig(const StartupConfig &config);
@@ -70,7 +70,7 @@ void start()
 void startAsRemoteConfig(const StartupConfig &config)
 {
 	Serial.println("Start config mode");
-	mode = AMULET_MODE_CONFIG;
+	gMode = AMULET_MODE_CONFIG;
 
 	// Turn the light hard on to indicate config mode
 	digitalWrite(LED_BUILTIN, LED_STATE_ON);
@@ -87,7 +87,7 @@ void startAsRemoteConfig(const StartupConfig &config)
 void startAsAmulet(const StartupConfig &config)
 {
 	Serial.println("Start amulet mode");
-	mode = AMULET_MODE_AMULET;
+	gMode = AMULET_MODE_AMULET;
 	led_setup();
 	ble_setup(true, true);
 
@@ -102,7 +102,7 @@ void startAsAmulet(const StartupConfig &config)
 void startAsBeacon(const StartupConfig &config)
 {
 	Serial.println("Start beacon mode");
-	mode = AMULET_MODE_BEACON;
+	gMode = AMULET_MODE_BEACON;
 
 	// Final config should be no LEDs but for now I'm turning on the LEDs and LED_BUILTIN
 	digitalWrite(LED_BUILTIN, LED_STATE_ON);
@@ -119,7 +119,7 @@ void startAsBeacon(const StartupConfig &config)
 void startAsRune(const StartupConfig &config)
 {
 	Serial.println("Start rune mode");
-	mode = AMULET_MODE_RUNE;
+	gMode = AMULET_MODE_RUNE;
 
 	// Final config should be no LEDs but for now I'm turning on the LEDs and LED_BUILTIN
 	// digitalWrite(LED_BUILTIN, LED_STATE_ON);
@@ -136,7 +136,7 @@ void startAsRune(const StartupConfig &config)
 void startAsPowerAmulet(const StartupConfig &config)
 {
 	Serial.printf("Start power amulet mode (%)\n", get_config_mode_name(config.mode));
-	mode = config.mode;
+	gMode = config.mode;
 
 	led_setup();
 	ble_setup(true, true);
