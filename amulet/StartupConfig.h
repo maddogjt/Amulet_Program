@@ -35,5 +35,3 @@ struct StartupConfig
 };
 
 StartupConfig defaultConfigForRemoteSetup();
-void testSerialization();
-StartupConfig deserializeStartupConfig(char *str, uint8_t len);

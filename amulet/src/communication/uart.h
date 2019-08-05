@@ -2,7 +2,8 @@
 
 #include <Arduino.h>
 
-class BLEUart;
+class BLEService;
 
 void uart_setup();
-BLEUart &uart_get_service();
+BLEService &uart_get_service();
+Stream &uart_stream();

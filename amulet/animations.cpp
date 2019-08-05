@@ -42,54 +42,8 @@ void dump_animation_to_console(const animPattern &anim)
 				  anim.params.color2_);
 }
 
-animPattern deserializeAnimPattern(char *str, uint8_t len)
-{
-	animPattern pattern;
-	pattern.name = (Anim)first_tok(str);
-	pattern.params.color1_ = next_tok();
-	pattern.params.color2_ = next_tok();
-	pattern.params.speed_ = next_tok();
-	pattern.params.flags_ = next_tok();
-	pattern.params.mask_ = next_tok();
-	pattern.params.filter_ = next_tok();
-	pattern.params.extra0_ = next_tok();
-	pattern.params.extra1_ = next_tok();
-	return pattern;
-}
-
-uint8_t serializeAnimPattern(char *buffer, const uint8_t len, const animPattern &pattern)
-{
-	memset(buffer, 0, len);
-	append_int_comma(buffer, (int)pattern.name);
-	append_int_comma(buffer, pattern.params.color1_);
-	append_int_comma(buffer, pattern.params.color2_);
-	append_int_comma(buffer, pattern.params.speed_);
-	append_int_comma(buffer, pattern.params.flags_);
-	append_int_comma(buffer, pattern.params.mask_);
-	append_int_comma(buffer, pattern.params.filter_);
-	append_int_comma(buffer, pattern.params.extra0_);
-	append_int_comma(buffer, pattern.params.extra1_);
-	buffer[strlen(buffer) - 1] = '\0'; // delete last comma
-	Serial.printf("Anim Pattern (len: %d): %s\n", strlen(buffer), buffer);
-	return strlen(buffer);
-}
-
-void start_animation(Anim name, int p1, int p2)
-{
-	animPattern pattern{};
-	pattern.name = name;
-	pattern.params.extra0_ = p1;
-	pattern.params.extra1_ = p2;
-	pattern.params.flags_ = 0;
-	pattern.params.speed_ = 1;
-	start_animation(pattern);
-}
-
 void start_animation(const animPattern &pattern)
 {
-	// char buf[120];
-	// serializeAnimPattern(buf, 120, pattern); // Serializing just for the Serial log
-
 	if (currentAnim != nullptr)
 	{
 		delete currentAnim;
@@ -200,17 +154,6 @@ bool matches_current_animation(const animPattern &pattern)
 	}
 	return currentAnimName == pattern.name &&
 		   currentAnim->params_ == pattern.params;
-}
-
-bool matches_current_animation(Anim name, int p1, int p2)
-{
-	if (currentAnim == nullptr)
-	{
-		return false;
-	}
-	return currentAnimName == name &&
-		   currentAnim->params_.extra0_ == p1 &&
-		   currentAnim->params_.extra1_ == p2;
 }
 
 //

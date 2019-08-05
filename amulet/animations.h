@@ -31,11 +31,7 @@ struct animPattern
 
 void dump_animation_to_console(const animPattern &anim);
 
-animPattern deserializeAnimPattern(char *str, uint8_t len);
-uint8_t serializeAnimPattern(char *buffer, const uint8_t len, const animPattern &pattern);
 void start_animation(const animPattern &pattern);
-void start_animation(Anim name, int p1, int p2);
-bool matches_current_animation(Anim name, int p1, int p2);
 bool matches_current_animation(const animPattern &pattern);
 
 void step_animation(Signal *topSignal);

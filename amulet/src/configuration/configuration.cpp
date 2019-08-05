@@ -1,7 +1,6 @@
 #include "configuration.h"
 #include "../communication/uart.h"
 
-#include <bluefruit.h>
 #define ARDUINO_GENERIC
 #include <FastLED.h>
 #undef ARDUINO_GENERIC
@@ -12,6 +11,10 @@
 #include "../../Startup.h"
 #include "../../AnimationMod.h"
 
+static uint8_t g_AnimIdx = 0;
+static uint8_t g_ConfigIdx = 0;
+static bool g_tweaker_is_modifying_animation = true;
+
 static StartupConfig config = defaultConfigForRemoteSetup();
 static animPattern ambient = config.pattern;
 
@@ -19,7 +22,7 @@ void colorCycle(bool next, uint8_t idx)
 {
 	uint8_t hue = (idx == 1) ? ambient.params.color1_ : ambient.params.color2_;
 	hue = (hue + 255 + (next ? 16 : -16)) % 255;
-	uart_get_service().printf("P: color%d V: %d\n", idx, hue);
+	uart_stream().printf("P: color%d V: %d\n", idx, hue);
 	if (idx == 1)
 	{
 		ambient.params.color1_ = hue;
@@ -33,14 +36,14 @@ void extraCycle(bool next, uint8_t idx)
 {
 	uint8_t &extra = (idx == 7) ? ambient.params.extra0_ : ambient.params.extra1_;
 	extra = (extra + 255 + (next ? 16 : -16)) % 255;
-	uart_get_service().printf("P: extra[%d] V: %d\n", (idx == 7) ? 0 : 1, extra);
+	uart_stream().printf("P: extra[%d] V: %d\n", (idx == 7) ? 0 : 1, extra);
 }
 
 void speedCycle(bool next, uint8_t unused)
 {
 	uint8_t speed = ambient.params.speed_;
 	speed = (speed + 255 + (next ? 16 : -16)) % 255;
-	uart_get_service().printf("P: speed V: %d\n", speed);
+	uart_stream().printf("P: speed V: %d\n", speed);
 	ambient.params.speed_ = speed;
 }
 
@@ -67,7 +70,7 @@ void flagCycle(bool next, uint8_t idx)
 		}
 	}
 	flags_idx = (flags_idx + effectCount + (next ? 1 : -1)) % effectCount;
-	uart_get_service().printf("P: flag V: %s\n", flag_names[flags_idx]);
+	uart_stream().printf("P: flag V: %s\n", flag_names[flags_idx]);
 	ambient.params.flags_ = flags[flags_idx];
 }
 
@@ -77,7 +80,7 @@ void maskCycle(bool next, uint8_t unused)
 	mask = (mask + 256 + (next ? 1 : -1)) % 256;
 	char buf[32];
 	getMaskName(buf, mask);
-	uart_get_service().printf("P: mask V: %s\n", buf);
+	uart_stream().printf("P: mask V: %s\n", buf);
 	ambient.params.mask_ = mask;
 }
 
@@ -87,7 +90,7 @@ void filterCycle(bool next, uint8_t unused)
 	filter = (filter + 256 + (next ? 1 : -1)) % 256;
 	char buf[32];
 	getFilterName(buf, filter);
-	uart_get_service().printf("P: filter V: %s\n", buf);
+	uart_stream().printf("P: filter V: %s\n", buf);
 	ambient.params.filter_ = filter;
 }
 
@@ -95,7 +98,7 @@ void animCycle(bool next, uint8_t unused)
 {
 	uint8_t anim_idx = (uint8_t)ambient.name;
 	anim_idx = (anim_idx + get_animations_count() + (next ? 1 : -1)) % get_animations_count();
-	uart_get_service().printf("P:anim V:%.10s\n", get_animation_name((Anim)anim_idx));
+	uart_stream().printf("P:anim V:%.10s\n", get_animation_name((Anim)anim_idx));
 	ambient.name = (Anim)anim_idx;
 }
 
@@ -113,7 +116,7 @@ void modeCycle(bool next, uint8_t unused)
 	}
 
 	mode_idx = (mode_idx + 4 + (next ? 1 : -1)) % 4;
-	uart_get_service().printf("P: mode V: %s\n", get_config_mode_name(modes[mode_idx]));
+	uart_stream().printf("P: mode V: %s\n", get_config_mode_name(modes[mode_idx]));
 	config.mode = modes[mode_idx];
 	if (config.mode == AMULET_MODE_BEACON)
 	{
@@ -145,7 +148,7 @@ void powerCycle(bool next, uint8_t unused)
 {
 	uint8_t power = config.ad.power;
 	power = (power + 255 + (next ? 16 : -16)) % 255;
-	uart_get_service().printf("P: power V: %d\n", power);
+	uart_stream().printf("P: power V: %d\n", power);
 	config.ad.power = power;
 }
 
@@ -153,7 +156,7 @@ void decayCycle(bool next, uint8_t unused)
 {
 	uint8_t decay = config.ad.decay;
 	decay = (decay + 255 + (next ? 16 : -16)) % 255;
-	uart_get_service().printf("P: decay V: %4.2f%%\n", (float)decay * 100.f / 255.f);
+	uart_stream().printf("P: decay V: %4.2f%%\n", (float)decay * 100.f / 255.f);
 	config.ad.decay = decay;
 }
 
@@ -161,14 +164,14 @@ void rangeCycle(bool next, uint8_t unused)
 {
 	int8_t range = config.ad.range;
 	range = max(-120, min(0, range + (next ? -2 : 2)));
-	uart_get_service().printf("P: range V: %d\n", range);
+	uart_stream().printf("P: range V: %d\n", range);
 	config.ad.range = range;
 }
 
 void animRSSICycle(bool next, uint8_t unused)
 {
 	ambient.params.flags_ ^= ANIMATION_FLAG_USE_SIGNAL_POWER;
-	uart_get_service().printf("P: anim rssi V: %d\n", ambient.params.flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER);
+	uart_stream().printf("P: anim rssi V: %d\n", ambient.params.flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER);
 }
 
 typedef void (*ParameterCycleList[])(bool next, uint8_t idx);
@@ -209,98 +212,16 @@ const char *g_AnimCyclerNames[] = {
 	"extra 1",
 	"extra 2",
 };
-uint8_t g_AnimIdx = 0;
-uint8_t g_ConfigIdx = 0;
-bool g_tweaker_is_modifying_animation = true;
 
-bool g_ble_uart_packet_in_progress = false;
 
-void prph_bleuart_rx_callback(uint16_t conn_handle)
+
+void configuration_handle_command(const char *str, size_t len)
 {
-	(void)conn_handle;
-
-	// Wait for new data to arrive
-#define MAX_BLE_UART_PACKET 200
-	static char str[MAX_BLE_UART_PACKET] = {0};
-	static uint8_t len = 0;
-
-	int avail = uart_get_service().available();
-	if (avail <= 0)
-	{
-		return;
-	}
-
-	if (avail + len > MAX_BLE_UART_PACKET)
-	{
-		Serial.println("ERROR: Buffer Overflow");
-	}
-
-	if (g_ble_uart_packet_in_progress)
-	{
-		if (uart_get_service().peek() == '!')
-		{
-			LOG_LV1("BLE", "Old packet incomplete, starting new one.");
-			memset(str, 0, MAX_BLE_UART_PACKET);
-			len = uart_get_service().read(str, avail);
-		}
-		else
-		{
-			len += uart_get_service().read(str + strlen(str), avail);
-		}
-	}
-	else
-	{
-		memset(str, 0, MAX_BLE_UART_PACKET);
-		len = uart_get_service().read(str, avail);
-	}
-
-	// Serial.print("[Prph] RX: ");
-	// Serial.println(str);
 
 	if (str[0] != '!')
 	{
-		Serial.println("uart_get_service() service got rogue packet");
+		Serial.println("uart_stream() service got rogue packet");
 		Serial.printBuffer(str, len);
-		return;
-	}
-
-	// StartupConfig
-	if (str[1] == 'S')
-	{
-		if (str[strlen(str) - 1] != '#')
-		{
-			g_ble_uart_packet_in_progress = true;
-			return;
-		}
-		g_ble_uart_packet_in_progress = false;
-		char *configStr = &str[2];
-
-		StartupConfig config = deserializeStartupConfig(configStr, len - 2);
-		Serial.println("Setting startup config from BLE service");
-		Serial.printf("%s", configStr);
-		localSettings_.startupConfig_ = config;
-		write_local_settings();
-		startWithConfig(config);
-		return;
-	}
-
-	// Set Ambient Animation
-	if (str[1] == 'A')
-	{
-		if (str[strlen(str) - 1] != '#')
-		{
-			g_ble_uart_packet_in_progress = true;
-			return;
-		}
-		g_ble_uart_packet_in_progress = false;
-
-		char *animStr = &str[2];
-		animPattern pattern = deserializeAnimPattern(animStr, len - 2);
-		Serial.println("Setting animation pattern from BLE service");
-		Serial.printf("%s", animStr);
-		localSettings_.startupConfig_.pattern = pattern;
-		//write_local_settings();
-		led_set_ambient_animation(pattern);
 		return;
 	}
 
@@ -346,12 +267,12 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 			if (g_tweaker_is_modifying_animation)
 			{
 				g_AnimIdx = (g_AnimIdx + 8) % 9;
-				uart_get_service().printf("P: %s\n", g_AnimCyclerNames[g_AnimIdx]);
+				uart_stream().printf("P: %s\n", g_AnimCyclerNames[g_AnimIdx]);
 			}
 			else
 			{
 				g_ConfigIdx = (g_ConfigIdx + 4) % 5;
-				uart_get_service().printf("P: %s\n", g_ConfigCyclerNames[g_ConfigIdx]);
+				uart_stream().printf("P: %s\n", g_ConfigCyclerNames[g_ConfigIdx]);
 			}
 		}
 		else if (button == '6') // down
@@ -359,12 +280,12 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 			if (g_tweaker_is_modifying_animation)
 			{
 				g_AnimIdx = (g_AnimIdx + 1) % 9;
-				uart_get_service().printf("P: %s\n", g_AnimCyclerNames[g_AnimIdx]);
+				uart_stream().printf("P: %s\n", g_AnimCyclerNames[g_AnimIdx]);
 			}
 			else
 			{
 				g_ConfigIdx = (g_ConfigIdx + 1) % 5;
-				uart_get_service().printf("P: %s\n", g_ConfigCyclerNames[g_ConfigIdx]);
+				uart_stream().printf("P: %s\n", g_ConfigCyclerNames[g_ConfigIdx]);
 			}
 		}
 		else if (button == '7' || button == '8') // left or right
@@ -382,11 +303,11 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 		{
 			if (g_tweaker_is_modifying_animation)
 			{
-				uart_get_service().printf("Anim: %s\n", get_animation_name(ambient.name));
+				uart_stream().printf("Anim: %s\n", get_animation_name(ambient.name));
 			}
 			else
 			{
-				uart_get_service().printf("Conf: %s\n", get_config_mode_name(config.mode));
+				uart_stream().printf("Conf: %s\n", get_config_mode_name(config.mode));
 			}
 		}
 		else if (button == '2') // The Info Details Button
@@ -395,29 +316,29 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 			digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 			if (g_tweaker_is_modifying_animation)
 			{
-				uart_get_service().printf("mask: %d filter: %d\n", ambient.params.mask_, ambient.params.filter_);
+				uart_stream().printf("mask: %d filter: %d\n", ambient.params.mask_, ambient.params.filter_);
 			}
 			else
 			{
-				uart_get_service().printf(":P\n");
+				uart_stream().printf(":P\n");
 			}
 		}
 		else if (button == '3') // The mode switcher button
 		{
 			if (g_tweaker_is_modifying_animation)
 			{
-				uart_get_service().printf("Editing config\n");
+				uart_stream().printf("Editing config\n");
 				g_tweaker_is_modifying_animation = false;
 			}
 			else
 			{
-				uart_get_service().printf("Editing anim\n");
+				uart_stream().printf("Editing anim\n");
 				g_tweaker_is_modifying_animation = true;
 			}
 		}
 		else if (button == '4') // Commit the changes button (after system reset)
 		{
-			uart_get_service().printf("Saving Config\n");
+			uart_stream().printf("Saving Config\n");
 			config.pattern = ambient;
 
 			// char buf[120];
@@ -432,7 +353,7 @@ void prph_bleuart_rx_callback(uint16_t conn_handle)
 			write_local_settings();
 
 			delay(500);
-			uart_get_service().printf("Restarting\n");
+			uart_stream().printf("Restarting\n");
 			NVIC_SystemReset();
 		}
 
