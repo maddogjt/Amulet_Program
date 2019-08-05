@@ -1,6 +1,8 @@
 #pragma once
+
 #include "animations.h"
-#include "ble.h"
+#include "src/communication/advertising.h"
+#include "src/communication/packet_types.h"
 
 typedef enum
 {

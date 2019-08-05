@@ -27,7 +27,7 @@ void set_animation_from_signal(Signal *s)
 	if (s != nullptr)
 	{
 		animPattern pattern;
-		VERIFY_STATIC(sizeof(pattern) <= MAX_MFD_DATA_LEN);
+		VERIFY_STATIC(sizeof(pattern) <= kMaxPayloadLen);
 		memcpy(&pattern, s->_scan._data, sizeof(animPattern));
 		if (!matches_current_animation(pattern))
 		{

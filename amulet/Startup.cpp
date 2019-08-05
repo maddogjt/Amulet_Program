@@ -1,6 +1,8 @@
 #include "Startup.h"
 #include "settings.h"
 
+#include "src/communication/advertising.h"
+
 #include <Arduino.h>
 
 #include "ble.h"
@@ -94,7 +96,7 @@ void startAsAmulet(const StartupConfig &config)
 
 	// Set the initial ambient animation
 	led_set_ambient_animation(config.pattern);
-	ble_set_advertisement_data(AdvertisementType::Amulet, config.ad, (uint8_t *)&config.pattern, sizeof(config.pattern));
+	advertising_start(AdvertisementType::Amulet, config.ad, (uint8_t *)&config.pattern, sizeof(config.pattern));
 }
 
 void startAsBeacon(const StartupConfig &config)
@@ -111,7 +113,7 @@ void startAsBeacon(const StartupConfig &config)
 	ble_setup(true, true);
 
 	led_set_ambient_animation(config.pattern);
-	ble_set_advertisement_data(AdvertisementType::Beacon, config.ad, (uint8_t *)&config.pattern, sizeof(config.pattern));
+	advertising_start(AdvertisementType::Beacon, config.ad, (uint8_t *)&config.pattern, sizeof(config.pattern));
 }
 
 void startAsRune(const StartupConfig &config)
@@ -128,7 +130,7 @@ void startAsRune(const StartupConfig &config)
 	ble_setup(true, true);
 
 	led_set_ambient_animation(config.pattern);
-	ble_set_advertisement_data(AdvertisementType::Runic, config.ad, (uint8_t *)&config.pattern, sizeof(config.pattern));
+	advertising_start(AdvertisementType::Runic, config.ad, (uint8_t *)&config.pattern, sizeof(config.pattern));
 }
 
 void startAsPowerAmulet(const StartupConfig &config)
@@ -144,5 +146,5 @@ void startAsPowerAmulet(const StartupConfig &config)
 
 	// Set the initial ambient animation
 	led_set_ambient_animation(config.pattern);
-	ble_set_advertisement_data(AdvertisementType::Amulet, config.ad, (uint8_t *)&config.pattern, sizeof(config.pattern));
+	advertising_start(AdvertisementType::Amulet, config.ad, (uint8_t *)&config.pattern, sizeof(config.pattern));
 }
