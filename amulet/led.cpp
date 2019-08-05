@@ -15,19 +15,18 @@ FASTLED_USING_NAMESPACE
 #define COLOR_ORDER GRB
 #define BRIGHTNESS 8
 
-bool led_test_mode = false;
-animPattern ambientAnimation = {};
+anim_config_t ambientAnimation = {};
 
-void led_set_ambient_animation(const animPattern &anim);
+void led_set_ambient_animation(const anim_config_t &anim);
 
 // returns true if animation was changed
 void set_animation_from_signal(Signal *s)
 {
 	if (s != nullptr)
 	{
-		animPattern pattern;
+		anim_config_t pattern;
 		VERIFY_STATIC(sizeof(pattern) <= kMaxPayloadLen);
-		memcpy(&pattern, s->_scan._data, sizeof(animPattern));
+		memcpy(&pattern, s->_scan._data, sizeof(anim_config_t));
 		if (!matches_current_animation(pattern))
 		{
 			LOG_LV1("LED", "Starting Animation from scan (%s)", get_advertisement_type_name((AdvertisementType)s->_scan.signal_type));
@@ -63,13 +62,13 @@ void run_power_animation() {
 	}
 }
 
-void led_set_ambient_animation(const animPattern &anim)
+void led_set_ambient_animation(const anim_config_t &anim)
 {
 	ambientAnimation = anim;
 	set_animation_from_signal(nullptr);
 }
 
-animPattern led_get_ambient_animation()
+anim_config_t led_get_ambient_animation()
 {
 	return ambientAnimation;
 }
@@ -93,7 +92,7 @@ void led_loop(int step)
 		if (powerIsAdvertising) {
 			run_power_animation();
 		}
-		else if (isAmulet() && !led_test_mode)
+		else if (isAmulet())
 		{
 			signal = current_top_signal();
 			set_animation_from_signal(signal);

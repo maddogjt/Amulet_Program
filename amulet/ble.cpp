@@ -29,7 +29,7 @@ void ble_loop()
 		{
 			powerIsAdvertising = false;
 			advertising_stop();
-			animPattern ap = defaultConfigForRemoteSetup().pattern;
+			anim_config_t ap = defaultConfigForRemoteSetup().pattern;
 			advertising_start(AdvertisementType::Amulet, localSettings_.startupConfig_.ad, (uint8_t *)&ap, sizeof(ap));
 		}
 	}
@@ -47,7 +47,7 @@ void startPowerAmuletSuperpower()
 
 	advertising_stop();
 
-	animPattern power = localSettings_.powerPattern_;
+	anim_config_t power = localSettings_.powerPattern_;
 
 	advertising_start(AdvertisementType::Beacon, localSettings_.startupConfig_.ad, (uint8_t *)&power, sizeof(power));
 }

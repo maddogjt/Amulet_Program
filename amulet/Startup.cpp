@@ -14,7 +14,7 @@ amulet_mode_t gMode = AMULET_MODE_AMULET;
 
 bool isPowerAmulet()
 {
-	return gMode == AMULET_MODE_BEACON_POWER_AMULET || gMode == AMULET_MODE_RUNIC_POWER_AMULET;
+	return gMode == AMULET_MODE_BEACON_POWER_AMULET;
 }
 
 bool isAmulet()
@@ -45,10 +45,8 @@ void startWithConfig(const StartupConfig &config)
 		startAsRune(config);
 		break;
 	case AMULET_MODE_BEACON_POWER_AMULET:
-	case AMULET_MODE_RUNIC_POWER_AMULET:
 		startAsPowerAmulet(config);
 		break;
-
 	default:
 		startAsRemoteConfig(config);
 		break;

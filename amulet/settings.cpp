@@ -23,7 +23,7 @@ GlobalSettings globalSettings_{
 
 	.pad_ = {}};
 
-constexpr animPattern kDefaultPattern{
+constexpr anim_config_t kDefaultPattern{
 	.name = Anim::AnimPrism,
 	.params = {}};
 

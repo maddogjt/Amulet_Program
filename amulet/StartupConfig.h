@@ -12,7 +12,6 @@ typedef enum
 	AMULET_MODE_BEACON,
 	AMULET_MODE_RUNE,
 	AMULET_MODE_BEACON_POWER_AMULET,
-	AMULET_MODE_RUNIC_POWER_AMULET,
 	AMULET_MODE_COUNT,
 } amulet_mode_t;
 
@@ -26,7 +25,7 @@ struct StartupConfig
 	advertisementParams ad;
 
 	// The animation
-	animPattern pattern;
+	anim_config_t pattern;
 
 	bool operator==(const StartupConfig &c) const
 	{

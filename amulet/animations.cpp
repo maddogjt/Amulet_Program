@@ -3,10 +3,10 @@
 
 #include "animations.h"
 #include "globals.h"
-#include "AnimationMod.h"
 #include "CSVHelpers.hpp"
 
 #include "src/animation/animation_modifiers.h"
+#include "src/animation/animation_overlay.h"
 
 CRGB gLeds[RGB_LED_COUNT];
 
@@ -15,13 +15,13 @@ Anim currentAnimName = Anim::Unknown;
 
 int frame_counter = 0;
 
-const char *animNames_[]{
+constexpr const char *animNames_[]{
 #define DEFINE_ANIM(name) #name,
 #include "AnimList.hpp"
 #undef DEFINE_ANIM
 };
 
-const char *get_animation_name(Anim anim)
+const char *animation_get_name(Anim anim)
 {
 	if ((int)anim >= 0 && anim < Anim::Count)
 	{
@@ -30,12 +30,8 @@ const char *get_animation_name(Anim anim)
 	}
 	return "unknown";
 }
-int get_animations_count()
-{
-	return (int)Anim::Count;
-}
 
-void dump_animation_to_console(const animPattern &anim)
+void dump_animation_to_console(const anim_config_t &anim)
 {
 	Serial.printf("A: %d c1: %d c2: %d\n",
 				  anim.name,
@@ -43,7 +39,7 @@ void dump_animation_to_console(const animPattern &anim)
 				  anim.params.color2_);
 }
 
-void start_animation(const animPattern &pattern)
+void start_animation(const anim_config_t &pattern)
 {
 	if (currentAnim != nullptr)
 	{
@@ -71,9 +67,9 @@ void start_animation(const animPattern &pattern)
 	{
 		currentAnim->setParams(pattern.params);
 
-		initMask(currentAnim->params_.mask_);
+		animation_overlay_set((Anim)currentAnim->params_.mask_, (OverlayFilter)currentAnim->params_.filter_);
 
-		LOG_LV1("ANIM", "New Current Anim %s", get_animation_name(currentAnimName));
+		LOG_LV1("ANIM", "New Current Anim %s", animation_get_name(currentAnimName));
 		LOG_LV1("ANIM", "  F: %d M %d F: %d", currentAnim->params_.flags_, currentAnim->params_.mask_, currentAnim->params_.filter_);
 
 		frame_counter = 0;
@@ -103,11 +99,11 @@ void step_animation(Signal *topSignal)
 			{
 				signalPower = normalizeRSSI(topSignal->_scan.rssi);
 			}
-			maskAndFilter(gLeds, RGB_LED_COUNT, currentAnim->params_.filter_, frame_counter, (int)(signalPower * 255));
+			animation_overlay_apply(gLeds, RGB_LED_COUNT, frame_counter, (int)(signalPower * 255));
 		}
 		else
 		{
-			maskAndFilter(gLeds, RGB_LED_COUNT, currentAnim->params_.filter_, frame_counter);
+			animation_overlay_apply(gLeds, RGB_LED_COUNT, frame_counter);
 		}
 
 		AnimationModifier modifier = (AnimationModifier)(currentAnim->params_.flags_ & 0x0F);
@@ -120,7 +116,7 @@ void step_animation(Signal *topSignal)
 	}
 }
 
-bool matches_current_animation(const animPattern &pattern)
+bool matches_current_animation(const anim_config_t &pattern)
 {
 	if (currentAnim == nullptr)
 	{

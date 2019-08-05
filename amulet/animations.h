@@ -15,33 +15,32 @@ enum class Anim
 	Count,
 };
 
-struct animPattern
+struct anim_config_t
 {
 	Anim name;
 	animParams params;
-	bool operator==(const animPattern &p) const
+	bool operator==(const anim_config_t &p) const
 	{
 		return name == p.name && params == p.params;
 	}
 };
 
-void dump_animation_to_console(const animPattern &anim);
+void dump_animation_to_console(const anim_config_t &anim);
 
-void start_animation(const animPattern &pattern);
-bool matches_current_animation(const animPattern &pattern);
+void start_animation(const anim_config_t &pattern);
+bool matches_current_animation(const anim_config_t &pattern);
 
 void step_animation(Signal *topSignal);
 
-const char *get_animation_name(Anim anim);
-int get_animations_count();
+const char *animation_get_name(Anim anim);
 
 // Functions that should be adapted to animations or removed
-void fold();
-void mirror_invert();
-void confetti();
-void sinelon();
-void mirror();
-void loop_leds();
+// void fold();
+// void mirror_invert();
+// void confetti();
+// void sinelon();
+// void mirror();
+// void loop_leds();
 
 // helper func for rssi based anims
 inline float normalizeRSSI(int8_t rssi)

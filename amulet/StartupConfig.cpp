@@ -21,9 +21,6 @@ const char *get_config_mode_name(amulet_mode_t mode)
 	case AMULET_MODE_BEACON_POWER_AMULET:
 		return "power";
 		break;
-	case AMULET_MODE_RUNIC_POWER_AMULET:
-		return "runulet";
-		break;
 	case AMULET_MODE_COUNT:
 	default:
 		break;
