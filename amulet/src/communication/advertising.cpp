@@ -5,6 +5,27 @@
 
 #include <bluefruit.h>
 
+const char *get_advertisement_type_name(AdvertisementType adType)
+{
+	switch (adType)
+	{
+	case AdvertisementType::Amulet:
+		return "Amulet";
+		break;
+	case AdvertisementType::Beacon:
+		return "Beacon";
+		break;
+	case AdvertisementType::Runic:
+		return "Rune";
+		break;
+	case AdvertisementType::Unknown:
+	default:
+		return "Unknown";
+		break;
+	}
+	return "err";
+}
+
 static void debug_print_amulet_mfd(const amulet_mfg_data_t &mfd)
 {
 	Serial.println("-- Amulet Manufacturer Data --");
