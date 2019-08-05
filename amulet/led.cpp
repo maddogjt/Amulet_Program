@@ -75,6 +75,8 @@ animPattern led_get_ambient_animation()
 	return ambientAnimation;
 }
 
+extern CRGB gLeds[RGB_LED_COUNT];
+
 void led_setup()
 {
 	FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(gLeds, RGB_LED_COUNT).setCorrection(TypicalLEDStrip);

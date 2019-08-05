@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Animation.h"
+#include "../src/animation/animation_modifiers.h"
 
 class AnimCylon : public Animation
 {
@@ -21,7 +22,7 @@ public:
 		fadeToBlackBy(leds, 4, 20);
 		int pos = beatsin16(speed, 0, 4 - 1);
 		leds[pos] += CHSV(hue, 255, 192);
-		mirror();
+		animation_modifier_apply(AnimationModifier::Mirror, leds, RGB_LED_COUNT);
 		hue += params_.extra0_ / 16;
 	}
 };

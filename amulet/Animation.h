@@ -24,16 +24,7 @@ struct animParams
 	};
 };
 
-extern CRGB gLeds[RGB_LED_COUNT];
 
-#define ANIMATION_EFFECT_FOLD 1   /**< Top 4 leds mirror bottom 4 leds */
-#define ANIMATION_EFFECT_MIRROR 2 /**< The left side mirrors the right side */
-#define ANIMATION_EFFECT_LOOP 3   /**< The left side mirrors the right side, but upside down */
-#define ANIMATION_EFFECT_CYCLE 4
-#define ANIMATION_EFFECT_SHIFT 5
-#define ANIMATION_EFFECT_BLUR 6
-#define ANIMATION_EFFECT_FLIP 7
-#define ANIMATION_EFFECT_SCRAMBLE 8
 #define ANIMATION_FLAG_USE_SIGNAL_POWER (0x10) /**< Set signal power parameter */
 #define ANIMATION_FLAG_NO_GRADIENT (0x20)	  /**< Just use the defined colors */
 #define ANIMATION_FLAG_FULL_SPECTRUM (0x40)	/**< Use full spectrum instead of a gradient */

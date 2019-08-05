@@ -236,6 +236,7 @@ void systemSleep()
 	power_off();
 }
 
+extern CRGB gLeds[RGB_LED_COUNT];
 
 void run_first_boot() {
 	led_setup();

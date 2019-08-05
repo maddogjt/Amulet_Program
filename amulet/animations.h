@@ -8,8 +8,6 @@
 
 FASTLED_USING_NAMESPACE
 
-extern CRGB gLeds[RGB_LED_COUNT];
-
 enum class Anim
 {
 	Unknown = -1,

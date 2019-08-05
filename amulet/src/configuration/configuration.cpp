@@ -1,5 +1,6 @@
 #include "configuration.h"
 #include "../communication/uart.h"
+#include "../animation/animation_modifiers.h"
 
 #define ARDUINO_GENERIC
 #include <FastLED.h>
@@ -32,6 +33,7 @@ void colorCycle(bool next, uint8_t idx)
 		ambient.params.color2_ = hue;
 	}
 }
+
 void extraCycle(bool next, uint8_t idx)
 {
 	uint8_t &extra = (idx == 7) ? ambient.params.extra0_ : ambient.params.extra1_;
@@ -49,29 +51,12 @@ void speedCycle(bool next, uint8_t unused)
 
 void flagCycle(bool next, uint8_t idx)
 {
-	uint8_t flags_idx = 0;
-	uint8_t flags[] = {0,
-					   ANIMATION_EFFECT_FOLD,
-					   ANIMATION_EFFECT_MIRROR,
-					   ANIMATION_EFFECT_LOOP,
-					   ANIMATION_EFFECT_CYCLE,
-					   ANIMATION_EFFECT_SHIFT,
-					   ANIMATION_EFFECT_BLUR,
-					   ANIMATION_EFFECT_FLIP,
-					   ANIMATION_EFFECT_SCRAMBLE};
-	const char *flag_names[] = {"None", "Fold", "Mirror", "Loop", "Cycle", "Shift", "Blur", "Flip", "Scramble"};
-	const int effectCount = 9;
-	for (int i = 0; i < effectCount; i++)
-	{
-		if (flags[i] == ambient.params.flags_)
-		{
-			flags_idx = i;
-			break;
-		}
-	}
-	flags_idx = (flags_idx + effectCount + (next ? 1 : -1)) % effectCount;
-	uart_stream().printf("P: flag V: %s\n", flag_names[flags_idx]);
-	ambient.params.flags_ = flags[flags_idx];
+	const int effectCount = (int)AnimationModifier::Count;
+
+	uint8_t modifier = 
+		(ambient.params.flags_ + effectCount + (next ? 1 : -1)) % effectCount;
+	uart_stream().printf("P: flag V: %s\n", animation_modifier_get_name((AnimationModifier)modifier));
+	ambient.params.flags_ = modifier;
 }
 
 void maskCycle(bool next, uint8_t unused)
