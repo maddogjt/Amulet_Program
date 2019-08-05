@@ -2,9 +2,7 @@
 #include "../communication/uart.h"
 #include "../animation/animation_modifiers.h"
 
-#define ARDUINO_GENERIC
 #include <FastLED.h>
-#undef ARDUINO_GENERIC
 
 #include "../../led.h"
 #include "../../signal.h"

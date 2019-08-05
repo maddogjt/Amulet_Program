@@ -3,9 +3,7 @@
 
 #include <Arduino.h>
 
-#define ARDUINO_GENERIC
 #include <FastLED.h>
-#undef ARDUINO_GENERIC
 
 #include "Startup.h"
 #include "settings.h"

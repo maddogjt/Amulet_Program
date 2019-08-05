@@ -2,9 +2,7 @@
 
 #include "../Animation.h"
 
-#define ARDUINO_GENERIC
 #include <FastLED.h>
-#undef ARDUINO_GENERIC
 FASTLED_USING_NAMESPACE
 
 class AnimFlame : public Animation

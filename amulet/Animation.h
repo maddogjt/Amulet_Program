@@ -3,9 +3,7 @@
 #include <cstdint>
 #include <Arduino.h>
 #include "globals.h"
-#define ARDUINO_GENERIC
 #include <FastLED.h>
-#undef ARDUINO_GENERIC
 FASTLED_USING_NAMESPACE
 
 struct animParams

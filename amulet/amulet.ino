@@ -1,7 +1,5 @@
 #include <JC_Button.h>
-#define ARDUINO_GENERIC
 #include <FastLED.h>
-#undef ARDUINO_GENERIC
 
 #include "globals.h"
 #include "led.h"

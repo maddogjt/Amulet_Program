@@ -1,6 +1,5 @@
-#define ARDUINO_GENERIC
+
 #include <FastLED.h>
-#undef ARDUINO_GENERIC
 
 #include "Animation.h"
 #include "animations.h"

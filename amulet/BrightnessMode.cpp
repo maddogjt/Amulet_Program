@@ -1,9 +1,6 @@
 #include "BrightnessMode.h"
 
-#define ARDUINO_GENERIC
 #include <FastLED.h>
-#undef ARDUINO_GENERIC
-
 uint8_t g_led_brightness_low = 4;
 uint8_t g_led_brightness_medium = 8;
 uint8_t g_led_brightness_high = 20;
