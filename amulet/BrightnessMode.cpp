@@ -1,18 +1,7 @@
 #include "BrightnessMode.h"
-
+#include "settings.h"
 #include <FastLED.h>
-uint8_t g_led_brightness_low = 4;
-uint8_t g_led_brightness_medium = 8;
-uint8_t g_led_brightness_high = 20;
 
-typedef enum
-{
-	AMULET_BRIGHTNESS_LOW,
-	AMULET_BRIGHTNESS_MEDIUM,
-	AMULET_BRIGHTNESS_HIGH,
-	AMULET_BRIGHTNESS_OFF,
-	AMULET_BRIGHTNESS_MODE_COUNT,
-} amulet_brightness_mode_t;
 
 amulet_brightness_mode_t g_brightness_mode = AMULET_BRIGHTNESS_MEDIUM;
 
@@ -25,13 +14,13 @@ void setBrightnessMode(amulet_brightness_mode_t mode)
 	switch (mode)
 	{
 	case AMULET_BRIGHTNESS_LOW:
-		newBrightness = g_led_brightness_low;
+		newBrightness = globalSettings_.brightness_[0];
 		break;
 	case AMULET_BRIGHTNESS_MEDIUM:
-		newBrightness = g_led_brightness_medium;
+		newBrightness = globalSettings_.brightness_[1] ;
 		break;
 	case AMULET_BRIGHTNESS_HIGH:
-		newBrightness = g_led_brightness_high;
+		newBrightness = globalSettings_.brightness_[2];
 		break;
 	case AMULET_BRIGHTNESS_OFF:
 	case AMULET_BRIGHTNESS_MODE_COUNT:

@@ -76,7 +76,7 @@ void startAsRemoteConfig(const StartupConfig &config)
 	ble_setup(false, true, true);
 
 	// set master brightness control
-	FastLED.setBrightness(g_led_brightness_medium);
+	setBrightnessMode(AMULET_BRIGHTNESS_LOW);
 
 	// Set the initial ambient animation
 	led_set_ambient_animation(config.pattern);
@@ -90,7 +90,7 @@ void startAsAmulet(const StartupConfig &config)
 	ble_setup(true, true);
 
 	// set master brightness control
-	FastLED.setBrightness(g_led_brightness_medium);
+	setBrightnessMode(AMULET_BRIGHTNESS_LOW);
 
 	// Set the initial ambient animation
 	led_set_ambient_animation(config.pattern);
@@ -106,7 +106,7 @@ void startAsBeacon(const StartupConfig &config)
 	digitalWrite(LED_BUILTIN, LED_STATE_ON);
 	digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
 	led_setup();
-	FastLED.setBrightness(g_led_brightness_medium);
+	setBrightnessMode(AMULET_BRIGHTNESS_LOW);
 
 	ble_setup(true, true);
 
@@ -123,7 +123,8 @@ void startAsRune(const StartupConfig &config)
 	// digitalWrite(LED_BUILTIN, LED_STATE_ON);
 	// digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
 	led_setup();
-	FastLED.setBrightness(g_led_brightness_medium);
+	setBrightnessMode(AMULET_BRIGHTNESS_LOW);
+
 
 	ble_setup(true, true);
 
@@ -140,7 +141,7 @@ void startAsPowerAmulet(const StartupConfig &config)
 	ble_setup(true, true);
 
 	// set master brightness control
-	FastLED.setBrightness(g_led_brightness_medium);
+	setBrightnessMode(AMULET_BRIGHTNESS_LOW);
 
 	// Set the initial ambient animation
 	led_set_ambient_animation(config.pattern);
