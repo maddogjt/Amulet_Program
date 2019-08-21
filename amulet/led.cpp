@@ -7,6 +7,7 @@
 #include "globals.h"
 #include "Startup.h"
 #include "settings.h"
+#include "BrightnessMode.h"
 
 FASTLED_USING_NAMESPACE
 
@@ -99,13 +100,18 @@ void led_loop(int step)
 	// Update the LED pattern based on bluetooth signals every 500ms
 	EVERY_N_MILLISECONDS(globalSettings_.animationUpdateTimer_)
 	{
-		if (powerIsAdvertising) {
+		overrideBrightnessMode(false);
+		if (powerIsAdvertising)
+		{
 			run_power_animation();
 		}
 		else if (isAmulet())
 		{
 			signal = current_top_signal();
 			set_animation_from_signal(signal);
+			if (localSettings_.bikeMode_ && signal) {
+				overrideBrightnessMode(true);
+			} 
 		}
 	}
 
@@ -124,7 +130,16 @@ void led_loop(int step)
 
 	for (int i = 0; i < BIKE_LED_COUNT; i++)
 	{
-		bikeModeLeds[i] = gLeds[i % RGB_LED_COUNT];
+		if (!localSettings_.bikeExtend_) {
+			bikeModeLeds[i] = gLeds[i % RGB_LED_COUNT];
+		} else {
+			float pos = ((float)i)/BIKE_LED_COUNT;
+			float orgPos = pos * RGB_LED_COUNT;
+			int low = (int)floor(orgPos);
+			float frac = orgPos-low;
+			bikeModeLeds[i] = gLeds[low].lerp8(gLeds[low+1], frac*255)
+			;
+		}
 	}
 
 	FastLED.show();

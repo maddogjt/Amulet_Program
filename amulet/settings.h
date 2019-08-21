@@ -28,6 +28,7 @@ typedef struct __attribute__((packed))
 	uint8_t brightness_[3];
 
 	bool bikeMode_;
+	bool bikeExtend_;
 } LocalSettings;
 
 void write_global_settings();

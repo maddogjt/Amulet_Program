@@ -107,6 +107,12 @@ void loop()
 				power_off();
 			}
 			FastLED.delay(5);
+
+			// if reset pressed, break loop and go to config
+			resetButton.read();
+			if (resetButton.wasPressed()) {
+				break;
+			}
 		}
 
 		// Turn on blue LED to signal timer tripped and let user should release button

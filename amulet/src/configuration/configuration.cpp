@@ -172,7 +172,14 @@ void bikeModeCycle(bool next, uint8_t unused)
 {
 	localSettings_.bikeMode_ = !localSettings_.bikeMode_;
 	// getAnim().flags_ ^= ANIMATION_FLAG_USE_SIGNAL_POWER;
-	// uart_stream().printf("P: anim rssi V: %d\n", getAnim().flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER);
+	uart_stream().printf("P: bike V: %s\n", localSettings_.bikeMode_ ? "true" : "false");
+}
+
+void bikeExtendCycle(bool next, uint8_t unused)
+{
+	localSettings_.bikeExtend_ = !localSettings_.bikeExtend_;
+	// getAnim().flags_ ^= ANIMATION_FLAG_USE_SIGNAL_POWER;
+	uart_stream().printf("P: bikeExt V: %s\n", localSettings_.bikeExtend_ ? "true" : "false");
 }
 
 void brightCycle(int index, bool next) {
@@ -206,6 +213,7 @@ ParameterCycleList g_ConfigCyclers = {
 	rangeCycle,
 	animRSSICycle,
 	bikeModeCycle,
+	bikeExtendCycle,
 	brightness0Cycle,
 	brightness1Cycle,
 	brightness2Cycle,
@@ -216,7 +224,8 @@ const char *g_ConfigCyclerNames[] = {
 	"decay",
 	"range",
 	"AnimRSSI",
-	"bikeMode",
+	"bike",
+	"bikeExt",
 	"bright0",
 	"bright1",
 	"bright2",

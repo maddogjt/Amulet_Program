@@ -4,10 +4,15 @@
 
 
 amulet_brightness_mode_t g_brightness_mode = AMULET_BRIGHTNESS_MEDIUM;
+bool g_override_brightness_mode = false;
 
 void setBrightnessMode(amulet_brightness_mode_t mode)
 {
 	g_brightness_mode = mode;
+
+	if (g_override_brightness_mode) {
+		mode = AMULET_BRIGHTNESS_HIGH;
+	}
 
 	uint8_t newBrightness = 0;
 	bool newLedPower = true;
@@ -54,4 +59,9 @@ void nextBrightnessMode()
 void refreshBrightness()
 {
 	setBrightnessMode(g_brightness_mode);
+}
+
+void overrideBrightnessMode(bool over) {
+	g_override_brightness_mode = over;
+	refreshBrightness();
 }

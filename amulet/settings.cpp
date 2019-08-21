@@ -7,7 +7,7 @@ using namespace Adafruit_LittleFS_Namespace;
 bool settingsValid_ = false;
 
 constexpr int16_t kGlobalSettingsSig = 0x6113;
-constexpr int16_t kLocalSettingsSig = 0x10D3;
+constexpr int16_t kLocalSettingsSig = 0x10F3;
 
 constexpr char kGlobalSettingsFile[] = "globalSettings";
 constexpr char kLocalSettingsFile[] = "localSettings";
@@ -33,7 +33,9 @@ LocalSettings localSettings_{
 	.configSize_ = sizeof(StartupConfig),
 	.startupConfig_ = {},
 	.brightness_ = {4, 8, 20},
-	.bikeMode_ = false};
+	.bikeMode_ = false,
+	.bikeExtend_ = true,
+};
 
 void settings_init()
 {
