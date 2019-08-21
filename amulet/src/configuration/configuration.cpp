@@ -2,6 +2,7 @@
 #include "../communication/uart.h"
 #include "../animation/animation_modifiers.h"
 #include "../animation/animation_overlay.h"
+#include "../../BrightnessMode.h"
 
 #include <FastLED.h>
 
@@ -14,37 +15,42 @@ static uint8_t g_AnimIdx = 0;
 static uint8_t g_ConfigIdx = 0;
 static bool g_tweaker_is_modifying_animation = true;
 
-static StartupConfig config = defaultConfigForRemoteSetup();
-static anim_config_t ambient = config.pattern;
+StartupConfig& getConfig() {
+	return localSettings_.startupConfig_;
+}
+
+anim_config_t& getAnim() {
+	return getConfig().getConfigModeAnim(getConfig().mode);
+}
 
 void colorCycle(bool next, uint8_t idx)
 {
-	uint8_t hue = (idx == 1) ? ambient.color1_ : ambient.color2_;
+	uint8_t hue = (idx == 1) ? getAnim().color1_ : getAnim().color2_;
 	hue = (hue + 255 + (next ? 16 : -16)) % 255;
 	uart_stream().printf("P: color%d V: %d\n", idx, hue);
 	if (idx == 1)
 	{
-		ambient.color1_ = hue;
+		getAnim().color1_ = hue;
 	}
 	else
 	{
-		ambient.color2_ = hue;
+		getAnim().color2_ = hue;
 	}
 }
 
 void extraCycle(bool next, uint8_t idx)
 {
-	uint8_t &extra = (idx == 7) ? ambient.extra0_ : ambient.extra1_;
+	uint8_t &extra = (idx == 7) ? getAnim().extra0_ : getAnim().extra1_;
 	extra = (extra + 255 + (next ? 16 : -16)) % 255;
 	uart_stream().printf("P: extra[%d] V: %d\n", (idx == 7) ? 0 : 1, extra);
 }
 
 void speedCycle(bool next, uint8_t unused)
 {
-	uint8_t speed = ambient.speed_;
+	uint8_t speed = getAnim().speed_;
 	speed = (speed + 255 + (next ? 16 : -16)) % 255;
 	uart_stream().printf("P: speed V: %d\n", speed);
-	ambient.speed_ = speed;
+	getAnim().speed_ = speed;
 }
 
 
@@ -65,28 +71,28 @@ T cycleEnum(bool next, T value)
 
 void flagCycle(bool next, uint8_t idx)
 {
-	ambient.modifiers_ = cycleEnum(next, ambient.modifiers_);
-	uart_stream().printf("P: flag V: %s\n", animation_modifier_get_name(ambient.modifiers_));
+	getAnim().modifiers_ = cycleEnum(next, getAnim().modifiers_);
+	uart_stream().printf("P: flag V: %s\n", animation_modifier_get_name(getAnim().modifiers_));
 }
 
 void maskCycle(bool next, uint8_t unused)
 {
-	ambient.overlay_ = cycleEnum(next, ambient.overlay_);
-	uart_stream().printf("P: mask V: %s\n", animation_get_name(ambient.overlay_));
+	getAnim().overlay_ = cycleEnum(next, getAnim().overlay_);
+	uart_stream().printf("P: mask V: %s\n", animation_get_name(getAnim().overlay_));
 }
 
 void filterCycle(bool next, uint8_t unused)
 {
-	ambient.filter_ = cycleEnum(next, ambient.filter_);
+	getAnim().filter_ = cycleEnum(next, getAnim().filter_);
 	uart_stream().printf("P: filter V: %s\n", 
-		animation_overlay_get_filter_name(ambient.filter_));
+		animation_overlay_get_filter_name(getAnim().filter_));
 }
 
 void animCycle(bool next, uint8_t unused)
 {
-	ambient.anim_ = cycleEnum(next, ambient.anim_);
+	getAnim().anim_ = cycleEnum(next, getAnim().anim_);
 	uart_stream().printf("P:anim V:%.10s\n", 
-		animation_get_name(ambient.anim_));
+		animation_get_name(getAnim().anim_));
 }
 
 void modeCycle(bool next, uint8_t unused)
@@ -95,7 +101,7 @@ void modeCycle(bool next, uint8_t unused)
 	const amulet_mode_t modes[] = {AMULET_MODE_AMULET, AMULET_MODE_BEACON, AMULET_MODE_RUNE, AMULET_MODE_BEACON_POWER_AMULET};
 	for (int i = 0; i < 4; i++)
 	{
-		if (modes[i] == config.mode)
+		if (modes[i] == getConfig().mode)
 		{
 			mode_idx = i;
 			break;
@@ -104,6 +110,7 @@ void modeCycle(bool next, uint8_t unused)
 
 	mode_idx = (mode_idx + 4 + (next ? 1 : -1)) % 4;
 	uart_stream().printf("P: mode V: %s\n", get_config_mode_name(modes[mode_idx]));
+	auto &config = getConfig();
 	config.mode = modes[mode_idx];
 	if (config.mode == AMULET_MODE_BEACON)
 	{
@@ -133,32 +140,62 @@ void modeCycle(bool next, uint8_t unused)
 
 void powerCycle(bool next, uint8_t unused)
 {
-	uint8_t power = config.ad.power;
+	uint8_t power = getConfig().ad.power;
 	power = (power + 255 + (next ? 16 : -16)) % 255;
 	uart_stream().printf("P: power V: %d\n", power);
-	config.ad.power = power;
+	getConfig().ad.power = power;
 }
 
 void decayCycle(bool next, uint8_t unused)
 {
-	uint8_t decay = config.ad.decay;
+	uint8_t decay = getConfig().ad.decay;
 	decay = (decay + 255 + (next ? 16 : -16)) % 255;
 	uart_stream().printf("P: decay V: %4.2f%%\n", (float)decay * 100.f / 255.f);
-	config.ad.decay = decay;
+	getConfig().ad.decay = decay;
 }
 
 void rangeCycle(bool next, uint8_t unused)
 {
-	int8_t range = config.ad.range;
+	int8_t range = getConfig().ad.range;
 	range = max(-120, min(0, range + (next ? -2 : 2)));
 	uart_stream().printf("P: range V: %d\n", range);
-	config.ad.range = range;
+	getConfig().ad.range = range;
 }
 
 void animRSSICycle(bool next, uint8_t unused)
 {
-	// ambient.flags_ ^= ANIMATION_FLAG_USE_SIGNAL_POWER;
-	// uart_stream().printf("P: anim rssi V: %d\n", ambient.flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER);
+	// getAnim().flags_ ^= ANIMATION_FLAG_USE_SIGNAL_POWER;
+	// uart_stream().printf("P: anim rssi V: %d\n", getAnim().flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER);
+}
+
+void bikeModeCycle(bool next, uint8_t unused)
+{
+	localSettings_.bikeMode_ = !localSettings_.bikeMode_;
+	// getAnim().flags_ ^= ANIMATION_FLAG_USE_SIGNAL_POWER;
+	// uart_stream().printf("P: anim rssi V: %d\n", getAnim().flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER);
+}
+
+void brightCycle(int index, bool next) {
+	int increment = (next ? 4 : -4);
+	localSettings_.brightness_[index] += increment;
+	// safety check
+	localSettings_.brightness_[index] = localSettings_.brightness_[index] % 128;
+	uart_stream().printf("P: b%d V: %d\n", index, localSettings_.brightness_[index]);
+	refreshBrightness();
+}
+
+void brightness0Cycle(bool next, uint8_t unused) {
+	brightCycle(0, next);
+}
+
+void brightness1Cycle(bool next, uint8_t unused)
+{
+	brightCycle(1, next);
+}
+
+void brightness2Cycle(bool next, uint8_t unused)
+{
+	brightCycle(2, next);
 }
 
 typedef void (*ParameterCycleList[])(bool next, uint8_t idx);
@@ -168,6 +205,10 @@ ParameterCycleList g_ConfigCyclers = {
 	decayCycle,
 	rangeCycle,
 	animRSSICycle,
+	bikeModeCycle,
+	brightness0Cycle,
+	brightness1Cycle,
+	brightness2Cycle,
 };
 const char *g_ConfigCyclerNames[] = {
 	"mode",
@@ -175,6 +216,10 @@ const char *g_ConfigCyclerNames[] = {
 	"decay",
 	"range",
 	"AnimRSSI",
+	"bikeMode",
+	"bright0",
+	"bright1",
+	"bright2",
 };
 
 ParameterCycleList g_AnimCyclers = {
@@ -190,17 +235,15 @@ ParameterCycleList g_AnimCyclers = {
 };
 const char *g_AnimCyclerNames[] = {
 	"animation",
+	"speed",
 	"color 1",
 	"color 2",
-	"speed",
 	"flag",
 	"mask",
 	"filter",
 	"extra 1",
 	"extra 2",
 };
-
-
 
 void configuration_handle_command(const char *str, size_t len)
 {
@@ -231,10 +274,10 @@ void configuration_handle_command(const char *str, size_t len)
 
 		CHSV color = rgb2hsv_approximate(CRGB(red, green, blue));
 
-		ambient.color1_ = color.hue;
+		getAnim().color1_ = color.hue;
 
 		// Set the ambient animation
-		led_set_ambient_animation(ambient);
+		led_set_ambient_animation(getAnim());
 		return;
 	}
 
@@ -290,11 +333,11 @@ void configuration_handle_command(const char *str, size_t len)
 		{
 			if (g_tweaker_is_modifying_animation)
 			{
-				uart_stream().printf("Anim: %s\n", animation_get_name(ambient.anim_));
+				uart_stream().printf("Anim: %s\n", animation_get_name(getAnim().anim_));
 			}
 			else
 			{
-				uart_stream().printf("Conf: %s\n", get_config_mode_name(config.mode));
+				uart_stream().printf("Conf: %s\n", get_config_mode_name(getConfig().mode));
 			}
 		}
 		else if (button == '2') // The Info Details Button
@@ -303,7 +346,7 @@ void configuration_handle_command(const char *str, size_t len)
 			digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 			if (g_tweaker_is_modifying_animation)
 			{
-				uart_stream().printf("mask: %d filter: %d\n", ambient.overlay_, ambient.filter_);
+				uart_stream().printf("mask: %d filter: %d\n", getAnim().overlay_, getAnim().filter_);
 			}
 			else
 			{
@@ -326,16 +369,16 @@ void configuration_handle_command(const char *str, size_t len)
 		else if (button == '4') // Commit the changes button (after system reset)
 		{
 			uart_stream().printf("Saving Config\n");
-			config.pattern = ambient;
+			//config.pattern = ambient;
 
 			// char buf[120];
 			// serializeAnimPattern(buf, 120, config.pattern); // Serializing just for the Serial log
-			localSettings_.startupConfig_ = config;
-			if (config.mode == AMULET_MODE_BEACON_POWER_AMULET)
-			{
-				// Save this separate so its never overwritten (such as ambient patterns)
-				localSettings_.powerPattern_ = config.pattern;
-			}
+			// localSettings_.startupConfig_ = config;
+			// if (config.mode == AMULET_MODE_BEACON_POWER_AMULET)
+			// {
+			// 	// Save this separate so its never overwritten (such as ambient patterns)
+			// 	localSettings_.startuppowerPattern_ = config.pattern;
+			// }
 
 			write_local_settings();
 
@@ -345,7 +388,8 @@ void configuration_handle_command(const char *str, size_t len)
 		}
 
 		// Set the ambient animation
-		led_set_ambient_animation(ambient);
+		auto &anim = localSettings_.startupConfig_.getConfigModeAnim(localSettings_.startupConfig_.mode);
+		led_set_ambient_animation(anim);
 		return;
 	}
 

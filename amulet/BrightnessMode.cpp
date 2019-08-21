@@ -14,13 +14,13 @@ void setBrightnessMode(amulet_brightness_mode_t mode)
 	switch (mode)
 	{
 	case AMULET_BRIGHTNESS_LOW:
-		newBrightness = globalSettings_.brightness_[0];
+		newBrightness = localSettings_.brightness_[0];
 		break;
 	case AMULET_BRIGHTNESS_MEDIUM:
-		newBrightness = globalSettings_.brightness_[1] ;
+		newBrightness = localSettings_.brightness_[1];
 		break;
 	case AMULET_BRIGHTNESS_HIGH:
-		newBrightness = globalSettings_.brightness_[2];
+		newBrightness = localSettings_.brightness_[2];
 		break;
 	case AMULET_BRIGHTNESS_OFF:
 	case AMULET_BRIGHTNESS_MODE_COUNT:
@@ -49,4 +49,9 @@ void setBrightnessMode(amulet_brightness_mode_t mode)
 void nextBrightnessMode()
 {
 	setBrightnessMode((amulet_brightness_mode_t)(((int)g_brightness_mode + 1) % (int)AMULET_BRIGHTNESS_MODE_COUNT));
+}
+
+void refreshBrightness()
+{
+	setBrightnessMode(g_brightness_mode);
 }

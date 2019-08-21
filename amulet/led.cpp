@@ -11,6 +11,7 @@
 FASTLED_USING_NAMESPACE
 
 #define DATA_PIN PIN_RGB_LEDS
+#define BIKE_MODE_PIN 28
 #define LED_TYPE WS2812B
 #define COLOR_ORDER GRB
 #define BRIGHTNESS 8
@@ -36,14 +37,14 @@ void set_animation_from_signal(Signal *s)
 		{
 			// It is our current pattern, but it is not our ambient pattern,
 			// Maybe it should become our ambient pattern
-			if (s->_scan.signal_type == (uint8_t)AdvertisementType::Runic &&
-				s->_seenCount >= globalSettings_.runeSeenCountThreshold_)
-			{
-				LOG_LV1("LED", "Setting Ambient Animation from rune");
-				localSettings_.startupConfig_.pattern = pattern;
-				write_local_settings();
-				led_set_ambient_animation(pattern);
-			}
+			// if (s->_scan.signal_type == (uint8_t)AdvertisementType::Runic &&
+			// 	s->_seenCount >= globalSettings_.runeSeenCountThreshold_)
+			// {
+			// 	LOG_LV1("LED", "Setting Ambient Animation from rune");
+			// 	localSettings_.startupConfig_.ambientPattern_ = pattern;
+			// 	write_local_settings();
+			// 	led_set_ambient_animation(pattern);
+			// }
 		}
 	}
 	else
@@ -56,9 +57,9 @@ void set_animation_from_signal(Signal *s)
 }
 
 void run_power_animation() {
-	if (!matches_current_animation(localSettings_.powerPattern_))
+	if (!matches_current_animation(localSettings_.startupConfig_.powerPattern_))
 	{
-		start_animation(localSettings_.powerPattern_);
+		start_animation(localSettings_.startupConfig_.powerPattern_);
 	}
 }
 
@@ -74,10 +75,18 @@ anim_config_t led_get_ambient_animation()
 }
 
 extern CRGB gLeds[RGB_LED_COUNT];
+#define BIKE_LED_COUNT 60
+CRGB bikeModeLeds[BIKE_LED_COUNT];
 
 void led_setup()
 {
-	FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(gLeds, RGB_LED_COUNT).setCorrection(TypicalLEDStrip);
+	//localSettings_.bikeMode_  = true;
+	//if (localSettings_.bikeMode_)
+	{
+	//} else { 
+		FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(gLeds, RGB_LED_COUNT).setCorrection(TypicalLEDStrip);
+	}
+	FastLED.addLeds<LED_TYPE, BIKE_MODE_PIN, COLOR_ORDER>(bikeModeLeds, BIKE_LED_COUNT).setCorrection(TypicalLEDStrip);
 }
 
 extern bool powerIsAdvertising;
@@ -85,6 +94,7 @@ void run_power_animation();
 
 void led_loop(int step)
 {
+	localSettings_.bikeMode_  = true;
 	Signal *signal = nullptr;
 	// Update the LED pattern based on bluetooth signals every 500ms
 	EVERY_N_MILLISECONDS(globalSettings_.animationUpdateTimer_)
@@ -109,5 +119,13 @@ void led_loop(int step)
 
 	// Step the currentAnimation
 	step_animation(signal);
+
+//	localSettings_.bikeMode_ = true;
+
+	for (int i = 0; i < BIKE_LED_COUNT; i++)
+	{
+		bikeModeLeds[i] = gLeds[i % RGB_LED_COUNT];
+	}
+
 	FastLED.show();
 }

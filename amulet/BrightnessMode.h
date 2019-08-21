@@ -11,4 +11,5 @@ typedef enum
 } amulet_brightness_mode_t;
 
 void setBrightnessMode(amulet_brightness_mode_t mode);
- void nextBrightnessMode();
+void nextBrightnessMode();
+void refreshBrightness();

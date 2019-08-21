@@ -7,7 +7,7 @@ using namespace Adafruit_LittleFS_Namespace;
 bool settingsValid_ = false;
 
 constexpr int16_t kGlobalSettingsSig = 0x6113;
-constexpr int16_t kLocalSettingsSig = 0x10D2;
+constexpr int16_t kLocalSettingsSig = 0x10D3;
 
 constexpr char kGlobalSettingsFile[] = "globalSettings";
 constexpr char kLocalSettingsFile[] = "localSettings";
@@ -15,7 +15,7 @@ constexpr char kLocalSettingsFile[] = "localSettings";
 GlobalSettings globalSettings_{
 	.signature_ = kGlobalSettingsSig,
 	.version_ = 0,
-	.brightness_ = {4, 8, 20},
+	.brightnessOld_ = {4, 8, 20},
 	.txPower_ = 4,
 	.runeSeenCountThreshold_ = 20,
 	.ambientPowerThreshold_ = 10,
@@ -23,8 +23,8 @@ GlobalSettings globalSettings_{
 
 	.pad_ = {}};
 
-constexpr anim_config_t kDefaultPattern{
-	.anim_ = Anim::AnimPrism
+anim_config_t kDefaultPattern{
+	.anim_ = Anim::AnimPrism,
 };
 
 LocalSettings localSettings_{
@@ -32,12 +32,18 @@ LocalSettings localSettings_{
 	.version_ = 0,
 	.configSize_ = sizeof(StartupConfig),
 	.startupConfig_ = {},
-	.powerPattern_ = {}};
+	.brightness_ = {4, 8, 20},
+	.bikeMode_ = false};
 
 void settings_init()
 {
+	kDefaultPattern.speed_ = 16;
+
 	localSettings_.startupConfig_.mode = AMULET_MODE_FIRSTBOOT;
-	localSettings_.startupConfig_.pattern = kDefaultPattern;
+	localSettings_.startupConfig_.ambientPattern_ = kDefaultPattern;
+	localSettings_.startupConfig_.beaconPattern_ = kDefaultPattern;
+	localSettings_.startupConfig_.powerPattern_ = kDefaultPattern;
+	localSettings_.startupConfig_.runePattern_ = kDefaultPattern;
 	localSettings_.startupConfig_.ad = {
 		.power = 100,
 		.decay = 128,
@@ -83,7 +89,7 @@ void settings_init()
 				{
 					localSettings_ = tempSettings;
 					Serial.printf("Read local settings v%d\n", localSettings_.version_);
-					dump_animation_to_console(localSettings_.startupConfig_.pattern);
+					// dump_animation_to_console(localSettings_.startupConfig_.pattern);
 				}
 				else
 				{
@@ -131,6 +137,6 @@ void write_local_settings()
 		size_t r = file.write((uint8_t *)&localSettings_, sizeof(localSettings_));
 		Serial.printf("write %d\n", r);
 		file.close();
-		dump_animation_to_console(localSettings_.startupConfig_.pattern);
+		// dump_animation_to_console(localSettings_.startupConfig_.pattern);
 	}
 }

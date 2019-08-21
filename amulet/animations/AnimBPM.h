@@ -22,6 +22,6 @@ public:
 		{ //9948
 			leds[i] = ColorFromPalette(palette, hue + (i * 2), beat - hue + (i * 10));
 		}
-		hue += params_.extra0_ / 16;
+		hue += params_.speed_ / 16;
 	}
 };

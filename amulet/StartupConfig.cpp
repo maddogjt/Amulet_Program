@@ -6,9 +6,6 @@ const char *get_config_mode_name(amulet_mode_t mode)
 {
 	switch (mode)
 	{
-	case AMULET_MODE_CONFIG:
-		return "config";
-		break;
 	case AMULET_MODE_AMULET:
 		return "amulet";
 		break;
@@ -26,15 +23,4 @@ const char *get_config_mode_name(amulet_mode_t mode)
 		break;
 	}
 	return "err";
-}
-
-StartupConfig defaultConfigForRemoteSetup()
-{
-	StartupConfig c{};
-	c.mode = AMULET_MODE_BEACON;
-	c.ad.power = 80;
-	c.ad.decay = 128;
-	c.ad.range = -80;
-	c.pattern.anim_ = Anim::AnimPrism;
-	return c;
 }

@@ -8,7 +8,7 @@ typedef struct __attribute__((packed))
 {
 	int16_t signature_;
 	uint8_t version_;
-	uint8_t brightness_[3];
+	uint8_t brightnessOld_[3];
 	int8_t txPower_;
 	int8_t runeSeenCountThreshold_; // how long do we have to hang around a rune for its pattern to stick
 	int8_t ambientPowerThreshold_;  // If top signal is lower power than this, show ambient
@@ -25,7 +25,9 @@ typedef struct __attribute__((packed))
 	uint8_t version_;
 	size_t configSize_;
 	StartupConfig startupConfig_;
-	anim_config_t powerPattern_;
+	uint8_t brightness_[3];
+
+	bool bikeMode_;
 } LocalSettings;
 
 void write_global_settings();

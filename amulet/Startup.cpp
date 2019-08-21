@@ -22,19 +22,21 @@ bool isAmulet()
 	return gMode == AMULET_MODE_AMULET || isPowerAmulet();
 }
 
-void startAsRemoteConfig(const StartupConfig &config);
+void startAsRemoteConfig(StartupConfig &config);
 void startAsAmulet(const StartupConfig &config);
 void startAsBeacon(const StartupConfig &config);
 void startAsRune(const StartupConfig &config);
 void startAsPowerAmulet(const StartupConfig &config);
 
-void startWithConfig(const StartupConfig &config)
+void startWithConfig(StartupConfig &config)
 {
+	if (config.enterConfigMode_) {
+		startAsRemoteConfig(config);
+		return;
+	}
+
 	switch (config.mode)
 	{
-	case AMULET_MODE_CONFIG:
-		startAsRemoteConfig(config);
-		break;
 	case AMULET_MODE_AMULET:
 		startAsAmulet(config);
 		break;
@@ -65,10 +67,10 @@ void start()
 	startWithConfig(localSettings_.startupConfig_);
 }
 
-void startAsRemoteConfig(const StartupConfig &config)
+void startAsRemoteConfig(StartupConfig &config)
 {
 	Serial.println("Start config mode");
-	gMode = AMULET_MODE_CONFIG;
+	gMode = config.mode;
 
 	// Turn the light hard on to indicate config mode
 	digitalWrite(LED_BUILTIN, LED_STATE_ON);
@@ -79,7 +81,7 @@ void startAsRemoteConfig(const StartupConfig &config)
 	setBrightnessMode(AMULET_BRIGHTNESS_LOW);
 
 	// Set the initial ambient animation
-	led_set_ambient_animation(config.pattern);
+	led_set_ambient_animation(config.getConfigModeAnim(config.mode));
 }
 
 void startAsAmulet(const StartupConfig &config)
@@ -93,8 +95,8 @@ void startAsAmulet(const StartupConfig &config)
 	setBrightnessMode(AMULET_BRIGHTNESS_LOW);
 
 	// Set the initial ambient animation
-	led_set_ambient_animation(config.pattern);
-	advertising_start(AdvertisementType::Amulet, config.ad, (uint8_t *)&config.pattern, sizeof(config.pattern));
+	led_set_ambient_animation(config.ambientPattern_);
+	advertising_start(AdvertisementType::Amulet, config.ad, (uint8_t *)&config.ambientPattern_, sizeof(config.ambientPattern_));
 }
 
 void startAsBeacon(const StartupConfig &config)
@@ -110,8 +112,8 @@ void startAsBeacon(const StartupConfig &config)
 
 	ble_setup(true, true);
 
-	led_set_ambient_animation(config.pattern);
-	advertising_start(AdvertisementType::Beacon, config.ad, (uint8_t *)&config.pattern, sizeof(config.pattern));
+	led_set_ambient_animation(config.beaconPattern_);
+	advertising_start(AdvertisementType::Beacon, config.ad, (uint8_t *)&config.beaconPattern_, sizeof(config.beaconPattern_));
 }
 
 void startAsRune(const StartupConfig &config)
@@ -128,8 +130,8 @@ void startAsRune(const StartupConfig &config)
 
 	ble_setup(true, true);
 
-	led_set_ambient_animation(config.pattern);
-	advertising_start(AdvertisementType::Runic, config.ad, (uint8_t *)&config.pattern, sizeof(config.pattern));
+	led_set_ambient_animation(config.runePattern_);
+	advertising_start(AdvertisementType::Runic, config.ad, (uint8_t *)&config.runePattern_, sizeof(config.runePattern_));
 }
 
 void startAsPowerAmulet(const StartupConfig &config)
@@ -144,6 +146,6 @@ void startAsPowerAmulet(const StartupConfig &config)
 	setBrightnessMode(AMULET_BRIGHTNESS_LOW);
 
 	// Set the initial ambient animation
-	led_set_ambient_animation(config.pattern);
-	advertising_start(AdvertisementType::Amulet, config.ad, (uint8_t *)&config.pattern, sizeof(config.pattern));
+	led_set_ambient_animation(config.ambientPattern_);
+	advertising_start(AdvertisementType::Amulet, config.ad, (uint8_t *)&config.ambientPattern_, sizeof(config.ambientPattern_));
 }

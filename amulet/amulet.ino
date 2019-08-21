@@ -118,13 +118,13 @@ void loop()
 		}
 
 		// Didn't relase mode, guess it's time to go to config mode (or reset to amulet mode if already in config)
-		if (localSettings_.startupConfig_.mode == AMULET_MODE_CONFIG)
+		if (localSettings_.startupConfig_.enterConfigMode_)
 		{
-			localSettings_.startupConfig_.mode = AMULET_MODE_RUNE;
+			localSettings_.startupConfig_.enterConfigMode_ = false;
 		}
 		else
 		{
-			localSettings_.startupConfig_.mode = AMULET_MODE_CONFIG;
+			localSettings_.startupConfig_.enterConfigMode_ = true;
 		}
 
 		write_local_settings();
