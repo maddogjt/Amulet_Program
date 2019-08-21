@@ -19,32 +19,32 @@ static anim_config_t ambient = config.pattern;
 
 void colorCycle(bool next, uint8_t idx)
 {
-	uint8_t hue = (idx == 1) ? ambient.params.color1_ : ambient.params.color2_;
+	uint8_t hue = (idx == 1) ? ambient.color1_ : ambient.color2_;
 	hue = (hue + 255 + (next ? 16 : -16)) % 255;
 	uart_stream().printf("P: color%d V: %d\n", idx, hue);
 	if (idx == 1)
 	{
-		ambient.params.color1_ = hue;
+		ambient.color1_ = hue;
 	}
 	else
 	{
-		ambient.params.color2_ = hue;
+		ambient.color2_ = hue;
 	}
 }
 
 void extraCycle(bool next, uint8_t idx)
 {
-	uint8_t &extra = (idx == 7) ? ambient.params.extra0_ : ambient.params.extra1_;
+	uint8_t &extra = (idx == 7) ? ambient.extra0_ : ambient.extra1_;
 	extra = (extra + 255 + (next ? 16 : -16)) % 255;
 	uart_stream().printf("P: extra[%d] V: %d\n", (idx == 7) ? 0 : 1, extra);
 }
 
 void speedCycle(bool next, uint8_t unused)
 {
-	uint8_t speed = ambient.params.speed_;
+	uint8_t speed = ambient.speed_;
 	speed = (speed + 255 + (next ? 16 : -16)) % 255;
 	uart_stream().printf("P: speed V: %d\n", speed);
-	ambient.params.speed_ = speed;
+	ambient.speed_ = speed;
 }
 
 
@@ -65,34 +65,28 @@ T cycleEnum(bool next, T value)
 
 void flagCycle(bool next, uint8_t idx)
 {
-	AnimationModifier modifier = (AnimationModifier)ambient.params.flags_;
-	modifier = cycleEnum(next, modifier);	
-	uart_stream().printf("P: flag V: %s\n", animation_modifier_get_name(modifier));
-	ambient.params.flags_ = (uint8_t)modifier;
+	ambient.modifiers_ = cycleEnum(next, ambient.modifiers_);
+	uart_stream().printf("P: flag V: %s\n", animation_modifier_get_name(ambient.modifiers_));
 }
 
 void maskCycle(bool next, uint8_t unused)
 {
-	Anim mask = (Anim)ambient.params.mask_;
-	mask = cycleEnum(next, mask);
-	const char *name = animation_get_name(mask);
-	uart_stream().printf("P: mask V: %s\n", name);
-	ambient.params.mask_ = (uint8_t)mask;
+	ambient.overlay_ = cycleEnum(next, ambient.overlay_);
+	uart_stream().printf("P: mask V: %s\n", animation_get_name(ambient.overlay_));
 }
 
 void filterCycle(bool next, uint8_t unused)
 {
-	OverlayFilter filter = (OverlayFilter)ambient.params.filter_;
-	filter = cycleEnum(next, filter);
-	const char *name = animation_overlay_get_filter_name(filter);
-	uart_stream().printf("P: filter V: %s\n", name);
-	ambient.params.filter_ = (uint8_t)filter;
+	ambient.filter_ = cycleEnum(next, ambient.filter_);
+	uart_stream().printf("P: filter V: %s\n", 
+		animation_overlay_get_filter_name(ambient.filter_));
 }
 
 void animCycle(bool next, uint8_t unused)
 {
-	ambient.name = cycleEnum(next, ambient.name);
-	uart_stream().printf("P:anim V:%.10s\n", animation_get_name(ambient.name));
+	ambient.anim_ = cycleEnum(next, ambient.anim_);
+	uart_stream().printf("P:anim V:%.10s\n", 
+		animation_get_name(ambient.anim_));
 }
 
 void modeCycle(bool next, uint8_t unused)
@@ -163,8 +157,8 @@ void rangeCycle(bool next, uint8_t unused)
 
 void animRSSICycle(bool next, uint8_t unused)
 {
-	ambient.params.flags_ ^= ANIMATION_FLAG_USE_SIGNAL_POWER;
-	uart_stream().printf("P: anim rssi V: %d\n", ambient.params.flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER);
+	// ambient.flags_ ^= ANIMATION_FLAG_USE_SIGNAL_POWER;
+	// uart_stream().printf("P: anim rssi V: %d\n", ambient.flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER);
 }
 
 typedef void (*ParameterCycleList[])(bool next, uint8_t idx);
@@ -237,7 +231,7 @@ void configuration_handle_command(const char *str, size_t len)
 
 		CHSV color = rgb2hsv_approximate(CRGB(red, green, blue));
 
-		ambient.params.color1_ = color.hue;
+		ambient.color1_ = color.hue;
 
 		// Set the ambient animation
 		led_set_ambient_animation(ambient);
@@ -296,7 +290,7 @@ void configuration_handle_command(const char *str, size_t len)
 		{
 			if (g_tweaker_is_modifying_animation)
 			{
-				uart_stream().printf("Anim: %s\n", animation_get_name(ambient.name));
+				uart_stream().printf("Anim: %s\n", animation_get_name(ambient.anim_));
 			}
 			else
 			{
@@ -309,7 +303,7 @@ void configuration_handle_command(const char *str, size_t len)
 			digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 			if (g_tweaker_is_modifying_animation)
 			{
-				uart_stream().printf("mask: %d filter: %d\n", ambient.params.mask_, ambient.params.filter_);
+				uart_stream().printf("mask: %d filter: %d\n", ambient.overlay_, ambient.filter_);
 			}
 			else
 			{

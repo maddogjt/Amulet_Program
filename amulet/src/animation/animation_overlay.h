@@ -1,8 +1,7 @@
 #pragma once
 
 #include <cstdint>
-
-#include "../../animations.h"
+#include "animation_list.h"
 
 struct CRGB;
 

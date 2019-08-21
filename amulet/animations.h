@@ -1,29 +1,13 @@
 #pragma once
 
+#include "src/animation/animation_config.h"
+
 #include <FastLED.h>
 #include "Animation.h"
 #include "signal.h"
 
 FASTLED_USING_NAMESPACE
 
-enum class Anim
-{
-	Unknown = -1,
-#define DEFINE_ANIM(name) name,
-#include "AnimList.hpp"
-#undef DEFINE_ANIM
-	Count,
-};
-
-struct anim_config_t
-{
-	Anim name;
-	animParams params;
-	bool operator==(const anim_config_t &p) const
-	{
-		return name == p.name && params == p.params;
-	}
-};
 
 void dump_animation_to_console(const anim_config_t &anim);
 
@@ -33,14 +17,6 @@ bool matches_current_animation(const anim_config_t &pattern);
 void step_animation(Signal *topSignal);
 
 const char *animation_get_name(Anim anim);
-
-// Functions that should be adapted to animations or removed
-// void fold();
-// void mirror_invert();
-// void confetti();
-// void sinelon();
-// void mirror();
-// void loop_leds();
 
 // helper func for rssi based anims
 inline float normalizeRSSI(int8_t rssi)

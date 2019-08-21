@@ -11,7 +11,7 @@
 CRGB gLeds[RGB_LED_COUNT];
 
 Animation *currentAnim = nullptr;
-Anim currentAnimName = Anim::Unknown;
+Anim currentAnimName = (Anim)(0xFF);
 
 int frame_counter = 0;
 
@@ -34,9 +34,9 @@ const char *animation_get_name(Anim anim)
 void dump_animation_to_console(const anim_config_t &anim)
 {
 	Serial.printf("A: %d c1: %d c2: %d\n",
-				  anim.name,
-				  anim.params.color1_,
-				  anim.params.color2_);
+				  anim.anim_,
+				  anim.color1_,
+				  anim.color2_);
 }
 
 void start_animation(const anim_config_t &pattern)
@@ -47,7 +47,7 @@ void start_animation(const anim_config_t &pattern)
 		currentAnim = nullptr;
 	}
 
-	switch (pattern.name)
+	switch (pattern.anim_)
 	{
 #define DEFINE_ANIM(animName)             \
 	case Anim::animName:                  \
@@ -65,12 +65,12 @@ void start_animation(const anim_config_t &pattern)
 
 	if (currentAnim != nullptr)
 	{
-		currentAnim->setParams(pattern.params);
+		currentAnim->setParams(pattern);
 
-		animation_overlay_set((Anim)currentAnim->params_.mask_, (OverlayFilter)currentAnim->params_.filter_);
+		animation_overlay_set(currentAnim->params_.overlay_, currentAnim->params_.filter_);
 
-		LOG_LV1("ANIM", "New Current Anim %s", animation_get_name(currentAnimName));
-		LOG_LV1("ANIM", "  F: %d M %d F: %d", currentAnim->params_.flags_, currentAnim->params_.mask_, currentAnim->params_.filter_);
+		LOG_LV1("ANIM", "New Current Anim %s", animation_get_name(currentAnim->params_.anim_));
+		LOG_LV1("ANIM", "  F: %d M %d F: %d", currentAnim->params_.modifiers_, currentAnim->params_.overlay_, currentAnim->params_.filter_);
 
 		frame_counter = 0;
 		currentAnim->init();
@@ -92,23 +92,23 @@ void step_animation(Signal *topSignal)
 			gLeds[i] = currentAnim->leds[i];
 		}
 
-		if (currentAnim->params_.flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER)
-		{
-			float signalPower = 1.f;
-			if (currentAnim->params_.flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER && topSignal != nullptr)
-			{
-				signalPower = normalizeRSSI(topSignal->_scan.rssi);
-			}
-			animation_overlay_apply(gLeds, RGB_LED_COUNT, frame_counter, (int)(signalPower * 255));
-		}
-		else
+		// if (currentAnim->params_.flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER)
+		// {
+		// 	float signalPower = 1.f;
+		// 	if (currentAnim->params_.flags_ & ANIMATION_FLAG_USE_SIGNAL_POWER && topSignal != nullptr)
+		// 	{
+		// 		signalPower = normalizeRSSI(topSignal->_scan.rssi);
+		// 	}
+		// 	animation_overlay_apply(gLeds, RGB_LED_COUNT, frame_counter, (int)(signalPower * 255));
+		// }
+		// else
 		{
 			animation_overlay_apply(gLeds, RGB_LED_COUNT, frame_counter);
 		}
 
-		AnimationModifier modifier = (AnimationModifier)(currentAnim->params_.flags_ & 0x0F);
+		//AnimationModifier modifier = (AnimationModifier)(currentAnim->params_.flags_ & 0x0F);
 
-		animation_modifier_apply(modifier, gLeds, RGB_LED_COUNT);
+		animation_modifier_apply(currentAnim->params_.modifiers_, gLeds, RGB_LED_COUNT);
 	}
 	else
 	{
@@ -116,12 +116,11 @@ void step_animation(Signal *topSignal)
 	}
 }
 
-bool matches_current_animation(const anim_config_t &pattern)
+bool matches_current_animation(const anim_config_t &config)
 {
 	if (currentAnim == nullptr)
 	{
 		return false;
 	}
-	return currentAnimName == pattern.name &&
-		   currentAnim->params_ == pattern.params;
+	return currentAnim->params_ == config;
 }

@@ -35,6 +35,6 @@ StartupConfig defaultConfigForRemoteSetup()
 	c.ad.power = 80;
 	c.ad.decay = 128;
 	c.ad.range = -80;
-	c.pattern.name = Anim::AnimPrism;
+	c.pattern.anim_ = Anim::AnimPrism;
 	return c;
 }

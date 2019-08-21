@@ -24,8 +24,8 @@ GlobalSettings globalSettings_{
 	.pad_ = {}};
 
 constexpr anim_config_t kDefaultPattern{
-	.name = Anim::AnimPrism,
-	.params = {}};
+	.anim_ = Anim::AnimPrism
+};
 
 LocalSettings localSettings_{
 	.signature_ = kLocalSettingsSig,
