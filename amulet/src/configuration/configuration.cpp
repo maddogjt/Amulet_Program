@@ -218,6 +218,8 @@ ParameterCycleList g_ConfigCyclers = {
 	brightness1Cycle,
 	brightness2Cycle,
 };
+constexpr auto kConfigCount = sizeof(g_ConfigCyclers) / sizeof(g_ConfigCyclers[0]);
+
 const char *g_ConfigCyclerNames[] = {
 	"mode",
 	"power",
@@ -241,7 +243,10 @@ ParameterCycleList g_AnimCyclers = {
 	filterCycle,
 	extraCycle,
 	extraCycle,
+
 };
+constexpr auto kAnimCount = sizeof(g_AnimCyclers) / sizeof(g_AnimCyclers[0]);
+
 const char *g_AnimCyclerNames[] = {
 	"animation",
 	"speed",
@@ -253,6 +258,7 @@ const char *g_AnimCyclerNames[] = {
 	"extra 1",
 	"extra 2",
 };
+
 
 void configuration_handle_command(const char *str, size_t len)
 {
@@ -305,12 +311,12 @@ void configuration_handle_command(const char *str, size_t len)
 		{
 			if (g_tweaker_is_modifying_animation)
 			{
-				g_AnimIdx = (g_AnimIdx + 8) % 9;
+				g_AnimIdx = min(g_AnimIdx  -1, kAnimCount-1);
 				uart_stream().printf("P: %s\n", g_AnimCyclerNames[g_AnimIdx]);
 			}
 			else
 			{
-				g_ConfigIdx = (g_ConfigIdx + 4) % 5;
+				g_ConfigIdx = min(g_ConfigIdx -1, kConfigCount-1);
 				uart_stream().printf("P: %s\n", g_ConfigCyclerNames[g_ConfigIdx]);
 			}
 		}
@@ -318,12 +324,12 @@ void configuration_handle_command(const char *str, size_t len)
 		{
 			if (g_tweaker_is_modifying_animation)
 			{
-				g_AnimIdx = (g_AnimIdx + 1) % 9;
+				g_AnimIdx = (g_AnimIdx + 1) % kAnimCount;
 				uart_stream().printf("P: %s\n", g_AnimCyclerNames[g_AnimIdx]);
 			}
 			else
 			{
-				g_ConfigIdx = (g_ConfigIdx + 1) % 5;
+				g_ConfigIdx = (g_ConfigIdx + 1) % kConfigCount;
 				uart_stream().printf("P: %s\n", g_ConfigCyclerNames[g_ConfigIdx]);
 			}
 		}

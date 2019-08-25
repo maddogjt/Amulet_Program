@@ -43,6 +43,7 @@ void setBrightnessMode(amulet_brightness_mode_t mode)
 	else
 	{
 		LOG_LV1("BRIT", "Turning off LED power rail (mode %d)", mode);
+		FastLED.setBrightness(newBrightness);
 		// Turn off the LED power rail
 		digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
 

@@ -106,9 +106,8 @@ void startAsBeacon(const StartupConfig &config)
 
 	// Final config should be no LEDs but for now I'm turning on the LEDs and LED_BUILTIN
 	digitalWrite(LED_BUILTIN, LED_STATE_ON);
-	digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
 	led_setup();
-	setBrightnessMode(AMULET_BRIGHTNESS_LOW);
+	setBrightnessMode(AMULET_BRIGHTNESS_OFF);
 
 	ble_setup(true, true);
 

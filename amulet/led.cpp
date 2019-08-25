@@ -13,9 +13,9 @@ FASTLED_USING_NAMESPACE
 
 #define DATA_PIN PIN_RGB_LEDS
 #define BIKE_MODE_PIN 28
+#define BIKE_LED_COUNT 200
 #define LED_TYPE WS2812B
 #define COLOR_ORDER GRB
-#define BRIGHTNESS 8
 
 anim_config_t ambientAnimation = {};
 
@@ -31,7 +31,8 @@ void set_animation_from_signal(Signal *s)
 		memcpy(&pattern, s->_scan._data, sizeof(anim_config_t));
 		if (!matches_current_animation(pattern))
 		{
-			LOG_LV1("LED", "Starting Animation from scan (%s)", get_advertisement_type_name((AdvertisementType)s->_scan.signal_type));
+			LOG_LV1("LED", "Starting Animation from scan (%s)", 
+				get_advertisement_type_name((AdvertisementType)s->_scan.signal_type));
 			start_animation(pattern);
 		}
 		else if (!(ambientAnimation == pattern))
@@ -76,7 +77,7 @@ anim_config_t led_get_ambient_animation()
 }
 
 extern CRGB gLeds[RGB_LED_COUNT];
-#define BIKE_LED_COUNT 60
+
 CRGB bikeModeLeds[BIKE_LED_COUNT];
 
 void led_setup()

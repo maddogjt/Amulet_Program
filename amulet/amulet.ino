@@ -95,10 +95,10 @@ void loop()
 		digitalWrite(LED_BUILTIN, LED_STATE_ON);
 		delay(500);
 
-		digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
+		setBrightnessMode(AMULET_BRIGHTNESS_OFF);
 		digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 
-		while (millis() - start < 10000)
+		while (millis() - start < 7500)
 		{
 			dfuButton.read();
 			// User released DFU button, before 10 seconds, so don't go to programming mode.
@@ -234,6 +234,7 @@ void systemSleep()
 	digitalWrite(LED_BUILTIN, LED_STATE_ON);
 	delay(500);
 
+	setBrightnessMode(AMULET_BRIGHTNESS_OFF);
 	digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
 	digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 
