@@ -42,10 +42,10 @@ void settings_init()
 	kDefaultPattern.speed_ = 16;
 
 	localSettings_.startupConfig_.mode = AMULET_MODE_FIRSTBOOT;
-	localSettings_.startupConfig_.ambientPattern_ = kDefaultPattern;
-	localSettings_.startupConfig_.beaconPattern_ = kDefaultPattern;
-	localSettings_.startupConfig_.powerPattern_ = kDefaultPattern;
-	localSettings_.startupConfig_.runePattern_ = kDefaultPattern;
+	// localSettings_.startupConfig_.ambientPattern_ = kDefaultPattern;
+	// localSettings_.startupConfig_.beaconPattern_ = kDefaultPattern;
+	// localSettings_.startupConfig_.powerPattern_ = kDefaultPattern;
+	// localSettings_.startupConfig_.runePattern_ = kDefaultPattern;
 	localSettings_.startupConfig_.burnPattern_ = kDefaultPattern;
 	localSettings_.startupConfig_.ad = {
 		.power = 100,

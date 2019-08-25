@@ -6,7 +6,6 @@
 #include "ble.h"
 #include "signal.h"
 #include "BrightnessMode.h"
-#include "Startup.h"
 #include "dev_mode.h"
 #include "settings.h"
 
@@ -52,7 +51,16 @@ void setup()
 		resetButton.begin();
 	}
 
-	start();
+	auto &config = localSettings_.startupConfig_;
+
+	led_setup();
+	// set master brightness control
+	setBrightnessMode(AMULET_BRIGHTNESS_LOW);
+
+	bool enableUart = config.enterConfigMode_;
+	ble_setup(enableUart);
+
+	amulet_mode_start(config.mode, config.enterConfigMode_);
 }
 
 int step = 0;
@@ -63,9 +71,9 @@ bool resetPrevPressedFor2k = false;
 void loop()
 {
 	// LOG_LV2("LOOP", "Loop start");
-	led_loop(step);
 	signal_loop(step);
-	ble_loop();
+	amulet_mode_loop();
+	led_loop(step);
 
 	dfuButton.read();
 	if (!devEnabled)
@@ -147,19 +155,30 @@ void loop()
 		}
 	}
 
-	if (dfuButton.wasReleased() || (!devEnabled && resetButton.wasReleased()))
+	if (dfuButton.wasReleased())
 	{
-		if ((dfuButton.wasReleased() && dfuPrevPressedFor2k) ||
-			(!devEnabled && resetButton.wasReleased() && resetPrevPressedFor2k))
+		if (dfuButton.wasReleased() && dfuPrevPressedFor2k)
 		{
-			Serial.println("Possibly trigger superpower here");
-			startPowerAmuletSuperpower();
+			amulet_mode_get()->buttonHoldMode();
 		}
 		else
 		{
-			nextBrightnessMode();
+			amulet_mode_get()->buttonPressMode();
 		}
 	}
+
+	if (!devEnabled && resetButton.wasReleased())
+	{
+		if (resetButton.wasReleased() && resetPrevPressedFor2k)
+		{
+			amulet_mode_get()->buttonHoldReset();
+		}
+		else
+		{
+			amulet_mode_get()->buttonPressReset();
+		}
+	}
+	
 
 	dfuPrevPressedFor2k = dfuButton.pressedFor(2000);
 	resetPrevPressedFor2k = (!devEnabled) ? resetButton.pressedFor(2000) : false;

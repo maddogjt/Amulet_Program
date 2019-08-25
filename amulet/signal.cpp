@@ -5,7 +5,6 @@
 
 #include <FastLED.h>
 
-#include "Startup.h"
 #include "settings.h"
 
 Signal *topSignal = nullptr;
@@ -19,13 +18,13 @@ float lerp(float v0, float v1, float t)
 void insert_new_scan(Scan &s);
 void add_scan_data(Scan &s)
 {
-	if (gMode == AMULET_MODE_RUNE && s.signal_type != (uint8_t)AdvertisementType::Amulet)
-	{
-		// Runes only care about amulets;
-		return;
-	}
+	// if (gMode == AMULET_MODE_RUNE && s.signal_type != (uint8_t)AdvertisementType::Amulet)
+	// {
+	// 	// Runes only care about amulets;
+	// 	return;
+	// }
 
-	if (isAmulet() && s.signal_type == (uint8_t)AdvertisementType::Amulet)
+	if (s.signal_type == (uint8_t)AdvertisementType::Amulet)
 	{
 		// Amulets do not care about amulets;
 		return;
@@ -95,12 +94,10 @@ void decay_signals()
 
 void signal_loop(int step)
 {
-	if (isAmulet() || gMode == AMULET_MODE_RUNE)
+
+	EVERY_N_SECONDS(1)
 	{
-		EVERY_N_SECONDS(1)
-		{
-			decay_signals();
-		}
+		decay_signals();
 	}
 }
 

@@ -5,7 +5,6 @@
 #include "animations.h"
 #include "signal.h"
 #include "globals.h"
-#include "Startup.h"
 #include "settings.h"
 #include "BrightnessMode.h"
 
@@ -58,22 +57,10 @@ void set_animation_from_signal(Signal *s)
 	}
 }
 
-void run_power_animation() {
-	if (!matches_current_animation(localSettings_.startupConfig_.powerPattern_))
-	{
-		start_animation(localSettings_.startupConfig_.powerPattern_);
-	}
-}
-
 void led_set_ambient_animation(const anim_config_t &anim)
 {
 	ambientAnimation = anim;
 	set_animation_from_signal(nullptr);
-}
-
-anim_config_t led_get_ambient_animation()
-{
-	return ambientAnimation;
 }
 
 extern CRGB gLeds[RGB_LED_COUNT];
@@ -91,9 +78,6 @@ void led_setup()
 	FastLED.addLeds<LED_TYPE, BIKE_MODE_PIN, COLOR_ORDER>(bikeModeLeds, BIKE_LED_COUNT).setCorrection(TypicalLEDStrip);
 }
 
-extern bool powerIsAdvertising;
-void run_power_animation();
-
 void led_loop(int step)
 {
 	localSettings_.bikeMode_  = true;
@@ -101,28 +85,28 @@ void led_loop(int step)
 	// Update the LED pattern based on bluetooth signals every 500ms
 	EVERY_N_MILLISECONDS(globalSettings_.animationUpdateTimer_)
 	{
-		overrideBrightnessMode(false);
-		if (powerIsAdvertising)
-		{
-			run_power_animation();
-		}
-		else if (isAmulet())
-		{
-			signal = current_top_signal();
-			set_animation_from_signal(signal);
-			if (localSettings_.bikeMode_ && signal) {
-				overrideBrightnessMode(true);
-			} 
-		}
+		// overrideBrightnessMode(false);
+		// if (gBroadcastingPattern)
+		// {
+		// 	run_power_animation();
+		// }
+		// else if (isAmulet())
+		// {
+		// 	signal = current_top_signal();
+		// 	set_animation_from_signal(signal);
+		// 	if (localSettings_.bikeMode_ && signal) {
+		// 		overrideBrightnessMode(true);
+		// 	} 
+		// }
 	}
 
-	if (gMode == AMULET_MODE_RUNE)
-	{
-		signal = current_top_signal();
-		int topRSSI = signal == nullptr ? -128 : signal->_scan.rssi;
-		float strength = normalizeRSSI(topRSSI);
-		FastLED.setBrightness(10 + strength * 180);
-	}
+	// if (gMode == AMULET_MODE_RUNE)
+	// {
+	// 	signal = current_top_signal();
+	// 	int topRSSI = signal == nullptr ? -128 : signal->_scan.rssi;
+	// 	float strength = normalizeRSSI(topRSSI);
+	// 	FastLED.setBrightness(10 + strength * 180);
+	// }
 
 	// Step the currentAnimation
 	step_animation(signal);

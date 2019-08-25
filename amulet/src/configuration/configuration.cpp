@@ -9,7 +9,6 @@
 #include "../../led.h"
 #include "../../signal.h"
 #include "../../settings.h"
-#include "../../Startup.h"
 
 static uint8_t g_AnimIdx = 0;
 static uint8_t g_ConfigIdx = 0;
@@ -115,24 +114,24 @@ void modeCycle(bool next, uint8_t unused)
 		config.ad.decay = 96;
 		config.ad.range = -90;
 	}
-	else if (config.mode == AMULET_MODE_RUNE)
-	{
-		config.ad.power = 150;
-		config.ad.decay = 96;
-		config.ad.range = -90;
-	}
-	else if (config.mode == AMULET_MODE_BEACON_POWER_AMULET)
-	{
-		config.ad.power = 180;
-		config.ad.decay = 160;
-		config.ad.range = -70;
-	}
-	else if (config.mode == AMULET_MODE_AMULET)
-	{
-		config.ad.power = 80;
-		config.ad.decay = 64;
-		config.ad.range = -70;
-	}
+	// else if (config.mode == AMULET_MODE_RUNE)
+	// {
+	// 	config.ad.power = 150;
+	// 	config.ad.decay = 96;
+	// 	config.ad.range = -90;
+	// }
+	// else if (config.mode == AMULET_MODE_BEACON_POWER_AMULET)
+	// {
+	// 	config.ad.power = 180;
+	// 	config.ad.decay = 160;
+	// 	config.ad.range = -70;
+	// }
+	// else if (config.mode == AMULET_MODE_AMULET)
+	// {
+	// 	config.ad.power = 80;
+	// 	config.ad.decay = 64;
+	// 	config.ad.range = -70;
+	// }
 }
 
 void powerCycle(bool next, uint8_t unused)
