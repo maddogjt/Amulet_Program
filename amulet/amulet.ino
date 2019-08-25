@@ -167,66 +167,6 @@ void loop()
 	step++;
 }
 
-/* 
-void nextDebugModeButton()
-{
-	switch (mode)
-	{
-	case AMULET_MODE_AMULET:
-		nextMode();
-		break;
-	case AMULET_MODE_BEACON:
-		nextMode();
-		break;
-	case AMULET_MODE_RUNE:
-		nextMode();
-		break;
-	case AMULET_MODE_LED_TEST:
-		// Instead of going to the next mode, go to the next test pattern if there is one.
-		if (led_test_has_next_pattern())
-		{
-			led_show_next_test_pattern();
-		}
-		else
-		{
-			led_show_test_pattern(false);
-			nextMode();
-		}
-		break;
-	case AMULET_MODE_COUNT:
-	default:
-		break;
-	}
-}
-
-void nextMode()
-{
-	mode = (amulet_mode_t)(((int)mode + 1) % (int)AMULET_MODE_COUNT);
-	setMode(mode);
-}
-
-void setMode(amulet_mode_t mode)
-{
-	switch (mode)
-	{
-	case AMULET_MODE_AMULET:
-	case AMULET_MODE_BEACON:
-	case AMULET_MODE_RUNE:
-		break;
-	case AMULET_MODE_LED_TEST:
-		digitalWrite(LED_BUILTIN, !LED_STATE_ON);
-		led_show_test_pattern(true);
-		break;
-	case AMULET_MODE_COUNT:
-		// shouldn't be here
-		break;
-	}
-
-	// Turn on the builtin if we are not an amulet.
-	// digitalWrite(LED_BUILTIN, mode == AMULET_MODE_AMULET ? !LED_STATE_ON : LED_STATE_ON);
-}
-*/
-
 void systemSleep()
 {
 	Serial.println("Going to sleep now");
@@ -264,7 +204,7 @@ void run_first_boot() {
 	FastLED.show();
 	delay(1000);
 
-	localSettings_.startupConfig_.mode = AMULET_MODE_AMULET;
+	localSettings_.startupConfig_.mode = AMULET_MODE_BURN;
 	write_local_settings();
 
 	

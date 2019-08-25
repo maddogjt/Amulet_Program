@@ -15,11 +15,13 @@ static uint8_t g_AnimIdx = 0;
 static uint8_t g_ConfigIdx = 0;
 static bool g_tweaker_is_modifying_animation = true;
 
-StartupConfig& getConfig() {
+StartupConfig &getConfig()
+{
 	return localSettings_.startupConfig_;
 }
 
-anim_config_t& getAnim() {
+anim_config_t &getAnim()
+{
 	return getConfig().getConfigModeAnim(getConfig().mode);
 }
 
@@ -53,13 +55,15 @@ void speedCycle(bool next, uint8_t unused)
 	getAnim().speed_ = speed;
 }
 
-
 int32_t cycle(bool next, int32_t value, int32_t count)
 {
-	if (next) {
+	if (next)
+	{
 		return (value + 1) % count;
-	} else {
-		return value > 0 ? (value-1) : (count-1);
+	}
+	else
+	{
+		return value > 0 ? (value - 1) : (count - 1);
 	}
 }
 
@@ -84,53 +88,46 @@ void maskCycle(bool next, uint8_t unused)
 void filterCycle(bool next, uint8_t unused)
 {
 	getAnim().filter_ = cycleEnum(next, getAnim().filter_);
-	uart_stream().printf("P: filter V: %s\n", 
-		animation_overlay_get_filter_name(getAnim().filter_));
+	uart_stream().printf("P: filter V: %s\n",
+						 animation_overlay_get_filter_name(getAnim().filter_));
 }
 
 void animCycle(bool next, uint8_t unused)
 {
 	getAnim().anim_ = cycleEnum(next, getAnim().anim_);
-	uart_stream().printf("P:anim V:%.10s\n", 
-		animation_get_name(getAnim().anim_));
+	uart_stream().printf("P:anim V:%.10s\n",
+						 animation_get_name(getAnim().anim_));
 }
 
 void modeCycle(bool next, uint8_t unused)
 {
+	int currentMode = (int)getConfig().mode;
 	uint8_t mode_idx = 0;
-	const amulet_mode_t modes[] = {AMULET_MODE_AMULET, AMULET_MODE_BEACON, AMULET_MODE_RUNE, AMULET_MODE_BEACON_POWER_AMULET};
-	for (int i = 0; i < 4; i++)
-	{
-		if (modes[i] == getConfig().mode)
-		{
-			mode_idx = i;
-			break;
-		}
-	}
 
-	mode_idx = (mode_idx + 4 + (next ? 1 : -1)) % 4;
-	uart_stream().printf("P: mode V: %s\n", get_config_mode_name(modes[mode_idx]));
+	currentMode = (currentMode + (next ? 1 : (int)AMULET_MODE_COUNT + 1)) % (int)AMULET_MODE_COUNT;
+	uart_stream().printf("P: mode V: %s\n", get_config_mode_name((amulet_mode_t)currentMode));
 	auto &config = getConfig();
-	config.mode = modes[mode_idx];
-	if (config.mode == AMULET_MODE_BEACON)
-	{
-		config.ad.power = 80;
-		config.ad.decay = 128;
-		config.ad.range = -80;
-	}
-	if (config.mode == AMULET_MODE_RUNE)
+	config.mode = (amulet_mode_t)currentMode;
+
+	if (config.mode == AMULET_MODE_BURN)
 	{
 		config.ad.power = 150;
 		config.ad.decay = 96;
 		config.ad.range = -90;
 	}
-	if (config.mode == AMULET_MODE_BEACON_POWER_AMULET)
+	else if (config.mode == AMULET_MODE_RUNE)
+	{
+		config.ad.power = 150;
+		config.ad.decay = 96;
+		config.ad.range = -90;
+	}
+	else if (config.mode == AMULET_MODE_BEACON_POWER_AMULET)
 	{
 		config.ad.power = 180;
 		config.ad.decay = 160;
 		config.ad.range = -70;
 	}
-	if (config.mode == AMULET_MODE_AMULET)
+	else if (config.mode == AMULET_MODE_AMULET)
 	{
 		config.ad.power = 80;
 		config.ad.decay = 64;
@@ -182,7 +179,8 @@ void bikeExtendCycle(bool next, uint8_t unused)
 	uart_stream().printf("P: bikeExt V: %s\n", localSettings_.bikeExtend_ ? "true" : "false");
 }
 
-void brightCycle(int index, bool next) {
+void brightCycle(int index, bool next)
+{
 	int increment = (next ? 4 : -4);
 	localSettings_.brightness_[index] += increment;
 	// safety check
@@ -191,7 +189,8 @@ void brightCycle(int index, bool next) {
 	refreshBrightness();
 }
 
-void brightness0Cycle(bool next, uint8_t unused) {
+void brightness0Cycle(bool next, uint8_t unused)
+{
 	brightCycle(0, next);
 }
 
@@ -259,7 +258,6 @@ const char *g_AnimCyclerNames[] = {
 	"extra 2",
 };
 
-
 void configuration_handle_command(const char *str, size_t len)
 {
 
@@ -311,12 +309,12 @@ void configuration_handle_command(const char *str, size_t len)
 		{
 			if (g_tweaker_is_modifying_animation)
 			{
-				g_AnimIdx = min(g_AnimIdx  -1, kAnimCount-1);
+				g_AnimIdx = min(g_AnimIdx - 1, kAnimCount - 1);
 				uart_stream().printf("P: %s\n", g_AnimCyclerNames[g_AnimIdx]);
 			}
 			else
 			{
-				g_ConfigIdx = min(g_ConfigIdx -1, kConfigCount-1);
+				g_ConfigIdx = min(g_ConfigIdx - 1, kConfigCount - 1);
 				uart_stream().printf("P: %s\n", g_ConfigCyclerNames[g_ConfigIdx]);
 			}
 		}

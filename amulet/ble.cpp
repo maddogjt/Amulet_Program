@@ -22,7 +22,7 @@ void ble_loop()
 		}
 	}
 
-	if (powerIsAdvertising && gMode == AMULET_MODE_BEACON_POWER_AMULET)
+	if (powerIsAdvertising && isPowerAmulet())
 	{
 		const uint32_t powerAdvertisingWindow = 15000;
 		if (millis() > powerActivatedTimestamp + powerAdvertisingWindow)
@@ -38,7 +38,7 @@ void ble_loop()
 
 void startPowerAmuletSuperpower()
 {
-	if (gMode != AMULET_MODE_BEACON_POWER_AMULET)
+	if (!isPowerAmulet())
 	{
 		Serial.println("Need to be a power amulet to have superpowers");
 		return;

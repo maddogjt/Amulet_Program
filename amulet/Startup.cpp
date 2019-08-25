@@ -14,7 +14,7 @@ amulet_mode_t gMode = AMULET_MODE_AMULET;
 
 bool isPowerAmulet()
 {
-	return gMode == AMULET_MODE_BEACON_POWER_AMULET;
+	return gMode == AMULET_MODE_BEACON_POWER_AMULET || gMode == AMULET_MODE_BURN;
 }
 
 bool isAmulet()
@@ -24,6 +24,7 @@ bool isAmulet()
 
 void startAsRemoteConfig(StartupConfig &config);
 void startAsAmulet(const StartupConfig &config);
+void startAsBurn(const StartupConfig &config);
 void startAsBeacon(const StartupConfig &config);
 void startAsRune(const StartupConfig &config);
 void startAsPowerAmulet(const StartupConfig &config);
@@ -37,6 +38,9 @@ void startWithConfig(StartupConfig &config)
 
 	switch (config.mode)
 	{
+	case AMULET_MODE_BURN:
+		startAsBurn(config);
+		break;
 	case AMULET_MODE_AMULET:
 		startAsAmulet(config);
 		break;
@@ -88,6 +92,21 @@ void startAsAmulet(const StartupConfig &config)
 {
 	Serial.println("Start amulet mode");
 	gMode = AMULET_MODE_AMULET;
+	led_setup();
+	ble_setup(true, true);
+
+	// set master brightness control
+	setBrightnessMode(AMULET_BRIGHTNESS_LOW);
+
+	// Set the initial ambient animation
+	led_set_ambient_animation(config.ambientPattern_);
+	advertising_start(AdvertisementType::Amulet, config.ad, (uint8_t *)&config.ambientPattern_, sizeof(config.ambientPattern_));
+}
+
+void startAsBurn(const StartupConfig &config)
+{
+	Serial.println("Start burn mode");
+	gMode = AMULET_MODE_BURN;
 	led_setup();
 	ble_setup(true, true);
 

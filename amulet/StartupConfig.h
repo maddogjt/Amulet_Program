@@ -7,6 +7,7 @@
 typedef enum
 {
 	AMULET_MODE_FIRSTBOOT,
+	AMULET_MODE_BURN,
 	AMULET_MODE_AMULET,
 	AMULET_MODE_BEACON,
 	AMULET_MODE_RUNE,
@@ -29,6 +30,7 @@ struct StartupConfig
 	anim_config_t beaconPattern_{};
 	anim_config_t powerPattern_{};
 	anim_config_t runePattern_{};
+	anim_config_t burnPattern_{};
 
 	// bool operator==(const StartupConfig &c) const
 	// {
@@ -38,6 +40,10 @@ struct StartupConfig
 	anim_config_t &getConfigModeAnim(amulet_mode_t mode) {
 		if (mode == AMULET_MODE_AMULET) {
 			return ambientPattern_;
+		}
+		else if (mode == AMULET_MODE_BURN)
+		{
+			return burnPattern_;
 		}
 		else if (mode == AMULET_MODE_BEACON)
 		{

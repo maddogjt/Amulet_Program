@@ -6,6 +6,9 @@ const char *get_config_mode_name(amulet_mode_t mode)
 {
 	switch (mode)
 	{
+	case AMULET_MODE_BURN:
+		return "burn";
+		break;
 	case AMULET_MODE_AMULET:
 		return "amulet";
 		break;
