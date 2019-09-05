@@ -289,7 +289,7 @@ void configuration_handle_command(const char *str, size_t len)
 		getAnim().color1_ = color.hue;
 
 		// Set the ambient animation
-		led_set_ambient_animation(getAnim());
+		start_animation(getAnim());
 		return;
 	}
 
@@ -391,6 +391,7 @@ void configuration_handle_command(const char *str, size_t len)
 			// 	// Save this separate so its never overwritten (such as ambient patterns)
 			// 	localSettings_.startuppowerPattern_ = config.pattern;
 			// }
+			localSettings_.startupConfig_.enterConfigMode_ = false;
 
 			write_local_settings();
 
@@ -401,7 +402,7 @@ void configuration_handle_command(const char *str, size_t len)
 
 		// Set the ambient animation
 		auto &anim = localSettings_.startupConfig_.getConfigModeAnim(localSettings_.startupConfig_.mode);
-		led_set_ambient_animation(anim);
+		start_animation(anim);
 		return;
 	}
 

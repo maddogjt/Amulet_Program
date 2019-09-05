@@ -94,7 +94,6 @@ void decay_signals()
 
 void signal_loop(int step)
 {
-
 	EVERY_N_SECONDS(1)
 	{
 		decay_signals();

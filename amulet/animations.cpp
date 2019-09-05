@@ -8,11 +8,9 @@
 #include "src/animation/animation_modifiers.h"
 #include "src/animation/animation_overlay.h"
 
-CRGB gLeds[RGB_LED_COUNT];
-
 Animation *currentAnim = nullptr;
 Anim currentAnimName = (Anim)(0xFF);
-
+extern CRGB gLeds[RGB_LED_COUNT];
 int frame_counter = 0;
 
 constexpr const char *animNames_[]{
@@ -82,7 +80,7 @@ void blur_leds();
 void flip_leds();
 void scramble_leds();
 
-void step_animation(Signal *topSignal)
+void step_animation()
 {
 	if (currentAnim != nullptr)
 	{
@@ -123,4 +121,11 @@ bool matches_current_animation(const anim_config_t &config)
 		return false;
 	}
 	return currentAnim->params_ == config;
+}
+
+void start_animation_if_new(const anim_config_t &pattern)
+{
+	if (!matches_current_animation(pattern)) {
+		start_animation(pattern);
+	}
 }

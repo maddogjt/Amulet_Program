@@ -14,7 +14,9 @@ void dump_animation_to_console(const anim_config_t &anim);
 void start_animation(const anim_config_t &pattern);
 bool matches_current_animation(const anim_config_t &pattern);
 
-void step_animation(Signal *topSignal);
+void start_animation_if_new(const anim_config_t &pattern);
+
+void step_animation();
 
 const char *animation_get_name(Anim anim);
 

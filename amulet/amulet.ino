@@ -16,7 +16,6 @@ Button resetButton(PIN_RESET, 25, true, true);
 #warning "Requires FastLED 3.1 or later; check github for latest code."
 #endif
 
-void nextMode();
 void systemSleep();
 
 bool devEnabled = false;
@@ -54,8 +53,9 @@ void setup()
 	auto &config = localSettings_.startupConfig_;
 
 	led_setup();
+
 	// set master brightness control
-	setBrightnessMode(AMULET_BRIGHTNESS_LOW);
+	setBrightnessMode(AMULET_BRIGHTNESS_HIGH);
 
 	bool enableUart = config.enterConfigMode_;
 	ble_setup(enableUart);
@@ -73,6 +73,8 @@ void loop()
 	// LOG_LV2("LOOP", "Loop start");
 	signal_loop(step);
 	amulet_mode_loop();
+	// Step the currentAnimation
+	step_animation();
 	led_loop(step);
 
 	dfuButton.read();

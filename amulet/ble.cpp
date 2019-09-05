@@ -22,6 +22,5 @@ void ble_setup(bool uart)
 
 	advertising_setup(true, uart);
 
-
 	scanning_setup();
 }
