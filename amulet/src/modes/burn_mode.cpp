@@ -1,6 +1,7 @@
 #include "burn_mode.h"
 #include "../animation/animations.h"
 #include "../communication/advertising.h"
+#include "../communication/signal.h"
 #include "../settings/settings.h"
 #include "../leds/led.h"
 
@@ -27,7 +28,7 @@ void BurnMode::set_animation_from_signal(Signal *s)
 	{
 		anim_config_t pattern;
 		VERIFY_STATIC(sizeof(pattern) <= kMaxPayloadLen);
-		memcpy(&pattern, s->_scan._data, sizeof(anim_config_t));
+		memcpy(&pattern, s->data_.payload, sizeof(anim_config_t));
 		start_animation_if_new(pattern);
 	}
 	else
@@ -57,7 +58,7 @@ void BurnMode::loop() {
 		led_override_brightness(false);
 		if (!sendingPattern_)
 		{
-			Signal *signal = current_top_signal();
+			Signal *signal = signal_get_current_top();
 			set_animation_from_signal(signal);
 			if (localSettings_.bikeMode_ && signal)
 			{

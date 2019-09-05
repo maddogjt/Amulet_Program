@@ -2,9 +2,6 @@
 
 #include "animation_config.h"
 
-#include <FastLED.h>
-#include "../../signal.h"
-
 void dump_animation_to_console(const anim_config_t &anim);
 
 void start_animation(const anim_config_t &pattern);

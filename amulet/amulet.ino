@@ -3,10 +3,10 @@
 #include "animations/animation.h"
 #include "src/animation/animations.h"
 #include "src/communication/ble.h"
+#include "src/communication/signal.h"
 #include "src/leds/led.h"
 #include "src/settings/dev_mode.h"
 #include "src/settings/settings.h"
-#include "signal.h"
 
 
 Button dfuButton(PIN_DFU, 25, true, true);

@@ -1,5 +1,10 @@
 #pragma once
 
+#include <inttypes.h>
+#include <stddef.h>
+#include <cstdint>
+#include <Arduino.h>
+
 static constexpr size_t kMaxPayloadLen = 14;
 
 struct ATTR_PACKED amulet_mfg_data_t

@@ -6,7 +6,7 @@
 #include "../leds/led.h"
 #include "../settings/settings.h"
 
-#include "../../signal.h"
+//#include "../../signal.h"
 
 static uint8_t g_AnimIdx = 0;
 static uint8_t g_ConfigIdx = 0;

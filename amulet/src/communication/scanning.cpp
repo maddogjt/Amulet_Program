@@ -2,7 +2,7 @@
 #include "packet_types.h"
 #include "parameters.h"
 #include "../settings/settings.h"
-#include "../../signal.h"
+#include "../communication/signal.h"
 
 #include <bluefruit.h>
 
@@ -66,15 +66,15 @@ void scan_callback(ble_gap_evt_adv_report_t *report)
 			// set the signal strength
 			LOG_LV2("Scan", "%14s %d dBm\n", "RSSI", report->rssi);
 
-			Scan s = {
-				.rssi = report->rssi,
-				.signal_type = mfd.signal_type,
-				.power = mfd.power,
-				.decayRate = ((float)mfd.decayRateInt / 255.f),
-			};
-			s.setData(mfd.payload);
+			// Scan s = {
+			// 	.rssi = report->rssi,
+			// 	.signal_type = mfd.signal_type,
+			// 	.power = mfd.power,
+			// 	.decayRate = ((float)mfd.decayRateInt / 255.f),
+			// };
+			// s.setData(mfd.payload);
 			// Save this entry to signals
-			add_scan_data(s);
+			signal_add_scan_data(report->rssi, mfd);
 		}
 	}
 	else
