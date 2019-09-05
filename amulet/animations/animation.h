@@ -1,10 +1,9 @@
 #pragma once
 
-#include <FastLED.h>
-FASTLED_USING_NAMESPACE
-
 #include "../src/animation/animation_config.h"
 #include "../globals.h"
+
+#include <FastLED.h>
 
 #define ANIMATION_FLAG_USE_SIGNAL_POWER (0x10) /**< Set signal power parameter */
 

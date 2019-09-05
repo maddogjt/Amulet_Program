@@ -1,22 +1,17 @@
 #include <JC_Button.h>
-#include <FastLED.h>
+//#include <FastLED.h>
 
 #include "globals.h"
-#include "led.h"
 #include "src/animation/animations.h"
 #include "src/communication/ble.h"
-#include "signal.h"
-#include "BrightnessMode.h"
-#include "dev_mode.h"
+#include "src/leds/led.h"
 #include "src/settings/settings.h"
+#include "signal.h"
+#include "dev_mode.h"
 
 
 Button dfuButton(PIN_DFU, 25, true, true);
 Button resetButton(PIN_RESET, 25, true, true);
-
-#if defined(FASTLED_VERSION) && (FASTLED_VERSION < 3001000)
-#warning "Requires FastLED 3.1 or later; check github for latest code."
-#endif
 
 void systemSleep();
 
@@ -57,7 +52,7 @@ void setup()
 	led_setup();
 
 	// set master brightness control
-	setBrightnessMode(AMULET_BRIGHTNESS_HIGH);
+	led_set_brightness(LedBrightness::High);
 
 	bool enableUart = config.enterConfigMode_;
 	ble_setup(enableUart);
@@ -107,7 +102,7 @@ void loop()
 		digitalWrite(LED_BUILTIN, LED_STATE_ON);
 		delay(500);
 
-		setBrightnessMode(AMULET_BRIGHTNESS_OFF);
+		led_set_brightness(LedBrightness::Off);
 		digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 
 		while (millis() - start < 7500)
@@ -197,7 +192,7 @@ void systemSleep()
 	digitalWrite(LED_BUILTIN, LED_STATE_ON);
 	delay(500);
 
-	setBrightnessMode(AMULET_BRIGHTNESS_OFF);
+	led_set_brightness(LedBrightness::Off);
 	digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
 	digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 

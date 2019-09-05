@@ -1,11 +1,8 @@
 
 #include "signal.h"
 
+#include "src/settings/settings.h"
 #include <Arduino.h>
-
-#include <FastLED.h>
-
-#include "settings.h"
 
 Signal *topSignal = nullptr;
 

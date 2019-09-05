@@ -2,9 +2,6 @@
 
 #include "animation.h"
 
-#include <FastLED.h>
-FASTLED_USING_NAMESPACE
-
 void mirror2();
 
 class AnimFlame : public Animation

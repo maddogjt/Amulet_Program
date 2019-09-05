@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdint>
 #include <FastLED.h>
 
 enum class AnimationModifier : uint8_t{

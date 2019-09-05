@@ -1,15 +1,12 @@
 #include "configuration.h"
-#include "../communication/uart.h"
 #include "../animation/animations.h"
 #include "../animation/animation_modifiers.h"
 #include "../animation/animation_overlay.h"
-#include "../../BrightnessMode.h"
+#include "../communication/uart.h"
+#include "../leds/led.h"
+#include "../settings/settings.h"
 
-#include <FastLED.h>
-
-#include "../../led.h"
 #include "../../signal.h"
-#include "../../settings.h"
 
 static uint8_t g_AnimIdx = 0;
 static uint8_t g_ConfigIdx = 0;
@@ -184,7 +181,7 @@ void brightCycle(int index, bool next)
 	// safety check
 	localSettings_.brightness_[index] = localSettings_.brightness_[index] % 128;
 	uart_stream().printf("P: b%d V: %d\n", index, localSettings_.brightness_[index]);
-	refreshBrightness();
+	led_refresh_brightness();
 }
 
 void brightness0Cycle(bool next, uint8_t unused)

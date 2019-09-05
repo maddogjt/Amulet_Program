@@ -2,8 +2,7 @@
 #include "../animation/animations.h"
 #include "../communication/advertising.h"
 #include "../settings/settings.h"
-#include "../../led.h"
-#include "../../BrightnessMode.h"
+#include "../leds/led.h"
 
 void BurnMode::start() {
 
@@ -55,14 +54,14 @@ void BurnMode::loop() {
 
 	EVERY_N_MILLISECONDS(globalSettings_.animationUpdateTimer_)
 	{
-		overrideBrightnessMode(false);
+		led_override_brightness(false);
 		if (!sendingPattern_)
 		{
 			Signal *signal = current_top_signal();
 			set_animation_from_signal(signal);
 			if (localSettings_.bikeMode_ && signal)
 			{
-				overrideBrightnessMode(true);
+				led_override_brightness(true);
 			}
 		}
 	}

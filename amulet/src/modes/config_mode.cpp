@@ -1,7 +1,7 @@
 #include "config_mode.h"
-#include "../../led.h"
-#include "../../settings.h"
 #include "../animation/animations.h"
+#include "../leds/led.h"
+#include "../settings/settings.h"
 
 void ConfigMode::start()
 {

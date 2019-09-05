@@ -1,7 +1,8 @@
 #include "mode.h"
 #include "burn_mode.h"
 #include "config_mode.h"
-#include "../../BrightnessMode.h"
+
+#include "../leds/led.h"
 
 AmuletMode *gAmuletMode = nullptr;
 
@@ -56,10 +57,10 @@ void AmuletMode::loop() {
 }
 
 void AmuletMode::buttonPressMode() {
-	nextBrightnessMode();
+	led_next_brightness();
 }
 
 void AmuletMode::buttonPressReset()
 {
-	nextBrightnessMode();
+	led_next_brightness();
 }
