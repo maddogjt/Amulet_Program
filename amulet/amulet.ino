@@ -1,13 +1,12 @@
 #include <JC_Button.h>
-//#include <FastLED.h>
 
-#include "globals.h"
+#include "animations/animation.h"
 #include "src/animation/animations.h"
 #include "src/communication/ble.h"
 #include "src/leds/led.h"
+#include "src/settings/dev_mode.h"
 #include "src/settings/settings.h"
 #include "signal.h"
-#include "dev_mode.h"
 
 
 Button dfuButton(PIN_DFU, 25, true, true);
@@ -181,7 +180,7 @@ void loop()
 
 	dfuPrevPressedFor2k = dfuButton.pressedFor(2000);
 	resetPrevPressedFor2k = (!devEnabled) ? resetButton.pressedFor(2000) : false;
-	FastLED.delay(1000 / FRAMERATE);
+	FastLED.delay(1000 / ANIMATION_FRAMERATE);
 	step++;
 }
 

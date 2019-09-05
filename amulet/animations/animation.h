@@ -1,10 +1,10 @@
 #pragma once
 
 #include "../src/animation/animation_config.h"
-#include "../globals.h"
 
 #include <FastLED.h>
 
+#define ANIMATION_FRAMERATE 120
 #define ANIMATION_FLAG_USE_SIGNAL_POWER (0x10) /**< Set signal power parameter */
 
 class Animation

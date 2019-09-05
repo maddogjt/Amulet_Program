@@ -1,5 +1,6 @@
-#include <Arduino.h>
 #include "dev_mode.h"
+
+#include <Arduino.h>
 #include <nrf52.h>
 
 bool dev_mode_enabled() {

@@ -1,6 +1,5 @@
 #include "led.h"
 
-#include "../../globals.h"
 #include "../settings/settings.h"
 
 #include <FastLED.h>

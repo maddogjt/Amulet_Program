@@ -1,6 +1,13 @@
 #pragma once
 
 #include "animation.h"
+#include <type_traits>
+
+template <typename T, size_t N>
+size_t countof(T (&arr)[N])
+{
+	return std::extent<T[N]>::value;
+}
 
 class AnimTwister : public Animation
 {
@@ -16,7 +23,7 @@ public:
 
 		for (int i = 0; i < RGB_LED_COUNT; i++)
 		{
-			leds[i] = twisterColors[random8() % ARRAY_SIZE(twisterColors)];
+			leds[i] = twisterColors[random8() % countof(twisterColors)];
 		}
 	}
 
@@ -28,7 +35,7 @@ public:
 			{
 				if (random8() % 3 == 0)
 				{
-					leds[i] = twisterColors[random8() % ARRAY_SIZE(twisterColors)];
+					leds[i] = twisterColors[random8() % countof(twisterColors)];
 				}
 			}
 		}

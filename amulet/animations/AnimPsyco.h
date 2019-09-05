@@ -20,7 +20,7 @@ public:
 		fadeToBlackBy(leds, RGB_LED_COUNT, 40);
 
 		// Update velocity every 4 seconds
-		if (frame % (FRAMERATE * 4))
+		if (frame % (ANIMATION_FRAMERATE * 4))
 		{
 			m_vx = random16() / 65535.f * .1f;
 			m_vy = random16() / 65535.f * .1f;

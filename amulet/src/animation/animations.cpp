@@ -2,13 +2,10 @@
 #include "animations.h"
 #include "animation_modifiers.h"
 #include "animation_overlay.h"
+#include "csv_helpers.hpp"
 
 #define DO_INCLUDES
 #include "animation_list.hpp"
-
-#include "../../globals.h"
-#include "../../CSVHelpers.hpp"
-
 
 Animation *currentAnim = nullptr;
 Anim currentAnimName = (Anim)(0xFF);
