@@ -1,5 +1,6 @@
 #include "configuration.h"
 #include "../communication/uart.h"
+#include "../animation/animations.h"
 #include "../animation/animation_modifiers.h"
 #include "../animation/animation_overlay.h"
 #include "../../BrightnessMode.h"
@@ -167,14 +168,12 @@ void animRSSICycle(bool next, uint8_t unused)
 void bikeModeCycle(bool next, uint8_t unused)
 {
 	localSettings_.bikeMode_ = !localSettings_.bikeMode_;
-	// getAnim().flags_ ^= ANIMATION_FLAG_USE_SIGNAL_POWER;
 	uart_stream().printf("P: bike V: %s\n", localSettings_.bikeMode_ ? "true" : "false");
 }
 
 void bikeExtendCycle(bool next, uint8_t unused)
 {
 	localSettings_.bikeExtend_ = !localSettings_.bikeExtend_;
-	// getAnim().flags_ ^= ANIMATION_FLAG_USE_SIGNAL_POWER;
 	uart_stream().printf("P: bikeExt V: %s\n", localSettings_.bikeExtend_ ? "true" : "false");
 }
 

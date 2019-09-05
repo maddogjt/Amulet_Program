@@ -1,12 +1,14 @@
-#define DO_INCLUDES
-#include "AnimList.hpp"
 
 #include "animations.h"
-#include "globals.h"
-#include "CSVHelpers.hpp"
+#include "animation_modifiers.h"
+#include "animation_overlay.h"
 
-#include "src/animation/animation_modifiers.h"
-#include "src/animation/animation_overlay.h"
+#define DO_INCLUDES
+#include "animation_list.hpp"
+
+#include "../../globals.h"
+#include "../../CSVHelpers.hpp"
+
 
 Animation *currentAnim = nullptr;
 Anim currentAnimName = (Anim)(0xFF);
@@ -15,7 +17,7 @@ int frame_counter = 0;
 
 constexpr const char *animNames_[]{
 #define DEFINE_ANIM(name) #name,
-#include "AnimList.hpp"
+#include "animation_list.hpp"
 #undef DEFINE_ANIM
 };
 
@@ -53,7 +55,7 @@ void start_animation(const anim_config_t &pattern)
 		currentAnimName = Anim::animName; \
 		break;
 
-#include "AnimList.hpp"
+#include "animation_list.hpp"
 #undef DEFINE_ANIM
 
 	default:

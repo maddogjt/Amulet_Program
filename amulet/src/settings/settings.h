@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-#include "../../animations.h"
+#include "../animation/animation_config.h"
 #include "../communication/advertising.h"
 #include "../communication/packet_types.h"
 #include "../modes/mode.h"

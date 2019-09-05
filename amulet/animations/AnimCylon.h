@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Animation.h"
+#include "animation.h"
 #include "../src/animation/animation_modifiers.h"
 
 class AnimCylon : public Animation

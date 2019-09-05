@@ -1,9 +1,8 @@
 #include "animation_overlay.h"
-#define DO_INCLUDES
-#include "../../AnimList.hpp"
+#include "animations.h"
 
-//#include "animations/RasterHelper.h"
-#include "../../animations.h"
+#define DO_INCLUDES
+#include "animation_list.hpp"
 
 constexpr const char *kFilterNames[]{
 	"None",
@@ -45,7 +44,7 @@ void animation_overlay_set(Anim animation, OverlayFilter filter)
 		gCurrentOverlay = new animName(); \
 		break;
 
-#include "../../AnimList.hpp"
+#include "animation_list.hpp"
 #undef DEFINE_ANIM
 
 	default:

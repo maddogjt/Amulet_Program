@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Animation.h"
+#include "animation.h"
 
 class AnimOrbit : public Animation
 {

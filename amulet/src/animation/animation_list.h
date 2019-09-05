@@ -3,7 +3,7 @@
 
 enum class Anim : uint8_t {
 #define DEFINE_ANIM(name) name,
-#include "../../AnimList.hpp"
+#include "animation_list.hpp"
 #undef DEFINE_ANIM
 		Count,
 };

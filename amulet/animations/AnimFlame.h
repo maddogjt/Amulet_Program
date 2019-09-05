@@ -1,16 +1,18 @@
 #pragma once
 
-#include "../Animation.h"
+#include "animation.h"
 
 #include <FastLED.h>
 FASTLED_USING_NAMESPACE
+
+void mirror2();
 
 class AnimFlame : public Animation
 {
 public:
 	uint8_t cooling;  // try 30
 	uint8_t sparking; // try 180
-	virtual void init()
+	void init() override
 	{
 		LOG_LV1("LED", "Flame::init");
 		gPal = HeatColors_p;
@@ -19,12 +21,12 @@ public:
 		fill_solid(leds, RGB_LED_COUNT, CHSV(params_.color1_, 255, 192));
 	}
 
-	virtual void step(const int frame, const float deltaTime, const float sourceDistance) override
+	void step(const int frame, const float deltaTime, const float sourceDistance) override
 	{
 		// Add entropy to random number generator; we use a lot of it.
 		random16_add_entropy(random());
 		Fire2012WithPalette(); // run simulation frame, using palette colors
-		mirror();
+		mirror2();
 		// do the animation thing here
 	}
 

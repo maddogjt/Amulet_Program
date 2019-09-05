@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "../Animation.h"
+#include "animation.h"
 
 // These are used by 'raster' style animations
 // Raster style animations use a mapping of the LEDs into a 2d plane.

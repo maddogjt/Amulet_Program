@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Animation.h"
+#include "animation.h"
 
 #include <FastLED.h>
 FASTLED_USING_NAMESPACE

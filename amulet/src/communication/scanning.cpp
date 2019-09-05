@@ -1,10 +1,11 @@
 #include "scanning.h"
 #include "packet_types.h"
 #include "parameters.h"
+#include "../settings/settings.h"
+#include "../../signal.h"
 
 #include <bluefruit.h>
 
-#include "../../settings.h"
 
 static void scan_callback(ble_gap_evt_adv_report_t *report);
 

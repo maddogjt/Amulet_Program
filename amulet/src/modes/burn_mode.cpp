@@ -1,6 +1,7 @@
 #include "burn_mode.h"
+#include "../animation/animations.h"
 #include "../communication/advertising.h"
-#include "../../settings.h"
+#include "../settings/settings.h"
 #include "../../led.h"
 #include "../../BrightnessMode.h"
 

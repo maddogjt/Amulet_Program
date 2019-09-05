@@ -1,10 +1,9 @@
 #pragma once
 
-#include "src/animation/animation_config.h"
+#include "animation_config.h"
 
 #include <FastLED.h>
-#include "Animation.h"
-#include "signal.h"
+#include "../../signal.h"
 
 void dump_animation_to_console(const anim_config_t &anim);
 
