@@ -3,11 +3,11 @@
 
 #include "globals.h"
 #include "led.h"
-#include "ble.h"
+#include "src/communication/ble.h"
 #include "signal.h"
 #include "BrightnessMode.h"
 #include "dev_mode.h"
-#include "settings.h"
+#include "src/settings/settings.h"
 
 Button dfuButton(PIN_DFU, 25, true, true);
 Button resetButton(PIN_RESET, 25, true, true);

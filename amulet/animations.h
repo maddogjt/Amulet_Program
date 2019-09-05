@@ -6,9 +6,6 @@
 #include "Animation.h"
 #include "signal.h"
 
-FASTLED_USING_NAMESPACE
-
-
 void dump_animation_to_console(const anim_config_t &anim);
 
 void start_animation(const anim_config_t &pattern);

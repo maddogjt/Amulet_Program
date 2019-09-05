@@ -1,12 +1,9 @@
 #include "ble.h"
-#include "src/communication/parameters.h"
-#include "src/communication/scanning.h"
-#include "src/communication/advertising.h"
+#include "advertising.h"
+#include "scanning.h"
+#include "../settings/settings.h"
 
 #include <bluefruit.h>
-
-#include "settings.h"
-
 
 void ble_setup(bool uart)
 {
