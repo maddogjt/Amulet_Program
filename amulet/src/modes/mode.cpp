@@ -1,8 +1,10 @@
 #include "mode.h"
 #include "burn_mode.h"
-#include "simon_mode.h"
-#include "seacomp_amulet_mode.h"
 #include "config_mode.h"
+#include "photo_key_mode.h"
+#include "safe_mode.h"
+#include "seacomp_amulet_mode.h"
+#include "simon_mode.h"
 
 #include "../leds/led.h"
 
@@ -21,6 +23,12 @@ const char *get_config_mode_name(amulet_mode_t mode)
 	case AMULET_MODE_SEACOMP_AMULET:
 		return "seacompam";
 		break;
+	case AMULET_MODE_SAFE:
+		return "safe";
+		break;
+	case AMULET_MODE_PHOTOKEY:
+		return "photokey";
+		break;
 	case AMULET_MODE_COUNT:
 	default:
 		break;
@@ -37,26 +45,30 @@ AmuletMode *amulet_mode_start(amulet_mode_t mode, bool enterConfig)
 
 	if (enterConfig) {
 		gAmuletMode = new ConfigMode();
-		gAmuletMode->start();
 	} else if (mode == AMULET_MODE_BURN) {
 		gAmuletMode = new BurnMode();
-		gAmuletMode->start();
 	}
 	else if (mode == AMULET_MODE_SIMON)
 	{
 		gAmuletMode = new SimonMode();
-		gAmuletMode->start();
 	}
 	else if (mode == AMULET_MODE_SEACOMP_AMULET)
 	{
 		gAmuletMode = new SeacompAmuletMode();
-		gAmuletMode->start();
+	}
+	else if (mode == AMULET_MODE_SAFE)
+	{
+		gAmuletMode = new SafeMode();
+	}
+	else if (mode == AMULET_MODE_PHOTOKEY)
+	{
+		gAmuletMode = new PhotoKeyMode();
 	}
 	else
 	{
 		gAmuletMode = new ConfigMode();
-		gAmuletMode->start();
 	}
+		gAmuletMode->start();
 
 	return gAmuletMode;
 }
