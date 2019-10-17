@@ -218,7 +218,7 @@ void run_first_boot() {
 	FastLED.show();
 	delay(1000);
 
-	localSettings_.startupConfig_.mode = AMULET_MODE_BURN;
+	localSettings_.startupConfig_.mode = AMULET_MODE_SEACOMP_AMULET;
 	write_local_settings();
 
 	

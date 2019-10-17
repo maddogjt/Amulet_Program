@@ -17,6 +17,8 @@ struct StartupConfig
 
 	// The animation
 	anim_config_t burnPattern_{};
+	anim_config_t simonPattern_{};
+	anim_config_t seacompAmuletPattern_{};
 
 	// bool operator==(const StartupConfig &c) const
 	// {
@@ -28,6 +30,13 @@ struct StartupConfig
 		if (mode == AMULET_MODE_BURN)
 		{
 			return burnPattern_;
+		} else if (mode == AMULET_MODE_SIMON)
+		{
+			return simonPattern_;
+		}
+		else if (mode == AMULET_MODE_SEACOMP_AMULET)
+		{
+			return seacompAmuletPattern_;
 		}
 		else
 		{

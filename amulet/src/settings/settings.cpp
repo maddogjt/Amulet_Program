@@ -47,7 +47,9 @@ void settings_init()
 	// localSettings_.startupConfig_.beaconPattern_ = kDefaultPattern;
 	// localSettings_.startupConfig_.powerPattern_ = kDefaultPattern;
 	// localSettings_.startupConfig_.runePattern_ = kDefaultPattern;
+	localSettings_.startupConfig_.seacompAmuletPattern_ = kDefaultPattern;
 	localSettings_.startupConfig_.burnPattern_ = kDefaultPattern;
+	localSettings_.startupConfig_.simonPattern_ = kDefaultPattern;
 	localSettings_.startupConfig_.ad = {
 		.power = 100,
 		.decay = 128,
