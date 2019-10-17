@@ -16,6 +16,10 @@ CRGB bikeModeLeds[BIKE_LED_COUNT];
 
 void led_setup()
 {
+#if !defined(NO_RGB_LEDS)
+	pinMode(PIN_RGB_LED_PWR, OUTPUT);
+	digitalWrite(PIN_RGB_LED_PWR, RGB_LED_PWR_ON);
+
 	//localSettings_.bikeMode_  = true;
 	//if (localSettings_.bikeMode_)
 	{
@@ -23,10 +27,12 @@ void led_setup()
 		FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(gLeds, RGB_LED_COUNT).setCorrection(TypicalLEDStrip);
 	}
 	FastLED.addLeds<LED_TYPE, BIKE_MODE_PIN, COLOR_ORDER>(bikeModeLeds, BIKE_LED_COUNT).setCorrection(TypicalLEDStrip);
+#endif
 }
 
 void led_loop(int step)
 {
+#if !defined(NO_RGB_LEDS)
 	for (int i = 0; i < BIKE_LED_COUNT; i++)
 	{
 		if (!localSettings_.bikeExtend_) {
@@ -41,6 +47,7 @@ void led_loop(int step)
 	}
 
 	FastLED.show();
+#endif
 }
 
 LedBrightness g_brightness_mode = LedBrightness::Medium;
@@ -74,6 +81,8 @@ void led_set_brightness(LedBrightness brightness)
 		newLedPower = false;
 	}
 
+#if !defined(NO_RGB_LEDS)
+
 	if (newLedPower)
 	{
 		// Turn on LED power rail
@@ -91,6 +100,7 @@ void led_set_brightness(LedBrightness brightness)
 		// TODO: Also turn off bluetooth.
 		// FEATURE: Maybe advertise in special off mode so we can find lost beacons by rssi?
 	}
+#endif
 }
 
 void led_next_brightness()

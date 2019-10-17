@@ -18,7 +18,9 @@ bool devEnabled = false;
 
 void setup()
 {
+#if defined(USE_DCDC)
 	sd_power_dcdc_mode_set(NRF_POWER_DCDC_ENABLE);
+#endif
 	// Set pin modes
 	pinMode(LED_BUILTIN, OUTPUT);
 
@@ -28,10 +30,6 @@ void setup()
 
 	// init settings
 	settings_init();
-
-	// Turn on LED power rail
-	pinMode(PIN_RGB_LED_PWR, OUTPUT);
-	digitalWrite(PIN_RGB_LED_PWR, RGB_LED_PWR_ON);
 
 	if (localSettings_.startupConfig_.mode==AMULET_MODE_FIRSTBOOT) {
 		run_first_boot();
@@ -192,7 +190,6 @@ void systemSleep()
 	delay(500);
 
 	led_set_brightness(LedBrightness::Off);
-	digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
 	digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 
 	power_off();
