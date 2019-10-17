@@ -19,6 +19,7 @@
 #include "../../animations/AnimJump.h"
 #include "../../animations/AnimOrbit.h"
 #include "../../animations/AnimTwinkle.h"
+#include "../../animations/AnimSimon.h"
 #else
 
 #ifndef DEFINE_ANIM
@@ -46,6 +47,8 @@ DEFINE_ANIM(AnimBPM)
 DEFINE_ANIM(AnimConfetti)
 DEFINE_ANIM(AnimShadow)
 DEFINE_ANIM(AnimPrism)
+
+DEFINE_ANIM(AnimSimon)
 
 #ifdef CLEAR_DEFINE_ANIM
 #undef DEFINE_ANIM
