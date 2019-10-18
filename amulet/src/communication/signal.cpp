@@ -31,7 +31,7 @@ void signal_add_scan_data(int8_t rssi, const amulet_mfg_data_t &data)
 
 	float strength = compute_strength(rssi, data);
 
-	if (gTopSignal = nullptr) {
+	if (nullptr == gTopSignal) {
 		gTopSignal = new Signal(rssi, data, strength);
 		return;
 	}
