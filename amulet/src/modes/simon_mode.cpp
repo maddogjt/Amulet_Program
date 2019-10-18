@@ -6,8 +6,8 @@
 #include "../leds/led.h"
 #include "../misc/simon_sequence.h"
 
-constexpr int led_pins[4] = {25, 27, 26, 30};   // R,G,B,Y
-constexpr int button_pins[4] = {15, 16, 11, 7}; // R,G,B,Y
+constexpr int led_pins[4] = {25, 27, 30, 26};   // R,G,B,Y
+constexpr int button_pins[4] = {15, 16, 7, 11}; // R,G,B,Y
 
 void SimonMode::start()
 {
@@ -22,6 +22,7 @@ void SimonMode::startNewSequence()
 {
 	advertising_stop();
 
+	srand(millis());
 	simonSeed_ = rand();
 	simonLevel_ = 1;
 
@@ -29,7 +30,7 @@ void SimonMode::startNewSequence()
 	anim.anim_ = Anim::AnimSimon;
 	anim.extra0_ = simonSeed_;
 	anim.speed_ = 420/4;
-	anim.extra1_ = 8;
+	anim.extra1_ = 4;
 
 	simonStepCount_ = generate_simon_sequence(anim.extra0_, anim.speed_*4, anim.extra1_, simonSteps_);
 
@@ -56,13 +57,18 @@ void SimonMode::startStep(int stepIndex)
 	stepEnd_ = millis() + simonSteps_[currentSimonStep_].duration;
 	auto color = simonSteps_[currentSimonStep_].color;
 
-	//Serial.println((int)color)); 
 	for (auto pin : led_pins)
 	{
 		digitalWrite(pin, 1);
 	}
 
+	if (currentSimonStep_ == 0)
+	{
+		Serial.println("Reset");
+	}
+
 	if (color != SimonColor::None) {
+		Serial.println((int)color); 
 
 		auto pinIdx = (int)color -1;
 		digitalWrite(led_pins[pinIdx], 0);
