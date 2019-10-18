@@ -9,19 +9,32 @@ class Signal;
 
 class SimonMode : public AmuletMode
 { 
+	enum class State
+	{
+		Playing,
+		Failure,
+	};
 public:
 	void start() override;
 	void loop() override;
 	void buttonPressMode() override;
 private:
-	void startNewSequence();
+	void startNewSequence(int level);
 	void startStep(int stepIndex);
+	void startRoundVictory(SimonColor color);
+	void startFinalVictory();
+	void handlePressedState(int state);
+
+	void startFail();
+	void endFail();
 
 	uint8_t simonSeed_;
-	uint8_t simonLevel_;
 
 	SimonStep simonSteps_[kMaxSimonSteps];
 	size_t simonStepCount_ = 0;
-	size_t currentSimonStep_ = 0;
+	uint currentSimonStep_ = 0;
 	int stepEnd_ = 0;
+
+	int currentLevel_ = 0;
+	State state_ {State::Playing};
 };

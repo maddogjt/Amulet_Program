@@ -42,14 +42,14 @@ inline size_t generate_simon_sequence(uint8_t seed, uint8_t speed, uint8_t count
 	int steps = min(count, kMaxSimonSteps / 2);
 	for (int i = 0; i < steps; i++)
 	{
-		out[i * 2].color = (SimonColor)(rand() % 4 + 1);
-		out[i * 2].duration = speed * 4;
+		out[i * 2].color = SimonColor::None;
+		out[i * 2].duration = 50;
 
-		out[i * 2 + 1].color = SimonColor::None;
-		out[i * 2 + 1].duration = 50;
+		out[i * 2+1].color = (SimonColor)(rand() % 4 + 1);
+		out[i * 2+1].duration = speed * 4;
 	}
 
-	out[steps * 2 - 1].duration = 1500;
+	out[0].duration = 1500;
 
 	return steps * 2;
 }

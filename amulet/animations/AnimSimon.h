@@ -11,7 +11,7 @@ public:
 	{
 		LOG_LV1("LED", "Simon::init");
 		simonStepCount_ = generate_simon_sequence(
-			params_.extra0_, params_.speed_ * 4, params_.extra1_,
+			params_.extra0_, params_.speed_, params_.extra1_,
 			simonSteps_);
 		startStep(0);
 	}
