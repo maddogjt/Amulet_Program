@@ -5,18 +5,23 @@
 class AnimVictory : public Animation
 {
 public:
-	float hue;
+	int hue;
+	int hue2;
 	virtual void init()
 	{
 		LOG_LV1("LED", "Victory::init");
 		hue = params_.color1_;
-		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 192));
+		hue2 = params_.color2_;
+		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
 	}
 
 	virtual void step(const int frame, const float deltaTime, const float sourceDistance) override
 	{
-		hue += params_.speed_ / 100.f;
-		uint8_t iHue = (int)hue % 256;
-		fill_solid(leds, RGB_LED_COUNT, CHSV(iHue, 255, 192));
+		EVERY_N_MILLISECONDS(100)
+		{
+			fadeToBlackBy(leds, RGB_LED_COUNT, 110);
+			leds[random8(0, 4)] = CHSV((hue2 += 30), 255, 192);
+			leds[random8(4, 8)] = CHSV((hue2 += 30), 255, 192);
+		}
 	}
 };
