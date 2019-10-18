@@ -107,7 +107,10 @@ void SimonMode::startNewSequence(int level)
 	advertising_stop();
 
 	srand(millis());
-	simonSeed_ = rand();
+
+	if (level == 0) {
+		simonSeed_ = rand();
+	}
 
 	anim_config_t anim{};
 	anim.anim_ = Anim::AnimSimon;
