@@ -11,14 +11,9 @@ class SeacompAmuletMode : public AmuletMode
 public:
 	void start() override;
 	void loop() override;
-	void buttonHoldReset() override;
-	void buttonPressMode() override;
-
-	uint32_t sendPatternStop_ = 0;
-	bool sendingPattern_ = false;
-
-	anim_config_t animations_[(int)Anim::Count];
-	int currentAnim_ = 0;
+//	void buttonHoldReset() override;
+//	void buttonPressMode() override;
 
 	void set_animation_from_signal(Signal *s);
+	anim_config_t anim_{};
 };

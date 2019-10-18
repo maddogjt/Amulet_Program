@@ -15,10 +15,13 @@ public:
 	void buttonPressMode() override;
 private:
 	void startNewSequence();
+	void startStep(int stepIndex);
 
 	uint8_t simonSeed_;
 	uint8_t simonLevel_;
 
 	SimonStep simonSteps_[kMaxSimonSteps];
 	size_t simonStepCount_ = 0;
+	size_t currentSimonStep_ = 0;
+	int stepEnd_ = 0;
 };

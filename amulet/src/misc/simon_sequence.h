@@ -35,15 +35,15 @@ struct SimonStep
 
 constexpr size_t kMaxSimonSteps = 32;
 
-inline size_t generate_simon_sequence(uint8_t seed, uint8_t level, SimonStep out[kMaxSimonSteps])
+inline size_t generate_simon_sequence(uint8_t seed, uint8_t speed, uint8_t count, SimonStep out[kMaxSimonSteps])
 {
 	srand(seed);
 
-	int steps = 4 + level * 2;
+	int steps = min(count, kMaxSimonSteps / 2);
 	for (int i = 0; i < steps; i++)
 	{
 		out[i * 2].color = (SimonColor)(rand() % 4 + 1);
-		out[i * 2].duration = 420;
+		out[i * 2].duration = speed * 4;
 
 		out[i * 2 + 1].color = SimonColor::None;
 		out[i * 2 + 1].duration = 50;
