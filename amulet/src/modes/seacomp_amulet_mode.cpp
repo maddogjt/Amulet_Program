@@ -4,18 +4,23 @@
 #include "../communication/signal.h"
 #include "../settings/settings.h"
 #include "../leds/led.h"
+#include "../misc/seacomp_game.h"
 
 void SeacompAmuletMode::start()
 {
 	Serial.println("Starting seacomp mode");
-	anim_ = {};
-	anim_.anim_ = Anim::AnimScoreboard;
-	anim_.speed_ = 4;
+	scoreboardAnim_ = {};
+	scoreboardAnim_.anim_ = Anim::AnimScoreboard;
+	scoreboardAnim_.speed_ = 4;
+
+	victoryAnim_ = {};
+	victoryAnim_.anim_ = Anim::AnimPrism;
+
 	// Set the initial ambient animation
 	auto &config = localSettings_.startupConfig_;
-	start_animation(anim_);
+	start_animation(scoreboardAnim_);
 	advertising_start(AdvertisementType::Amulet, config.ad,
-					  (uint8_t *)&anim_, sizeof(anim_config_t));
+					  (uint8_t *)&scoreboardAnim_, sizeof(anim_config_t));
 }
 
 // returns true if animation was changed
@@ -61,8 +66,15 @@ void SeacompAmuletMode::set_animation_from_signal(Signal *s)
 	}
 	else
 	{
-		anim_.extra0_ = gameState_;
-		start_animation_if_new(anim_);
+		if (seacomp_game_state_is_victory(gameState_))
+		{
+			start_animation_if_new(victoryAnim_);
+		}
+		else
+		{
+			scoreboardAnim_.extra0_ = gameState_;
+			start_animation_if_new(scoreboardAnim_);
+		}
 	}
 }
 
@@ -74,3 +86,48 @@ void SeacompAmuletMode::loop()
 		set_animation_from_signal(signal);
 	}
 }
+
+/* button press for testing only
+void SeacompAmuletMode::buttonPressMode()
+{
+	static int stateIdx = 0;
+	stateIdx = (stateIdx + 1) % 8;
+	Serial.printf("New state idx: %d\n", stateIdx);
+	Serial.printf("New state int: %d\n", stateIdx);
+
+	if (stateIdx == 0)
+	{
+		gameState_ = seacomp_game_state(false, false, false);
+	}
+	if (stateIdx == 1)
+	{
+		gameState_ = seacomp_game_state(true, false, false);
+	}
+	if (stateIdx == 2)
+	{
+		gameState_ = seacomp_game_state(false, true, false);
+	}
+	if (stateIdx == 3)
+	{
+		gameState_ = seacomp_game_state(false, false, true);
+	}
+	if (stateIdx == 4)
+	{
+		gameState_ = seacomp_game_state(true, true, false);
+	}
+	if (stateIdx == 5)
+	{
+		gameState_ = seacomp_game_state(true, false, true);
+	}
+	if (stateIdx == 6)
+	{
+		gameState_ = seacomp_game_state(false, true, true);
+	}
+	if (stateIdx == 7)
+	{
+		gameState_ = seacomp_game_state(true, true, true);
+	}
+	Serial.printf("New state int: %d\n", gameState_);
+}
+
+*/

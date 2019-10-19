@@ -2,9 +2,14 @@
 
 #include <Arduino.h>
 
-constexpr uint8_t kSeacompGameSimon = 1 << 1;
-constexpr uint8_t kSeacompGameSafe = 1 << 2;
-constexpr uint8_t kSeacompGamePhotokey = 1 << 3;
+constexpr uint8_t kSeacompGameSimon = 1 << 0;
+constexpr uint8_t kSeacompGameSafe = 1 << 1;
+constexpr uint8_t kSeacompGamePhotokey = 1 << 2;
+
+inline bool seacomp_game_state_is_victory(uint8_t gameState)
+{
+	return gameState >= (kSeacompGameSimon | kSeacompGameSafe | kSeacompGamePhotokey);
+}
 
 inline uint8_t seacomp_game_state(bool solvedSimon, bool solvedSafe, bool solvedPhotokey)
 {
@@ -17,7 +22,7 @@ inline uint8_t seacomp_game_state(bool solvedSimon, bool solvedSafe, bool solved
 	{
 		ret |= kSeacompGameSafe;
 	}
-	if (solvedSafe)
+	if (solvedPhotokey)
 	{
 		ret |= kSeacompGamePhotokey;
 	}
