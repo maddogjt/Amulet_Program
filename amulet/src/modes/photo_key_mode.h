@@ -12,4 +12,6 @@ public:
 	void start() override;
 	void loop() override;
 	void buttonPressMode() override;
+	void startPuzzle();
+	void startVictory();
 };

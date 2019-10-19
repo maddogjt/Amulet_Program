@@ -1,6 +1,7 @@
 #pragma once
 
 #include "animation.h"
+#include "../src/misc/seacomp_game.h"
 
 class AnimScoreboard : public Animation
 {
@@ -13,6 +14,11 @@ public:
 	virtual void init()
 	{
 		LOG_LV1("LED", "Scoreboard::init");
+
+		simonSolved_ = params_.extra0_ & kSeacompGameSimon;
+		safeSolved_ = params_.extra0_ & kSeacompGameSafe;
+		photokeySolved_ = params_.extra0_ & kSeacompGamePhotokey;
+
 		hue = params_.color1_;
 		fill_solid(leds, RGB_LED_COUNT, CRGB::Black);
 	}

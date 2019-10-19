@@ -26,10 +26,42 @@ void SeacompAmuletMode::set_animation_from_signal(Signal *s)
 		anim_config_t pattern;
 		VERIFY_STATIC(sizeof(pattern) <= kMaxPayloadLen);
 		memcpy(&pattern, s->data_.payload, sizeof(anim_config_t));
-		start_animation_if_new(pattern);
+
+		if (!matches_current_animation(pattern))
+		{
+			if (pattern.anim_ == Anim::AnimVictory)
+			{
+				// change game state
+				gameState_ |= pattern.extra0_;
+			}
+			if (pattern.anim_ == Anim::AnimInNOut)
+			{
+				// since this is a new animation pattern we set the timestamp
+				timeAtTree_ = millis();
+			}
+			else
+			{
+				// we are changing to a pattern that is NOT orbit which means we are away from the tree
+				timeAtTree_ = 0;
+			}
+			start_animation_if_new(pattern);
+		}
+		else
+		{
+			if (pattern.anim_ == Anim::AnimInNOut && timeAtTree_ > 0)
+			{
+				int treeDuration = millis() - timeAtTree_;
+				if (treeDuration > 1000 * 60 * 5)
+				{
+					// reset game state. Amulet has been under tree for over 5 minutes
+					gameState_ = 0;
+				}
+			}
+		}
 	}
 	else
 	{
+		anim_.extra0_ = gameState_;
 		start_animation_if_new(anim_);
 	}
 }
