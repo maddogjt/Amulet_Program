@@ -18,9 +18,9 @@ constexpr int button_pins[4] = {15, 16, 7, 11}; // R,G,B,Y
 constexpr int freqs[5] = {310, 415, 209, 252, 150};
 constexpr int freq_bad = 150;
 
-constexpr int32_t kLevelCount = 7;
-constexpr uint8_t kLevelColors[kLevelCount] = {2, 3, 4, 5, 6, 7, 8};
-constexpr uint8_t kLevelSpeeds[kLevelCount] = {420 / 4, 420 / 4, 420 / 4, 420 / 4, 420 / 4, 420 / 4, 420 / 4};
+constexpr int32_t kLevelCount = 4;
+constexpr uint8_t kLevelColors[kLevelCount] = {2, 3, 4, 5};//, 6, 7, 8};
+constexpr uint8_t kLevelSpeeds[kLevelCount] = {420 / 4, 420 / 4, 420 / 4, 420 / 4};//, 420 / 4, 420 / 4, 420 / 4};
 
 Button buttons[4] = {{15}, {16}, {7}, {11}};
 
