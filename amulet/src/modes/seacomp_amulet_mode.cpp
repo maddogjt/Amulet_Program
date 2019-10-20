@@ -26,11 +26,34 @@ void SeacompAmuletMode::start()
 // returns true if animation was changed
 void SeacompAmuletMode::set_animation_from_signal(Signal *s)
 {
+	if (nullptr != s) {
+		anim_config_t pattern;
+		VERIFY_STATIC(sizeof(pattern) <= kMaxPayloadLen);
+		memcpy(&pattern, s->data_.payload, sizeof(anim_config_t));
+		if (pattern.anim_ == Anim::AnimSimon && ((gameState_ & kSeacompGameSimon) != 0))
+		{
+			s = nullptr;
+		}
+
+		if (pattern.anim_ == Anim::AnimPhotoKey && ((gameState_ & kSeacompGamePhotokey) != 0))
+		{
+			s = nullptr;
+		}
+
+		if (pattern.anim_ == Anim::AnimSafe && ((gameState_ & kSeacompGameSafe) != 0))
+		{
+			s = nullptr;
+			;
+		}
+	}
+
 	if (s != nullptr)
 	{
 		anim_config_t pattern;
 		VERIFY_STATIC(sizeof(pattern) <= kMaxPayloadLen);
 		memcpy(&pattern, s->data_.payload, sizeof(anim_config_t));
+
+
 
 		if (!matches_current_animation(pattern))
 		{
@@ -38,6 +61,9 @@ void SeacompAmuletMode::set_animation_from_signal(Signal *s)
 			{
 				// change game state
 				gameState_ |= pattern.extra0_;
+				if (seacomp_game_state_is_victory(gameState_)) {
+					resetTimeout_ = millis() + 1000 * 60 * 30;
+				}
 			}
 			if (pattern.anim_ == Anim::AnimInNOut)
 			{
@@ -56,10 +82,11 @@ void SeacompAmuletMode::set_animation_from_signal(Signal *s)
 			if (pattern.anim_ == Anim::AnimInNOut && timeAtTree_ > 0)
 			{
 				int treeDuration = millis() - timeAtTree_;
-				if (treeDuration > 1000 * 60 * 5)
+				if (treeDuration > 1000 * 60)
 				{
 					// reset game state. Amulet has been under tree for over 5 minutes
 					gameState_ = 0;
+					resetTimeout_ = INT32_MAX;
 				}
 			}
 		}
@@ -80,6 +107,13 @@ void SeacompAmuletMode::set_animation_from_signal(Signal *s)
 
 void SeacompAmuletMode::loop()
 {
+	if (millis() > resetTimeout_)
+	{
+		// reset game state. Amulet has been under tree for over 5 minutes
+		gameState_ = 0;
+		resetTimeout_ = INT32_MAX;
+	}
+
 	EVERY_N_MILLISECONDS(globalSettings_.animationUpdateTimer_)
 	{
 		Signal *signal = signal_get_current_top();
