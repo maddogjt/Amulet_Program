@@ -227,12 +227,11 @@ void run_first_boot() {
 
 void power_off()
 {
-#define DFU_MAGIC_IGNORE_PIN			0xC6
-
+#define DFU_MAGIC_SKIP 0x6d
 
     nrf_gpio_cfg_sense_input(PIN_DFU, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
 	nrf_gpio_cfg_sense_input(PIN_RESET, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
 
-	NRF_POWER->GPREGRET = DFU_MAGIC_IGNORE_PIN;
+	NRF_POWER->GPREGRET = DFU_MAGIC_SKIP;
     NRF_POWER->SYSTEMOFF = 1;
 }
