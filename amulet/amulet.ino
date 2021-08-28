@@ -200,19 +200,22 @@ extern CRGB gLeds[RGB_LED_COUNT];
 void run_first_boot() {
 	led_setup();
 	FastLED.setBrightness(20);
-	for (auto i =0; i < 10; i++) {
+	for (auto i = 0; i < RGB_LED_COUNT; i++)
+	{
 		gLeds[i] = CRGB::Red;
 	}
 	FastLED.show();
 	delay(1000);
 
-	for (auto i =0; i < 10; i++) {
+	for (auto i = 0; i < RGB_LED_COUNT; i++)
+	{
 		gLeds[i] = CRGB::Green;
 	}
 	FastLED.show();
 	delay(1000);
 
-		for (auto i =0; i < 10; i++) {
+	for (auto i = 0; i < RGB_LED_COUNT; i++)
+	{
 		gLeds[i] = CRGB::Blue;
 	}
 	FastLED.show();
