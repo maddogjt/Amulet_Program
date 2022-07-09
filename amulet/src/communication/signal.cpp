@@ -4,6 +4,7 @@
 #include "../settings/settings.h"
 
 static Signal *gTopSignal = nullptr;
+static bool gMimicMode = false;
 
 // Precise method, which guarantees v = v1 when t = 1.
 float lerp(float v0, float v1, float t)
@@ -15,6 +16,10 @@ float compute_strength(int8_t rssi, const amulet_mfg_data_t &data) {
 	return data.power;
 }
 
+void set_mimic_mode(bool mimic) {
+	gMimicMode = mimic;
+}
+
 void signal_add_scan_data(int8_t rssi, const amulet_mfg_data_t &data)
 {
 	// if (gMode == AMULET_MODE_RUNE && s.signal_type != (uint8_t)AdvertisementType::Amulet)
@@ -23,7 +28,7 @@ void signal_add_scan_data(int8_t rssi, const amulet_mfg_data_t &data)
 	// 	return;
 	// }
 
-	if (data.signal_type == (uint8_t)AdvertisementType::Amulet)
+	if (data.signal_type == (uint8_t)AdvertisementType::Amulet && !gMimicMode)
 	{
 		// Amulets do not care about amulets;
 		return;

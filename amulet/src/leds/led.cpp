@@ -1,6 +1,7 @@
 #include "led.h"
 
 #include "../settings/settings.h"
+#include "../misc/system_sleep.h"
 
 #include <FastLED.h>
 
@@ -11,8 +12,15 @@
 #define COLOR_ORDER GRB
 
 CRGB gLeds[RGB_LED_COUNT];
-
 CRGB bikeModeLeds[BIKE_LED_COUNT];
+
+uint32_t gTurnOffTime = 0;
+bool gWaitingToSleep = false;
+
+LedBrightness g_brightness_mode = LedBrightness::Medium;
+bool g_override_brightness_mode = false;
+uint8_t g_old_brightness = 0;
+
 
 void led_setup()
 {
@@ -28,6 +36,11 @@ void led_setup()
 	}
 	FastLED.addLeds<LED_TYPE, BIKE_MODE_PIN, COLOR_ORDER>(bikeModeLeds, BIKE_LED_COUNT).setCorrection(TypicalLEDStrip);
 #endif
+}
+
+LedBrightness led_get_brightness()
+{
+	return g_brightness_mode;
 }
 
 void led_loop(int step)
@@ -46,12 +59,17 @@ void led_loop(int step)
 		}
 	}
 
-	FastLED.show();
+	if ( g_brightness_mode != LedBrightness::Off ) {
+		FastLED.show();
+	} else if( gWaitingToSleep && gTurnOffTime + 30000 < millis() ) {
+		Serial.println("[LED] Going to sleep now");
+		// TODO: Only do this in blinky mode
+		gWaitingToSleep = false;
+		write_local_settings();
+		power_off();
+	}
 #endif
 }
-
-LedBrightness g_brightness_mode = LedBrightness::Medium;
-bool g_override_brightness_mode = false;
 
 void led_set_brightness(LedBrightness brightness)
 {
@@ -81,18 +99,26 @@ void led_set_brightness(LedBrightness brightness)
 		newLedPower = false;
 	}
 
-#if !defined(NO_RGB_LEDS)
-
+#if !defined(NO_RGB_LEDS) 
 	if (newLedPower)
 	{
 		// Turn on LED power rail
-		LOG_LV1("BRIT", "Setting brightness to %d (mode %d)", newBrightness, brightness);
+		if ( newBrightness != g_old_brightness ) {
+			LOG_LV1("BRIT", "Setting brightness to %d (mode %d)", newBrightness, brightness);
+		}
 		digitalWrite(PIN_RGB_LED_PWR, RGB_LED_PWR_ON);
 		FastLED.setBrightness(newBrightness);
+		gWaitingToSleep = false;
 	}
 	else
 	{
-		LOG_LV1("BRIT", "Turning off LED power rail (mode %d)", brightness);
+		if ( newBrightness != g_old_brightness ) {
+			LOG_LV1("BRIT", "Turning off LED power rail (mode %d)", brightness);
+
+			// Only blinkies turn off after 30s, the other modes keep on and keep advertising.
+			gWaitingToSleep = (localSettings_.startupConfig_.mode==AMULET_MODE_BLINKY);
+			gTurnOffTime = millis();
+		}
 		FastLED.setBrightness(newBrightness);
 		// Turn off the LED power rail
 		digitalWrite(PIN_RGB_LED_PWR, !RGB_LED_PWR_ON);
@@ -100,6 +126,7 @@ void led_set_brightness(LedBrightness brightness)
 		// TODO: Also turn off bluetooth.
 		// FEATURE: Maybe advertise in special off mode so we can find lost beacons by rssi?
 	}
+	g_old_brightness = newBrightness;
 #endif
 }
 

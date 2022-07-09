@@ -7,12 +7,10 @@
 #include "src/leds/led.h"
 #include "src/settings/dev_mode.h"
 #include "src/settings/settings.h"
-
+#include "src/misc/system_sleep.h"
 
 Button dfuButton(PIN_DFU, 25, true, true);
 Button resetButton(PIN_RESET, 25, true, true);
-
-void systemSleep();
 
 bool devEnabled = false;
 
@@ -53,6 +51,7 @@ void setup()
 
 	bool enableUart = config.enterConfigMode_;
 	ble_setup(enableUart);
+
 
 	amulet_mode_start(config.mode, config.enterConfigMode_);
 }
@@ -102,6 +101,7 @@ void loop()
 		led_set_brightness(LedBrightness::Off);
 		digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 
+		// DFU pressed for more than 5s, less than 12.5s
 		while (millis() - start < 7500)
 		{
 			dfuButton.read();
@@ -175,24 +175,10 @@ void loop()
 		}
 	}
 	
-
 	dfuPrevPressedFor2k = dfuButton.pressedFor(2000);
 	resetPrevPressedFor2k = (!devEnabled) ? resetButton.pressedFor(2000) : false;
 	FastLED.delay(1000 / ANIMATION_FRAMERATE);
 	step++;
-}
-
-void systemSleep()
-{
-	Serial.println("Going to sleep now");
-
-	digitalWrite(LED_BUILTIN, LED_STATE_ON);
-	delay(500);
-
-	led_set_brightness(LedBrightness::Off);
-	digitalWrite(LED_BUILTIN, !LED_STATE_ON);
-
-	power_off();
 }
 
 extern CRGB gLeds[RGB_LED_COUNT];
@@ -218,21 +204,10 @@ void run_first_boot() {
 	FastLED.show();
 	delay(1000);
 
-	localSettings_.startupConfig_.mode = AMULET_MODE_SEACOMP_AMULET;
+	localSettings_.startupConfig_.mode = AMULET_MODE_BLINKY;
 	write_local_settings();
 
 	
 	systemSleep();
 }
 
-void power_off()
-{
-#define DFU_MAGIC_IGNORE_PIN			0xC6
-
-
-    nrf_gpio_cfg_sense_input(PIN_DFU, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
-	nrf_gpio_cfg_sense_input(PIN_RESET, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
-
-	NRF_POWER->GPREGRET = DFU_MAGIC_IGNORE_PIN;
-    NRF_POWER->SYSTEMOFF = 1;
-}

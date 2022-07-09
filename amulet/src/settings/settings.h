@@ -17,10 +17,6 @@ struct StartupConfig
 
 	// The animation
 	anim_config_t burnPattern_{};
-	anim_config_t simonPattern_{};
-	anim_config_t seacompAmuletPattern_{};
-	anim_config_t safePattern_{};
-	anim_config_t photoKeyPattern_{};
 
 	// bool operator==(const StartupConfig &c) const
 	// {
@@ -29,25 +25,10 @@ struct StartupConfig
 
 	anim_config_t &getConfigModeAnim(amulet_mode_t mode)
 	{
-		if (mode == AMULET_MODE_BURN)
+		if (mode == AMULET_MODE_BLINKY)
 		{
 			return burnPattern_;
-		} else if (mode == AMULET_MODE_SIMON)
-		{
-			return simonPattern_;
-		}
-		else if (mode == AMULET_MODE_SEACOMP_AMULET)
-		{
-			return seacompAmuletPattern_;
-		}
-		else if (mode == AMULET_MODE_PHOTOKEY)
-		{
-			return photoKeyPattern_;
-		}
-		else if (mode == AMULET_MODE_SAFE)
-		{
-			return safePattern_;
-		}
+		} 
 		else
 		{
 			return burnPattern_;
@@ -77,6 +58,9 @@ typedef struct __attribute__((packed))
 	size_t configSize_;
 	StartupConfig startupConfig_;
 	uint8_t brightness_[3];
+
+	uint8_t blinkyAnimIndex_;
+	bool blinkyAltAnim_;
 
 	bool bikeMode_;
 	bool bikeExtend_;

@@ -7,11 +7,11 @@ enum class AnimationModifier : uint8_t{
 	Fold,   /**< Top 4 leds mirror bottom 4 leds */
 	Mirror, /**< The left side mirrors the right side */
 	Loop,   /**< The left side mirrors the right side, but upside down */
-	Cycle,
-	Shift,
-	Blur,
-	Flip,
-	Scramble,
+	Cycle,  /**< Slowly moves the pattern around the amulet */
+	Shift,  /**< mirror, but swaps the RGB channels on one half  */
+	Blur, 	/**< uses fastled blur func. not sure if its done right  */
+	Flip,	/**< Just swaps the middle leds  */
+	Scramble,	/**< Swaps the LEDs in a fixed but arbitrary way  */
 
 	Count
 };

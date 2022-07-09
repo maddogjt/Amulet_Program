@@ -106,30 +106,24 @@ void modeCycle(bool next, uint8_t unused)
 	auto &config = getConfig();
 	config.mode = (amulet_mode_t)currentMode;
 
-	if (config.mode == AMULET_MODE_BURN)
+	if (config.mode == AMULET_MODE_RUNE)
 	{
 		config.ad.power = 150;
 		config.ad.decay = 96;
 		config.ad.range = -90;
 	}
-	// else if (config.mode == AMULET_MODE_RUNE)
-	// {
-	// 	config.ad.power = 150;
-	// 	config.ad.decay = 96;
-	// 	config.ad.range = -90;
-	// }
-	// else if (config.mode == AMULET_MODE_BEACON_POWER_AMULET)
-	// {
-	// 	config.ad.power = 180;
-	// 	config.ad.decay = 160;
-	// 	config.ad.range = -70;
-	// }
-	// else if (config.mode == AMULET_MODE_AMULET)
-	// {
-	// 	config.ad.power = 80;
-	// 	config.ad.decay = 64;
-	// 	config.ad.range = -70;
-	// }
+	else if (config.mode == AMULET_MODE_BEACON)
+	{
+		config.ad.power = 150;
+		config.ad.decay = 96;
+		config.ad.range = -90;
+	}
+	else if (config.mode == AMULET_MODE_BLINKY)
+	{
+		config.ad.power = 80;
+		config.ad.decay = 64;
+		config.ad.range = -70;
+	}
 }
 
 void powerCycle(bool next, uint8_t unused)

@@ -18,6 +18,16 @@ constexpr const char *animNames_[]{
 #undef DEFINE_ANIM
 };
 
+bool getCurrentAnimationPattern(anim_config_t &config)
+{
+	if (currentAnim!=nullptr) {
+		config = currentAnim->params_;
+		return true;
+	}
+
+	return false;
+}
+
 const char *animation_get_name(Anim anim)
 {
 	if ((int)anim >= 0 && anim < Anim::Count)
@@ -67,7 +77,7 @@ void start_animation(const anim_config_t &pattern)
 		animation_overlay_set(currentAnim->params_.overlay_, currentAnim->params_.filter_);
 
 		LOG_LV1("ANIM", "New Current Anim %s", animation_get_name(currentAnim->params_.anim_));
-		LOG_LV1("ANIM", "  F: %d M %d F: %d", currentAnim->params_.modifiers_, currentAnim->params_.overlay_, currentAnim->params_.filter_);
+		LOG_LV1("ANIM", "  M: %d O: %d F: %d", currentAnim->params_.modifiers_, currentAnim->params_.overlay_, currentAnim->params_.filter_);
 
 		frame_counter = 0;
 		currentAnim->init();

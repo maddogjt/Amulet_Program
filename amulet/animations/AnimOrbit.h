@@ -15,7 +15,6 @@ public:
 		hue = params_.color1_;
 		hue2 = params_.color2_;
 		extra0 = params_.extra0_;
-		extra1 = params_.extra1_;
 
 		fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));
 	}

@@ -12,6 +12,7 @@ enum class LedBrightness
 void led_setup();
 void led_loop(int step);
 
+LedBrightness led_get_brightness();
 void led_set_brightness(LedBrightness brightness);
 void led_next_brightness();
 void led_refresh_brightness();

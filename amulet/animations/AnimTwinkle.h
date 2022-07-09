@@ -33,7 +33,7 @@ public:
 			fadeToBlackBy(leds, RGB_LED_COUNT, 110);
 			leds[random8(0, 4)] = CHSV((hue2 += 30), 255, 192);
 			leds[random8(4, 8)] = CHSV((hue2 += 30), 255, 192);
-			//addGlitter(80);
+			addGlitter(80);
 		}
 	}
 };

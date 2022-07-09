@@ -31,6 +31,7 @@ const char *animation_overlay_get_filter_name(OverlayFilter filter_number)
 
 void animation_overlay_set(Anim animation, OverlayFilter filter)
 {
+	gCurrentFilter = filter;
 	if (gCurrentOverlay != nullptr)
 	{
 		delete gCurrentOverlay;

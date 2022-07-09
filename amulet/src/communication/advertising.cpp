@@ -88,7 +88,7 @@ static void start_advertising_with_data(amulet_mfg_data_t &data)
 }
 
 void advertising_setup(bool advertise, bool uart)
-{\
+{
 	if (advertise && uart)
 	{
 		LOG_LV1("BLE", "Error: we can't advertise and have a uart service");

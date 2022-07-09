@@ -19,6 +19,11 @@ void scanning_setup()
 	Bluefruit.Scanner.start(0);						// 0 = Don't stop scanning after n seconds
 }
 
+void scanning_stop()
+{
+	Bluefruit.Scanner.stop();
+}
+
 /*------------------------------------------------------------------*/
 /* Central (Scanner)
  *------------------------------------------------------------------*/

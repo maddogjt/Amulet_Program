@@ -14,10 +14,13 @@ class AnimTwister : public Animation
 public:
 	virtual void init()
 	{
-		twisterColors[0] = CRGB::Green;
-		twisterColors[1] = CRGB::Yellow;
-		twisterColors[2] = CRGB::Blue;
-		twisterColors[3] = CRGB::Red;
+		// Pride Colors
+		twisterColors[0] = CRGB::Red;
+		twisterColors[1] = CRGB::Orange;
+		twisterColors[2] = CRGB::Yellow;
+		twisterColors[3] = CRGB::Green;
+		twisterColors[4] = CRGB::Blue;
+		twisterColors[5] = CRGB::Purple;
 
 		LOG_LV1("LED", "Twister::init");
 
@@ -33,7 +36,7 @@ public:
 		{
 			for (int i = 0; i < RGB_LED_COUNT; i++)
 			{
-				if (random8() % 3 == 0)
+				if (random8() % 15 == 0)
 				{
 					leds[i] = twisterColors[random8() % countof(twisterColors)];
 				}
@@ -41,5 +44,5 @@ public:
 		}
 	}
 
-	CRGB twisterColors[4];
+	CRGB twisterColors[6];
 };

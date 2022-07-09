@@ -7,6 +7,8 @@
 #define ANIMATION_FRAMERATE 120
 #define ANIMATION_FLAG_USE_SIGNAL_POWER (0x10) /**< Set signal power parameter */
 
+bool getCurrentAnimationPattern(anim_config_t &config);
+
 class Animation
 {
 public:

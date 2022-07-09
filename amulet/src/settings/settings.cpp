@@ -7,8 +7,8 @@ using namespace Adafruit_LittleFS_Namespace;
 
 bool settingsValid_ = false;
 
-constexpr int16_t kGlobalSettingsSig = 0x6114;
-constexpr int16_t kLocalSettingsSig = 0x10F3;
+constexpr int16_t kGlobalSettingsSig = 0x6115;
+constexpr int16_t kLocalSettingsSig = 0x10F4;
 
 constexpr char kGlobalSettingsFile[] = "globalSettings";
 constexpr char kLocalSettingsFile[] = "localSettings";
@@ -34,30 +34,27 @@ LocalSettings localSettings_{
 	.configSize_ = sizeof(StartupConfig),
 	.startupConfig_ = {},
 	.brightness_ = {4, 8, 20},
+	.blinkyAnimIndex_=0,
+	.blinkyAltAnim_=false,
 	.bikeMode_ = false,
 	.bikeExtend_ = true,
 };
 
 void settings_init()
 {
+	// Set local defaults
 	kDefaultPattern.speed_ = 16;
-
 	localSettings_.startupConfig_.mode = AMULET_MODE_FIRSTBOOT;
-	// localSettings_.startupConfig_.ambientPattern_ = kDefaultPattern;
-	// localSettings_.startupConfig_.beaconPattern_ = kDefaultPattern;
-	// localSettings_.startupConfig_.powerPattern_ = kDefaultPattern;
-	// localSettings_.startupConfig_.runePattern_ = kDefaultPattern;
-	localSettings_.startupConfig_.seacompAmuletPattern_ = kDefaultPattern;
 	localSettings_.startupConfig_.burnPattern_ = kDefaultPattern;
-	localSettings_.startupConfig_.simonPattern_ = kDefaultPattern;
-	localSettings_.startupConfig_.safePattern_ = kDefaultPattern;
-	localSettings_.startupConfig_.photoKeyPattern_ = kDefaultPattern;
 	localSettings_.startupConfig_.ad = {
 		.power = 100,
 		.decay = 128,
 		.range = -80,
 	};
 
+	// Load Global settings
+	// Load global settings from file system 
+	// UNLESS globalSettings_ has a different sig, or a higher version.
 	InternalFS.begin();
 	if (InternalFS.exists(kGlobalSettingsFile))
 	{
@@ -84,6 +81,9 @@ void settings_init()
 		}
 	}
 
+	// Load Local settings
+	// Load local settings from file system 
+	// UNLESS localSettings_ has a different sig, different size or an equal or higher version.
 	if (InternalFS.exists(kLocalSettingsFile))
 	{
 		Serial.println("Reading local settings");

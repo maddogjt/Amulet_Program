@@ -20,5 +20,6 @@ public:
 };
 
 void signal_loop(int step);
+void set_mimic_mode(bool mimic);
 void signal_add_scan_data(int8_t rssi, const amulet_mfg_data_t &data);
 Signal *signal_get_current_top();

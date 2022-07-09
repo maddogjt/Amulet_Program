@@ -1,10 +1,8 @@
 #include "mode.h"
 #include "burn_mode.h"
+#include "blinky_mode.h"
+#include "rune_mode.h"
 #include "config_mode.h"
-#include "photo_key_mode.h"
-#include "safe_mode.h"
-#include "seacomp_amulet_mode.h"
-#include "simon_mode.h"
 
 #include "../leds/led.h"
 
@@ -14,20 +12,14 @@ const char *get_config_mode_name(amulet_mode_t mode)
 {
 	switch (mode)
 	{
-	case AMULET_MODE_BURN:
-		return "burn";
+	case AMULET_MODE_BLINKY:
+		return "blinky";
 		break;
-	case AMULET_MODE_SIMON:
-		return "simon";
+	case AMULET_MODE_RUNE:
+		return "rune";
 		break;
-	case AMULET_MODE_SEACOMP_AMULET:
-		return "seacompam";
-		break;
-	case AMULET_MODE_SAFE:
-		return "safe";
-		break;
-	case AMULET_MODE_PHOTOKEY:
-		return "photokey";
+	case AMULET_MODE_BEACON:
+		return "beacon";
 		break;
 	case AMULET_MODE_COUNT:
 	default:
@@ -45,31 +37,17 @@ AmuletMode *amulet_mode_start(amulet_mode_t mode, bool enterConfig)
 
 	if (enterConfig) {
 		gAmuletMode = new ConfigMode();
-	} else if (mode == AMULET_MODE_BURN) {
-		gAmuletMode = new BurnMode();
-	}
-	else if (mode == AMULET_MODE_SIMON)
-	{
-		gAmuletMode = new SimonMode();
-	}
-	else if (mode == AMULET_MODE_SEACOMP_AMULET)
-	{
-		gAmuletMode = new SeacompAmuletMode();
-	}
-	else if (mode == AMULET_MODE_SAFE)
-	{
-		gAmuletMode = new SafeMode();
-	}
-	else if (mode == AMULET_MODE_PHOTOKEY)
-	{
-		gAmuletMode = new PhotoKeyMode();
-	}
-	else
-	{
+	} else if (mode == AMULET_MODE_BLINKY) {
+		gAmuletMode = new BlinkyMode();
+	} else if (mode == AMULET_MODE_RUNE) {
+		gAmuletMode = new RuneMode();
+	} else if (mode == AMULET_MODE_BEACON) {
+		gAmuletMode = new RuneMode();
+	} else {
 		gAmuletMode = new ConfigMode();
 	}
-		gAmuletMode->start();
-
+	
+	gAmuletMode->start();
 	return gAmuletMode;
 }
 
