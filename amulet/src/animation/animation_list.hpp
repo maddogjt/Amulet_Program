@@ -26,6 +26,7 @@
 #include "../../animations/AnimTwinkle.h"
 #include "../../animations/AnimFlame.h"
 
+#include "../../animations/AnimVictory.h"
 
 // #include "../../animations/AnimDebugInfo.h"
 
@@ -33,7 +34,6 @@
 // #include "../../animations/AnimSafe.h"
 // #include "../../animations/AnimPhotoKey.h"
 // #include "../../animations/AnimScoreboard.h"
-// #include "../../animations/AnimVictory.h"
 #else
 
 #ifndef DEFINE_ANIM
