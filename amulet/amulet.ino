@@ -58,8 +58,8 @@ void setup()
 
 int step = 0;
 
-bool dfuPrevPressedFor2k = false;
-bool resetPrevPressedFor2k = false;
+bool longPressDfu = false;
+bool longPressReset = false;
 
 void loop()
 {
@@ -153,30 +153,47 @@ void loop()
 
 	if (dfuButton.wasReleased())
 	{
-		if (dfuButton.wasReleased() && dfuPrevPressedFor2k)
+		if (longPressDfu)
 		{
-			amulet_mode_get()->buttonHoldMode();
+			amulet_mode_get()->buttonHoldMode(true);
 		}
 		else
 		{
-			amulet_mode_get()->buttonPressMode();
+			amulet_mode_get()->buttonPressMode(true);
 		}
+	}
+
+	if (dfuButton.wasPressed())
+	{
+		amulet_mode_get()->buttonPressMode(false);
 	}
 
 	if (!devEnabled && resetButton.wasReleased())
 	{
-		if (resetButton.wasReleased() && resetPrevPressedFor2k)
+		if (longPressReset)
 		{
-			amulet_mode_get()->buttonHoldReset();
+			amulet_mode_get()->buttonHoldReset(true);
 		}
 		else
 		{
-			amulet_mode_get()->buttonPressReset();
+			amulet_mode_get()->buttonPressReset(true);
 		}
 	}
+
+	if (!devEnabled && resetButton.wasPressed())
+	{
+		amulet_mode_get()->buttonPressReset(false);
+	}
 	
-	dfuPrevPressedFor2k = dfuButton.pressedFor(2000);
-	resetPrevPressedFor2k = (!devEnabled) ? resetButton.pressedFor(2000) : false;
+	if (!longPressDfu && dfuButton.pressedFor(1000)) {
+		amulet_mode_get()->buttonHoldMode(false);
+	} 
+	longPressDfu = dfuButton.pressedFor(1000);
+	
+	if (!longPressReset && (!devEnabled) ? resetButton.pressedFor(1000) : false) {
+		amulet_mode_get()->buttonHoldReset(false);
+	}
+	longPressReset = (!devEnabled) ? resetButton.pressedFor(1000) : false;
 	FastLED.delay(1000 / ANIMATION_FRAMERATE);
 	step++;
 }

@@ -12,8 +12,8 @@ class RuneMode : public AmuletMode
 public:
 	void start() override;
 	void loop() override;
-	void buttonPressReset() override;
-	void buttonPressMode() override;
+	void buttonPressReset(bool released) override;
+	void buttonPressMode(bool released) override;
 	
 	// startup
 	bool ignoreNextButton = true;

@@ -237,9 +237,9 @@ constexpr auto kAnimCount = sizeof(g_AnimCyclers) / sizeof(g_AnimCyclers[0]);
 
 const char *g_AnimCyclerNames[] = {
 	"animation",
-	"speed",
 	"color 1",
 	"color 2",
+	"speed",
 	"flag",
 	"mask",
 	"filter",

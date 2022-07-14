@@ -15,30 +15,93 @@ void BlinkyMode::start() {
 
 	for (int i = 0; i < 14; i++) {
 		animations_[i] = {};
-		animations_[i].anim_ = (Anim)(i);
-		animations_[i].speed_ = 4;
-
 		altAnimations_[i] = {};
-		altAnimations_[i].anim_ = (Anim)(i);
 		switch (i)
 		{
-		case (int)Anim::AnimSolidHue:
-		case (int)Anim::AnimRainbow:
-		case (int)Anim::AnimTwister:
-		case (int)Anim::AnimBurn:
-		case (int)Anim::AnimJump:
-		case (int)Anim::AnimOrbit:
-		case (int)Anim::AnimTwinkle:
-		case (int)Anim::AnimInNOut:
-		case (int)Anim::AnimCylon:
-		case (int)Anim::AnimJuggle:
-		case (int)Anim::AnimPsyco:
-		case (int)Anim::AnimSinelon:
-		case (int)Anim::AnimBPM:
-		case (int)Anim::AnimConfetti:
+		case 0:
+			animations_[i].anim_ = Anim::AnimPrism;
+			animations_[i].modifiers_ = AnimationModifier::Ocean;
+			altAnimations_[i].anim_ = Anim::AnimPrism;
+			break;
+		case 1:
+			animations_[i].anim_ = Anim::AnimRainbow;
+			animations_[i].speed_ = 4;
+			altAnimations_[i].anim_ = Anim::AnimRainbow;
+			altAnimations_[i].modifiers_ = AnimationModifier::Blush;
+			altAnimations_[i].speed_ = 4;
+			break;
+		case 2:
+			animations_[i].anim_ = Anim::AnimTwister;
+			altAnimations_[i].anim_ = Anim::AnimTwister;
 			altAnimations_[i].modifiers_ = AnimationModifier::Shift;
-	
+			break;
+		case 3:
+			animations_[i].anim_ = Anim::AnimBurn;
+			altAnimations_[i].anim_ = Anim::AnimBurn;
+			altAnimations_[i].modifiers_ = AnimationModifier::Ocean;
+			break;
+		case 4:
+			animations_[i].anim_ = Anim::AnimJump;
+			altAnimations_[i].anim_ = Anim::AnimJump;
+			altAnimations_[i].modifiers_ = AnimationModifier::FoldAutumn;
+			break;
+		case 5:
+			animations_[i].anim_ = Anim::AnimOrbit;
+			altAnimations_[i].anim_ = Anim::AnimOrbit;
+			altAnimations_[i].modifiers_ = AnimationModifier::Bifold;
+			break;
+		case 6:
+			animations_[i].anim_ = Anim::AnimTwinkle;
+			altAnimations_[i].anim_ = Anim::AnimTwinkle;
+			altAnimations_[i].extra0_ = 1;
+			break;
+		case 7:
+			animations_[i].anim_ = Anim::AnimInNOut;
+			altAnimations_[i].anim_ = Anim::AnimInNOut;
+			altAnimations_[i].modifiers_ = AnimationModifier::Scramble;
+			altAnimations_[i].filter_ = OverlayFilter::Right;
+			break;
+		case 8:
+			animations_[i].anim_ = Anim::AnimCylon;
+			altAnimations_[i].anim_ = Anim::AnimCylon;
+			altAnimations_[i].modifiers_ = AnimationModifier::Shift;
+			break;
+		case 9:
+			animations_[i].anim_ = Anim::AnimJuggle;
+			animations_[i].modifiers_ = AnimationModifier::Ocean;
+			altAnimations_[i].anim_ = Anim::AnimJuggle;
+			altAnimations_[i].modifiers_ = AnimationModifier::Autumn;
+			break;
+		case 10:
+			animations_[i].anim_ = Anim::AnimPsyco;
+			animations_[i].modifiers_ = AnimationModifier::Ocean;
+			altAnimations_[i].anim_ = Anim::AnimPsyco;
+			altAnimations_[i].modifiers_ = AnimationModifier::Mirror;
+			altAnimations_[i].filter_ = OverlayFilter::Darken;
+			altAnimations_[i].color1_ = CRGB::Teal;
+			break;
+		case 11:
+			animations_[i].anim_ = Anim::AnimShadow;
+			altAnimations_[i].anim_ = Anim::AnimShadow;
+			altAnimations_[i].modifiers_ = AnimationModifier::Shift;
+			break;
+		case 12:
+			animations_[i].anim_ = Anim::AnimBPM;
+			animations_[i].modifiers_ = AnimationModifier::Blush;
+			animations_[i].speed_ = 32;
+			altAnimations_[i].anim_ = Anim::AnimBPM;
+			altAnimations_[i].modifiers_ = AnimationModifier::Mirror;
+			altAnimations_[i].speed_ = 16;
+			break;
+		case 13:
+			animations_[i].anim_ = Anim::AnimConfetti;
+			altAnimations_[i].anim_ = Anim::AnimConfetti;
+			altAnimations_[i].modifiers_ = AnimationModifier::Shift;
+			break;
 		default:
+			animations_[i].anim_ = (Anim)i;
+			altAnimations_[i].anim_ = (Anim)i;
+			altAnimations_[i].modifiers_ = AnimationModifier::Shift;
 			break;
 		}
 	}
@@ -48,6 +111,7 @@ void BlinkyMode::start() {
 
 	mimicRestingAnim_ = {};
 	mimicRestingAnim_.anim_ = Anim::AnimBounce;
+	mimicRestingAnim_.color2_ = CRGB::CornflowerBlue;
 
 	// Set the initial animation
 	currentAnim_ = localSettings_.blinkyAnimIndex_;
@@ -78,7 +142,8 @@ void BlinkyMode::start_current_anim()
 	else if (currentAnim_ == MIMIC_IDX) {
 		// Mimic mode
 		set_mimic_mode(true);
-		if (millis() < lastSignalTime_ + 5000) {
+		if (millis() < lastSignalTime_ + 10000) {
+			// Keep a seen pattern for at least 10s before losing it
 			start_animation_if_new(lastSignalPattern_);
 		} else {
 			start_animation_if_new(mimicRestingAnim_);
@@ -94,14 +159,21 @@ void BlinkyMode::start_current_anim()
 void BlinkyMode::advertiseCurrentPattern(const AdvertisementType adType)
 {
 	// Start Amulet broadcast
-	// BUG: will crash if currentAnim is too high
-	auto anim = animAltMode_ ? altAnimations_[currentAnim_] : animations_[currentAnim_];
 	advertising_stop();
-	advertising_start(
-		adType,
-		localSettings_.startupConfig_.ad,
-		(uint8_t *)&anim,
-		sizeof(anim));
+	if (currentAnim_ < 14) {
+		auto anim = animAltMode_ ? altAnimations_[currentAnim_] : animations_[currentAnim_];
+		advertising_start(
+			adType,
+			localSettings_.startupConfig_.ad,
+			(uint8_t *)&anim,
+			sizeof(anim));
+	} else if (currentAnim_ == 15) {
+		advertising_start(
+			adType,
+			localSettings_.startupConfig_.ad,
+			(uint8_t *)&localSettings_.startupConfig_.burnPattern_,
+			sizeof(localSettings_.startupConfig_.burnPattern_));
+	}
 }
 
 // returns true if animation was changed
@@ -121,16 +193,20 @@ void BlinkyMode::set_animation_from_signal(Signal *s)
 			memcpy(&newPattern, s->data_.payload, sizeof(anim_config_t));
 			
 			lastSignalTime_ = millis();
-			if (newPattern == lastSignalPattern_) {
-				if (lastRuneTime_ + 30000 < millis() && !(localSettings_.startupConfig_.burnPattern_ == newPattern)) {
-					// We've been near this rune for a while, save it to config
-					localSettings_.startupConfig_.burnPattern_ = newPattern;
-					write_local_settings();
+			if (s->data_.signal_type == (uint8_t)AdvertisementType::Runic) {
+				if (newPattern == lastSignalPattern_) {
+					if (lastRuneTime_ + 30000 < millis() && !(localSettings_.startupConfig_.burnPattern_ == newPattern)) {
+						// We've been near this rune for a while, save it to config
+						localSettings_.startupConfig_.burnPattern_ = newPattern;
+						write_local_settings();
+					}
+				} else {
+					// its a different pattern than the last signal.
+					// Reset the rune time
+					lastRuneTime_ = millis();
 				}
 			} else {
-				// its a differnt pattern than the last signal.
-				// Reset the rune time
-				lastRuneTime_ = (s->data_.signal_type == (uint8_t)AdvertisementType::Runic) ? millis() : 0;
+				lastRuneTime_ = 0;
 			}
 			lastSignalPattern_ = newPattern;
 			start_animation_if_new(lastSignalPattern_);
@@ -184,6 +260,7 @@ void BlinkyMode::loop() {
 	if ( changeAnimTime_ != 0 && millis() > changeAnimTime_ + 1000)
 	{
 		changeAnimTime_ = 0;
+		updateAmuletAdvertising = true;
 		this->start_current_anim();
 	}
 }
@@ -200,22 +277,20 @@ void BlinkyMode::broadcastAction() {
 
 void BlinkyMode::nextAnimationAction() {
 	currentAnim_ = (currentAnim_+1) % 16;
-	displayCodeAnim_.extra0_ = currentAnim_;
-	updateAmuletAdvertising = true;
+	displayCodeAnim_.extra0_ = currentAnim_ + (animAltMode_ ? 16 : 0);
 
 	start_animation_if_new(displayCodeAnim_);
 	changeAnimTime_ = millis();
-
 	localSettings_.blinkyAnimIndex_ = currentAnim_;
 }
 
 void BlinkyMode::altAnimationAction() {
 	animAltMode_ = !animAltMode_;
-	localSettings_.blinkyAltAnim_ = animAltMode_;
+	displayCodeAnim_.extra0_ = currentAnim_ + (animAltMode_ ? 16 : 0);
 
-	updateAmuletAdvertising = true;
+	start_animation_if_new(displayCodeAnim_);
 	changeAnimTime_ = millis();
-	this->start_current_anim();
+	localSettings_.blinkyAltAnim_ = animAltMode_;
 }
 
 void BlinkyMode::ledBrightnessAction() {
@@ -224,8 +299,11 @@ void BlinkyMode::ledBrightnessAction() {
 }
 
 // Brightness/Power Action
-void BlinkyMode::buttonPressReset() {
-	LOG_LV1("MODE", "Blinky press reset");
+void BlinkyMode::buttonPressReset(bool released) {
+	LOG_LV1("MODE", "Blinky press reset %d", released);
+	if (!released) {
+		return;
+	}
 	if (!ignoreNextButton) {
 		this->ledBrightnessAction();
 	} else {
@@ -234,8 +312,11 @@ void BlinkyMode::buttonPressReset() {
 }
 
 // Broadcast
-void BlinkyMode::buttonHoldReset() {
-	LOG_LV1("MODE", "Blinky hold reset");
+void BlinkyMode::buttonHoldReset(bool released) {
+	LOG_LV1("MODE", "Blinky hold reset %d", released);
+	if (!released) {
+		return;
+	}
 	if (!ignoreNextButton) {
 		this->broadcastAction();
 	} else {
@@ -244,8 +325,11 @@ void BlinkyMode::buttonHoldReset() {
 }
 
 // Change Animation
-void BlinkyMode::buttonPressMode() {
-	LOG_LV1("MODE", "Blinky press mode");
+void BlinkyMode::buttonPressMode(bool released) {
+	LOG_LV1("MODE", "Blinky press mode %d", released);
+	if (!released) {
+		return;
+	}
 	if (!ignoreNextButton) {
 		this->nextAnimationAction();
 	} else {
@@ -254,10 +338,13 @@ void BlinkyMode::buttonPressMode() {
 }
 
 // Alt Animation
-void BlinkyMode::buttonHoldMode() {
-	LOG_LV1("MODE", "Blinky hold mode");
-	if (!ignoreNextButton) {
+void BlinkyMode::buttonHoldMode(bool released) {
+	LOG_LV1("MODE", "Blinky hold mode %d", released);
+	if (!released) {
 		this->altAnimationAction();
+		return;
+	}
+	if (!ignoreNextButton) {
 	} else {
 		ignoreNextButton = false;
 	}

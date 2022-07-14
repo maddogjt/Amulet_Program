@@ -23,15 +23,15 @@ public:
 	{
 		CRGB groupColor;
 		if (number < 4) {	
-			groupColor = CRGB::Blue; 
+			groupColor = CRGB::Teal; 
 		} else if (number < 8) {
 			groupColor = CRGB::Green; 
 		} else if (number < 12) {
 			groupColor = CRGB::Purple; 
 		}else if (number < 16) {
-			groupColor = CRGB::Red; 
+			groupColor = CRGB::Orange; 
 		} else {
-			groupColor = CRGB::Yellow; 
+			groupColor = CRGB::Red; 
 		}
 		
 		int num = number % 16;

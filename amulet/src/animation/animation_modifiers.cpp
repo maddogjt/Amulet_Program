@@ -3,6 +3,7 @@
 
 static void blur_leds(CRGB leds[], size_t count);
 static void fold(CRGB leds[], size_t count);
+static void bifold(CRGB leds[], size_t count);
 static void scramble_leds(CRGB leds[], size_t count);
 static void flip_leds(CRGB leds[], size_t count);
 static void loop_leds(CRGB leds[], size_t count);
@@ -19,7 +20,12 @@ constexpr char* kAnimationModifierNames[] {
 	"Shift",
 	"Blur",
 	"Flip",
-	"Scramble"
+	"Scramble",
+	"Ocean",
+	"Autumn",
+	"Blush",
+	"FoldAutumn",
+	"Bifold"
 };
 
 const char *animation_modifier_get_name(AnimationModifier modifier)
@@ -56,6 +62,70 @@ void animation_modifier_apply(AnimationModifier modifier, CRGB leds[], size_t co
 	case AnimationModifier::Scramble:
 		scramble_leds(leds, count);
 		break;
+	case AnimationModifier::Ocean:
+		for (int i = 0; i < count; i++)
+		{
+			CRGB color = leds[i];
+			color.red = color.red/4;
+			int excessRed = color.red - min(color.blue,color.green);
+			if (excessRed > 0)
+			{
+				color.blue += excessRed/2;
+				color.green += excessRed/2;
+			}
+			
+			color -= min(color.red,min(color.green,color.blue));
+			leds[i] = color;
+		}
+		break;
+	case AnimationModifier::Autumn:
+		for (int i = 0; i < count; i++)
+		{
+			CRGB color = leds[i];
+			color.blue = color.blue/4;
+			int excessBlue = color.blue - min(color.red,color.green);
+			if (excessBlue > 0)
+			{
+				color.red += excessBlue/2;
+				color.green += excessBlue/2;
+			}
+			color -= min(color.red,min(color.green,color.blue));
+			leds[i] = color;
+		}
+		break;
+	case AnimationModifier::Blush:
+		for (int i = 0; i < count; i++)
+		{
+			CRGB color = leds[i];
+			color.green = color.green/4;
+			int excessGreen = color.green - min(color.blue,color.red);
+			if (excessGreen > 0)
+			{
+				color.blue += excessGreen/2;
+				color.red += excessGreen/2;
+			}
+			color -= min(color.red,min(color.green,color.blue));
+			leds[i] = color;
+		}
+		break;
+	case AnimationModifier::FoldAutumn:
+		for (int i = 0; i < count; i++)
+		{
+			CRGB color = leds[i];
+			color.blue = color.blue/4;
+			int excessBlue = color.blue - min(color.red,color.green);
+			if (excessBlue > 0)
+			{
+				color.red += excessBlue/2;
+				color.green += excessBlue/2;
+			}
+			color -= min(color.red,min(color.green,color.blue));
+			leds[i] = color;
+		}
+		fold(leds, count);
+		break;
+	case AnimationModifier::Bifold:
+		bifold(leds, count);
 	default:
 		break;
 	}
@@ -87,6 +157,27 @@ void swap(CRGB &c1, CRGB &c2)
 	CRGB swap = c1;
 	c1 = c2;
 	c2 = swap;
+}
+
+void bifold(CRGB leds[], size_t count)
+{
+	if (count < 8)
+	{
+		return;
+	}
+
+	/* *
+	+------+
+	\ 4  3 /
+	| 5  2 |
+	| 6  1 |
+	/ 7  0 \
+	+------+
+	*/
+	swap(leds[4],leds[5]);
+	swap(leds[6],leds[7]);
+	swap(leds[3],leds[2]);
+	swap(leds[1],leds[0]);
 }
 
 void blur_leds(CRGB leds[], size_t count)
@@ -122,6 +213,7 @@ void scramble_leds(CRGB leds[], size_t count)
 	{
 		return;
 	}
+	// Remaps to an arbitrary mapping
 	CRGB scramble[8];
 	scramble[0] = leds[3];
 	scramble[1] = leds[1];
@@ -143,9 +235,11 @@ void flip_leds(CRGB leds[], size_t count)
 	{
 		return;
 	}
-
+	// Remaps leds, inverts them vertically
 	swap(leds[7], leds[4]);
 	swap(leds[6], leds[5]);
+	swap(leds[0], leds[3]);
+	swap(leds[1], leds[2]);
 }
 
 void loop_leds(CRGB leds[], size_t count)
@@ -175,7 +269,7 @@ void cycle_leds(int msPerCycle, CRGB leds[], size_t count)
 		temp[i] = leds[i];
 	}
 
-	for (int i = 0; i < count; i++)
+	for (int i = 0; i < count / 2; i++)
 	{
 		leds[i] = temp[(i + cycleStart) % count];
 	}

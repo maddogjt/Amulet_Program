@@ -1,5 +1,4 @@
 #include "mode.h"
-#include "burn_mode.h"
 #include "blinky_mode.h"
 #include "rune_mode.h"
 #include "config_mode.h"
@@ -66,11 +65,15 @@ void AmuletMode::loop() {
 
 }
 
-void AmuletMode::buttonPressMode() {
-	led_next_brightness();
+void AmuletMode::buttonPressMode(bool released) {
+	if (released) {
+		led_next_brightness();
+	}
 }
 
-void AmuletMode::buttonPressReset()
+void AmuletMode::buttonPressReset(bool released)
 {
-	led_next_brightness();
+	if (released) {
+		led_next_brightness();
+	}
 }

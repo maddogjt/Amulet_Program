@@ -12,7 +12,11 @@ enum class AnimationModifier : uint8_t{
 	Blur, 	/**< uses fastled blur func. not sure if its done right  */
 	Flip,	/**< Just swaps the middle leds  */
 	Scramble,	/**< Swaps the LEDs in a fixed but arbitrary way  */
-
+	Ocean,	/**< Maps colors to minize red  */
+	Autumn,	/**< Maps colors to minize blue  */
+	Blush,	/**< Maps colors to minize green  */
+	FoldAutumn,
+	Bifold, /**< Swaps inner and outer */
 	Count
 };
 

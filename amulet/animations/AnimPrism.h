@@ -35,8 +35,8 @@ public:
 
 	virtual void step(const int frame, const float deltaTime, const float sourceDistance) override
 	{
-		fHue += 0.3;
-		angle += 0.01;
+		fHue += 0.2;
+		angle += 0.005;
 
 		float x;
 		float y;

@@ -12,10 +12,10 @@ class BlinkyMode : public AmuletMode
 public:
 	void start() override;
 	void loop() override;
-	void buttonPressReset() override;
-	void buttonHoldReset() override;
-	void buttonPressMode() override;
-	void buttonHoldMode() override;
+	void buttonPressReset(bool released) override;
+	void buttonHoldReset(bool released) override;
+	void buttonPressMode(bool released) override;
+	void buttonHoldMode(bool released) override;
 	
 	// startup
 	bool ignoreNextButton = true;

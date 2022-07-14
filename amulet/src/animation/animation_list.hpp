@@ -42,8 +42,8 @@
 #endif
 
 // Group 1
-DEFINE_ANIM(AnimSolidHue)
 DEFINE_ANIM(AnimPrism)
+DEFINE_ANIM(AnimRainbow) // this is good, should be on the list.
 DEFINE_ANIM(AnimTwister)
 DEFINE_ANIM(AnimBurn)
 
@@ -64,8 +64,8 @@ DEFINE_ANIM(AnimBPM)
 DEFINE_ANIM(AnimConfetti)
 
 // Extra
+DEFINE_ANIM(AnimSolidHue)
 DEFINE_ANIM(AnimSinelon) // similar to cylon but not interests
-DEFINE_ANIM(AnimRainbow) // this is good, should be on the list.
 DEFINE_ANIM(AnimBounce) // like sninelon without the trails
 DEFINE_ANIM(AnimDisplayInt)
 DEFINE_ANIM(AnimVictory)

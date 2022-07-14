@@ -22,10 +22,14 @@ GlobalSettings globalSettings_{
 	.ambientPowerThreshold_ = 10,
 	.animationUpdateTimer_ = 500, // in milliseconds. This determines how often we check a new top signal and change anims.
 
-	.pad_ = {}};
+	.pad_ = {}
+};
 
 anim_config_t kDefaultPattern{
-	.anim_ = Anim::AnimPrism,
+	.anim_ = Anim::AnimBurn,
+	.modifiers_ = AnimationModifier::Flip,
+	.overlay_ = Anim::AnimPrism,
+	.filter_ = OverlayFilter::Darken,
 };
 
 LocalSettings localSettings_{

@@ -38,7 +38,10 @@ void RuneMode::ledBrightnessAction() {
 }
 
 // Brightness/Power Action
-void RuneMode::buttonPressReset() {
+void RuneMode::buttonPressReset(bool released) {
+	if (!released) {
+		return;
+	}
 	LOG_LV1("MODE", "Rune press reset");
 	if (!ignoreNextButton) {
 		this->ledBrightnessAction();
@@ -48,8 +51,11 @@ void RuneMode::buttonPressReset() {
 }
 
 // Change Animation
-void RuneMode::buttonPressMode() {
+void RuneMode::buttonPressMode(bool released) {
 	LOG_LV1("MODE", "Rune press mode");
+	if (!released) {
+		return;
+	}
 	if (!ignoreNextButton) {
 		this->ledBrightnessAction();
 	} else {

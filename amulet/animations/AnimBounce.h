@@ -21,7 +21,7 @@ public:
 
 	virtual void step(const int frame, const float deltaTime, const float sourceDistance) override
 	{
-		EVERY_N_MILLISECONDS(100)
+		EVERY_N_MILLISECONDS(200)
 		{
 			//This does there and back
 			fill_solid(leds, RGB_LED_COUNT, CHSV(hue, 255, 0));

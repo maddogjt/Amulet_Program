@@ -15,10 +15,10 @@ class AmuletMode {
 public:
 	virtual void start(){}
 	virtual void loop();
-	virtual void buttonPressMode();
-	virtual void buttonPressReset();
-	virtual void buttonHoldMode(){}
-	virtual void buttonHoldReset(){}
+	virtual void buttonPressMode(bool released);
+	virtual void buttonPressReset(bool released);
+	virtual void buttonHoldMode(bool released){}
+	virtual void buttonHoldReset(bool released){}
 };
 
 AmuletMode *amulet_mode_get();

@@ -157,6 +157,11 @@ void modLED(CRGB &led, const CRGB &overlay, const uint8_t alpha, const OverlayFi
 	{
 		// MASK ON TOP
 		led = blend(led, overlay, alpha);
+		// for (int i = 0; i < RGB_LED_COUNT; i++) {
+		// 	CHSV color = rgb2hsv_approximate(gCurrentOverlay->leds[i]);
+		// 	led[i] = (1 / 1 + exp())
+			
+		// }
 	}
 	else if (mod == OverlayFilter::MaskUnder)
 	{
