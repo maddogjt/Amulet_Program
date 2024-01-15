@@ -32,6 +32,7 @@ void setup()
 	settings_init();
 
 	if (localSettings_.startupConfig_.mode==AMULET_MODE_FIRSTBOOT) {
+		Serial.println("running first boot mode");
 		run_first_boot();
 	}
 
@@ -52,6 +53,7 @@ void setup()
 	led_set_brightness(LedBrightness::High);
 
 	bool enableUart = config.enterConfigMode_;
+	// bool enableUart = true;
 	ble_setup(enableUart);
 
 	amulet_mode_start(config.mode, config.enterConfigMode_);
@@ -221,7 +223,9 @@ void run_first_boot() {
 	FastLED.show();
 	delay(1000);
 
-	localSettings_.startupConfig_.mode = AMULET_MODE_SEACOMP_AMULET;
+	Serial.println("displayed test pattern");
+
+	localSettings_.startupConfig_.mode = AMULET_MODE_BURN;
 	write_local_settings();
 
 	
@@ -232,7 +236,7 @@ void power_off()
 {
 #define DFU_MAGIC_SKIP 0x6d
 
-    nrf_gpio_cfg_sense_input(PIN_DFU, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
+	nrf_gpio_cfg_sense_input(PIN_DFU, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
 	nrf_gpio_cfg_sense_input(PIN_RESET, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_SENSE_LOW);
 
 	NRF_POWER->GPREGRET = DFU_MAGIC_SKIP;

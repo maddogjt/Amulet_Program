@@ -24,6 +24,7 @@
 #include "../../animations/AnimPhotoKey.h"
 #include "../../animations/AnimScoreboard.h"
 #include "../../animations/AnimVictory.h"
+#include "../../animations/AnimBlackout.h"
 #else
 
 #ifndef DEFINE_ANIM
@@ -52,11 +53,13 @@ DEFINE_ANIM(AnimConfetti)
 DEFINE_ANIM(AnimShadow)
 DEFINE_ANIM(AnimPrism)
 
-DEFINE_ANIM(AnimSimon)
-DEFINE_ANIM(AnimSafe)
-DEFINE_ANIM(AnimPhotoKey)
-DEFINE_ANIM(AnimVictory)
-DEFINE_ANIM(AnimScoreboard)
+// DEFINE_ANIM(AnimSimon)
+// DEFINE_ANIM(AnimSafe)
+// DEFINE_ANIM(AnimPhotoKey)
+// DEFINE_ANIM(AnimVictory)
+// DEFINE_ANIM(AnimScoreboard)
+
+DEFINE_ANIM(AnimBlackout)
 
 #ifdef CLEAR_DEFINE_ANIM
 #undef DEFINE_ANIM

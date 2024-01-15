@@ -6,19 +6,13 @@
 
 class Signal;
 
-class BurnMode : public AmuletMode
+class BurnFollowMode : public AmuletMode
 { 
 public:
 	void start() override;
 	void loop() override;
-	void buttonHoldReset() override;
-	void buttonPressMode() override;
 
-	uint32_t sendPatternStop_ = 0;
-	bool sendingPattern_ = false;
-
-	anim_config_t animations_[(int)Anim::Count];
-	int currentAnim_ = 0;
+	anim_config_t blackout_;
 
 	void set_animation_from_signal(Signal *s);
 

@@ -26,23 +26,27 @@ const char *get_advertisement_type_name(AdvertisementType adType)
 	return "err";
 }
 
-static void debug_print_amulet_mfd(const amulet_mfg_data_t &mfd)
+void debug_print_amulet_mfd(const amulet_mfg_data_t &mfd)
 {
 	Serial.println("-- Amulet Manufacturer Data --");
 	Serial.printf("signal_type: %d\n", mfd.signal_type);
-	Serial.printf("power: %d\n", mfd.power);
+	// Serial.printf("power: %d\n", mfd.power);
 	Serial.printf("range: %d\n", mfd.range);
 	Serial.printf("decay rate: %d\n", mfd.decayRateInt);
 	Serial.printf("version:    	%d\n", mfd.version);
+	Serial.printf("group:    	%d\n", mfd.groupId);
 	Serial.printBuffer(mfd.payload, kMaxPayloadLen, '-');
 	Serial.println();
 }
 
 static void start_advertising_uart()
 {
+	Serial.println("uart advertising start");
+	Bluefruit.Advertising.clearData();
+	Bluefruit.ScanResponse.clearData();
 	// Advertising packet
 	Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
-	Bluefruit.Advertising.addTxPower();
+	// Bluefruit.Advertising.addTxPower();
 
 	// Include the BLE UART (AKA 'NUS') 128-bit UUID
 	Bluefruit.Advertising.addService(uart_get_service());
@@ -72,11 +76,22 @@ static void start_advertising_with_data(amulet_mfg_data_t &data)
 #if CFG_DEBUG >= 1
 	debug_print_amulet_mfd(data);
 #endif
+	Bluefruit.Advertising.clearData();
+	Bluefruit.ScanResponse.clearData();
+
 	// Advertise as non-connectable
-	Bluefruit.Advertising.setType(BLE_GAP_ADV_TYPE_NONCONNECTABLE_SCANNABLE_UNDIRECTED);
+	// Bluefruit.Advertising.setType(BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED);
+	Bluefruit.Advertising.setType(BLE_GAP_ADV_TYPE_EXTENDED_CONNECTABLE_NONSCANNABLE_UNDIRECTED);
+
+	// Include the BLE UART (AKA 'NUS') 128-bit UUID
+	// Bluefruit.ScanResponse.addService(uart_get_service());
 
 	// Unknown if this is the best option
 	Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
+
+	// Secondary Scan Response packet (optional)
+	// Since there is no room for 'Name' in Advertising packet
+	Bluefruit.ScanResponse.addName();
 
 	// add the amulet's data to the advertisement
 	// VERIFY_STATIC(sizeof(data) == 8 + kMaxPayloadLen);
@@ -94,16 +109,17 @@ void advertising_setup(bool advertise, bool uart)
 		LOG_LV1("BLE", "Error: we can't advertise and have a uart service");
 	}
 
-	if (uart)
-	{
 		Bluefruit.setName("Amulet");
 		uart_setup();
+	if (uart)
+	{
 		start_advertising_uart();
 	}
 }
 
 void advertising_start(const AdvertisementType type, const advertisementParams &params, const uint8_t *data, const uint8_t len)
 {
+	Serial.println("advertising start");
 	LOG_LV2("BLE", "advertising_start");
 	if (len > kMaxPayloadLen)
 	{
@@ -117,6 +133,7 @@ void advertising_start(const AdvertisementType type, const advertisementParams &
 	mfdata.version = kAmuletDataVersion;
 	mfdata.power = params.power;
 	mfdata.range = params.range;
+	mfdata.groupId = params.groupId;
 	mfdata.decayRateInt = params.decay;
 	memset(mfdata.payload, 0, kMaxPayloadLen);
 	memcpy(&(mfdata.payload), data, len);
@@ -125,7 +142,10 @@ void advertising_start(const AdvertisementType type, const advertisementParams &
 
 void advertising_stop()
 {
+	if (Bluefruit.Advertising.isRunning()) {
 	Bluefruit.Advertising.stop();
 	Bluefruit.Advertising.clearData();
 	Bluefruit.ScanResponse.clearData();
+
+	}
 }

@@ -122,9 +122,11 @@ bool matches_current_animation(const anim_config_t &config)
 	return currentAnim->params_ == config;
 }
 
-void start_animation_if_new(const anim_config_t &pattern)
+bool start_animation_if_new(const anim_config_t &pattern)
 {
 	if (!matches_current_animation(pattern)) {
 		start_animation(pattern);
+		return true;
 	}
+	return false;
 }

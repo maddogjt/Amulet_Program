@@ -1,5 +1,6 @@
 #include "mode.h"
 #include "burn_mode.h"
+#include "burn_follow_mode.h"
 #include "config_mode.h"
 #include "photo_key_mode.h"
 #include "safe_mode.h"
@@ -17,18 +18,21 @@ const char *get_config_mode_name(amulet_mode_t mode)
 	case AMULET_MODE_BURN:
 		return "burn";
 		break;
-	case AMULET_MODE_SIMON:
-		return "simon";
+	case AMULET_MODE_BURN_FOLLOW:
+		return "burn_follow";
 		break;
-	case AMULET_MODE_SEACOMP_AMULET:
-		return "seacompam";
-		break;
-	case AMULET_MODE_SAFE:
-		return "safe";
-		break;
-	case AMULET_MODE_PHOTOKEY:
-		return "photokey";
-		break;
+	// case AMULET_MODE_SIMON:
+	// 	return "simon";
+	// 	break;
+	// case AMULET_MODE_SEACOMP_AMULET:
+	// 	return "seacompam";
+	// 	break;
+	// case AMULET_MODE_SAFE:
+	// 	return "safe";
+	// 	break;
+	// case AMULET_MODE_PHOTOKEY:
+	// 	return "photokey";
+	// 	break;
 	case AMULET_MODE_COUNT:
 	default:
 		break;
@@ -47,23 +51,25 @@ AmuletMode *amulet_mode_start(amulet_mode_t mode, bool enterConfig)
 		gAmuletMode = new ConfigMode();
 	} else if (mode == AMULET_MODE_BURN) {
 		gAmuletMode = new BurnMode();
+	} else if (mode == AMULET_MODE_BURN_FOLLOW) {
+		gAmuletMode = new BurnFollowMode();
 	}
-	else if (mode == AMULET_MODE_SIMON)
-	{
-		gAmuletMode = new SimonMode();
-	}
-	else if (mode == AMULET_MODE_SEACOMP_AMULET)
-	{
-		gAmuletMode = new SeacompAmuletMode();
-	}
-	else if (mode == AMULET_MODE_SAFE)
-	{
-		gAmuletMode = new SafeMode();
-	}
-	else if (mode == AMULET_MODE_PHOTOKEY)
-	{
-		gAmuletMode = new PhotoKeyMode();
-	}
+	// else if (mode == AMULET_MODE_SIMON)
+	// {
+	// 	gAmuletMode = new SimonMode();
+	// }
+	// else if (mode == AMULET_MODE_SEACOMP_AMULET)
+	// {
+	// 	gAmuletMode = new SeacompAmuletMode();
+	// }
+	// else if (mode == AMULET_MODE_SAFE)
+	// {
+	// 	gAmuletMode = new SafeMode();
+	// }
+	// else if (mode == AMULET_MODE_PHOTOKEY)
+	// {
+	// 	gAmuletMode = new PhotoKeyMode();
+	// }
 	else
 	{
 		gAmuletMode = new ConfigMode();

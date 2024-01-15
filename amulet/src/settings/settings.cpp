@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <InternalFileSystem.h>
+#include <algorithm>
 
 using namespace Adafruit_LittleFS_Namespace;
 
@@ -13,6 +14,10 @@ constexpr int16_t kLocalSettingsSig = 0x10F3;
 constexpr char kGlobalSettingsFile[] = "globalSettings";
 constexpr char kLocalSettingsFile[] = "localSettings";
 
+// constexpr size_t foo = sizeof(LocalSettings);
+
+// char (*__kaboom)[sizeof(LocalSettings)] = 1;
+
 GlobalSettings globalSettings_{
 	.signature_ = kGlobalSettingsSig,
 	.version_ = 0,
@@ -20,7 +25,7 @@ GlobalSettings globalSettings_{
 	.txPower_ = 4,
 	.runeSeenCountThreshold_ = 20,
 	.ambientPowerThreshold_ = 10,
-	.animationUpdateTimer_ = 500, // in milliseconds. This determines how often we check a new top signal and change anims.
+	.animationUpdateTimer_ = 250, // in milliseconds. This determines how often we check a new top signal and change anims.
 
 	.pad_ = {}};
 
@@ -33,9 +38,8 @@ LocalSettings localSettings_{
 	.version_ = 0,
 	.configSize_ = sizeof(StartupConfig),
 	.startupConfig_ = {},
-	.brightness_ = {4, 8, 20},
-	.bikeMode_ = false,
-	.bikeExtend_ = true,
+
+	// .bikeExtend_ = true,
 };
 
 void settings_init()
@@ -43,12 +47,22 @@ void settings_init()
 	kDefaultPattern.speed_ = 16;
 
 	localSettings_.startupConfig_.mode = AMULET_MODE_FIRSTBOOT;
+	uint8_t defBrightness[3] = {4, 8, 20};
+	std::copy(defBrightness, defBrightness + 3, localSettings_.startupConfig_.brightness_);
+	uint8_t defExtBrightness[3] = {16, 64, 128};
+	std::copy(defExtBrightness, defExtBrightness + 3, localSettings_.startupConfig_.extBrightness_);
+	// localSettings_.startupConfig_.extBrightness_ = {16, 64, 128};
+	localSettings_.startupConfig_.intLedEn_ = true;
+	localSettings_.startupConfig_.externalLedEn_ = false;
+	localSettings_.startupConfig_.externalLedCount_ = 100;
+	localSettings_.startupConfig_.externalLedExtend_ = true;
 	// localSettings_.startupConfig_.ambientPattern_ = kDefaultPattern;
 	// localSettings_.startupConfig_.beaconPattern_ = kDefaultPattern;
 	// localSettings_.startupConfig_.powerPattern_ = kDefaultPattern;
 	// localSettings_.startupConfig_.runePattern_ = kDefaultPattern;
 	localSettings_.startupConfig_.seacompAmuletPattern_ = kDefaultPattern;
 	localSettings_.startupConfig_.burnPattern_ = kDefaultPattern;
+	localSettings_.startupConfig_.burnFollowPattern_ = kDefaultPattern;
 	localSettings_.startupConfig_.simonPattern_ = kDefaultPattern;
 	localSettings_.startupConfig_.safePattern_ = kDefaultPattern;
 	localSettings_.startupConfig_.photoKeyPattern_ = kDefaultPattern;
@@ -56,6 +70,7 @@ void settings_init()
 		.power = 100,
 		.decay = 128,
 		.range = -80,
+		.groupId = 0,
 	};
 
 	InternalFS.begin();
@@ -103,6 +118,10 @@ void settings_init()
 				{
 					Serial.println("Rejected local settings");
 				}
+			}
+			else
+			{
+				Serial.println("Rejected local settings");
 			}
 		}
 		file.close();

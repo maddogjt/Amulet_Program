@@ -8,6 +8,7 @@
 
 void SeacompAmuletMode::start()
 {
+	advertising_stop();
 	Serial.println("Starting seacomp mode");
 	scoreboardAnim_ = {};
 	scoreboardAnim_.anim_ = Anim::AnimScoreboard;

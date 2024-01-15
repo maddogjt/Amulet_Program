@@ -18,6 +18,7 @@ struct advertisementParams
 	uint8_t power;
 	uint8_t decay; // This is treated as a fract8, ie the uint value will be divided by 256 to get a floating point value 0..1
 	int8_t range;
+	uint8_t groupId;
 	bool operator==(const advertisementParams &ap) const
 	{
 		return power == ap.power && decay == ap.decay && range == ap.range;

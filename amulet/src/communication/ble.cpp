@@ -8,6 +8,7 @@
 void ble_setup(bool uart)
 {
 	// Initialize Bluefruit
+	Bluefruit.configPrphBandwidth(BANDWIDTH_HIGH);
 	Bluefruit.autoConnLed(false); // Don't blink the led
 	if (!Bluefruit.begin(1, 1))
 	{
@@ -17,6 +18,7 @@ void ble_setup(bool uart)
 	}
 	Bluefruit.setTxPower(globalSettings_.txPower_); // 4 is (probably) the strongest tx power that we can support.
 
+	Bluefruit.printInfo();
 	advertising_setup(true, uart);
 
 	scanning_setup();

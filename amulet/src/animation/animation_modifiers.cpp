@@ -10,7 +10,7 @@ static void cycle_leds(int msPerCycle, CRGB leds[], size_t count);
 static void mirror(CRGB leds[], size_t count);
 static void mirror_invert(CRGB leds[], size_t count);
 
-constexpr char* kAnimationModifierNames[] {
+constexpr char const* kAnimationModifierNames[] {
 	"None",
 	"Fold",
 	"Mirror",
@@ -88,6 +88,15 @@ void swap(CRGB &c1, CRGB &c2)
 	c1 = c2;
 	c2 = swap;
 }
+// blurRows: perform a blur1d on every row of a rectangular matrix
+void blurRows2(CRGB *leds, uint8_t width, uint8_t height, fract8 blur_amount)
+{
+	for (uint8_t row = 0; row < height; ++row)
+	{
+		CRGB *rowbase = leds + (row * width);
+		blur1d(rowbase, width, blur_amount);
+	}
+}
 
 void blur_leds(CRGB leds[], size_t count)
 {
@@ -105,7 +114,7 @@ void blur_leds(CRGB leds[], size_t count)
 	rows[5] = leds[2];
 	rows[6] = leds[4];
 	rows[7] = leds[3];
-	blurRows(rows, 4, 2, 40);
+	blurRows2(rows, 4, 2, 40);
 	leds[7] = rows[0];
 	leds[0] = rows[1];
 	leds[6] = rows[2];

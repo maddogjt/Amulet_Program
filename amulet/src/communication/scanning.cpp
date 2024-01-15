@@ -8,6 +8,7 @@
 
 
 static void scan_callback(ble_gap_evt_adv_report_t *report);
+void debug_print_amulet_mfd(const amulet_mfg_data_t &mfd);
 
 void scanning_setup()
 {
@@ -27,6 +28,7 @@ void scan_callback(ble_gap_evt_adv_report_t *report)
 	uint8_t len = 0;
 	uint8_t buffer[32];
 	memset(buffer, 0, sizeof(buffer));
+	Serial.println("got scan report");
 
 	/* Check for Manufacturer Specific Data */
 	len = Bluefruit.Scanner.parseReportByType(report, BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA, buffer, sizeof(buffer));

@@ -7,7 +7,7 @@ void dump_animation_to_console(const anim_config_t &anim);
 void start_animation(const anim_config_t &pattern);
 bool matches_current_animation(const anim_config_t &pattern);
 
-void start_animation_if_new(const anim_config_t &pattern);
+bool start_animation_if_new(const anim_config_t &pattern);
 
 void step_animation();
 

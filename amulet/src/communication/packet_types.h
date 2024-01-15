@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <Arduino.h>
 
-static constexpr size_t kMaxPayloadLen = 14;
+static constexpr size_t kMaxPayloadLen = 13;
 
 struct ATTR_PACKED amulet_mfg_data_t
 {
@@ -15,5 +15,6 @@ struct ATTR_PACKED amulet_mfg_data_t
 	int8_t range;
 	uint8_t decayRateInt; // essentially a fract8
 	uint8_t version;
+	uint8_t groupId;
 	uint8_t payload[kMaxPayloadLen];
 };
