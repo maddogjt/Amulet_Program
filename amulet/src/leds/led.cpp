@@ -18,7 +18,7 @@ uint32_t gTurnOffTime = 0;
 bool gWaitingToSleep = false;
 
 LedBrightness g_brightness_mode = LedBrightness::Medium;
-bool g_override_brightness_mode = false;
+uint8_t g_override_brightness_value = 0;
 uint8_t g_old_brightness = 0;
 
 
@@ -75,32 +75,35 @@ void led_set_brightness(LedBrightness brightness)
 {
 	g_brightness_mode = brightness;
 
-	if (g_override_brightness_mode)
+	uint8_t newBrightness = 0;
+
+	if (g_override_brightness_value)
 	{
-		brightness = LedBrightness::High;
+		newBrightness = g_override_brightness_value;
+	} 
+	else 
+	{
+		switch (brightness)
+		{
+		case LedBrightness::Low:
+			newBrightness = localSettings_.brightness_[0];
+			break;
+		case LedBrightness::Medium:
+			newBrightness = localSettings_.brightness_[1];
+			break;
+		case LedBrightness::High:
+			newBrightness = localSettings_.brightness_[2];
+			break;
+		case LedBrightness::Off:
+		case LedBrightness::Count:
+		default:
+			break;
+		}
 	}
 
-	uint8_t newBrightness = 0;
-	bool newLedPower = true;
-	switch (brightness)
-	{
-	case LedBrightness::Low:
-		newBrightness = localSettings_.brightness_[0];
-		break;
-	case LedBrightness::Medium:
-		newBrightness = localSettings_.brightness_[1];
-		break;
-	case LedBrightness::High:
-		newBrightness = localSettings_.brightness_[2];
-		break;
-	case LedBrightness::Off:
-	case LedBrightness::Count:
-	default:
-		newLedPower = false;
-	}
 
 #if !defined(NO_RGB_LEDS) 
-	if (newLedPower)
+	if (newBrightness > 0)
 	{
 		// Turn on LED power rail
 		if ( newBrightness != g_old_brightness ) {
@@ -142,6 +145,12 @@ void led_refresh_brightness()
 
 void led_override_brightness(bool over)
 {
-	g_override_brightness_mode = over;
+	g_override_brightness_value = over ? localSettings_.brightness_[2] : 0;
+	led_refresh_brightness();
+}
+
+void led_override_brightness_value(uint8_t brightness)
+{
+	g_override_brightness_value = brightness;
 	led_refresh_brightness();
 }

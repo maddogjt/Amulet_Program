@@ -1,7 +1,7 @@
 #ifdef DO_INCLUDES
 #undef DO_INCLUDES
 #include "../../animations/AnimSolidHue.h"
-
+#include "../../animations/AnimSolid.h"
 #include "../../animations/AnimDisplayInt.h"
 
 #include "../../animations/AnimRainbow.h"
@@ -69,6 +69,8 @@ DEFINE_ANIM(AnimSinelon) // similar to cylon but not interests
 DEFINE_ANIM(AnimBounce) // like sninelon without the trails
 DEFINE_ANIM(AnimDisplayInt)
 DEFINE_ANIM(AnimVictory)
+
+DEFINE_ANIM(AnimSolid)
 
 // DEFINE_ANIM(AnimDebugInfo)
 // DEFINE_ANIM(AnimSimon)

@@ -1,6 +1,7 @@
 #include "mode.h"
 #include "blinky_mode.h"
 #include "rune_mode.h"
+#include "lamp_mode.h"
 #include "config_mode.h"
 
 #include "../leds/led.h"
@@ -19,6 +20,9 @@ const char *get_config_mode_name(amulet_mode_t mode)
 		break;
 	case AMULET_MODE_BEACON:
 		return "beacon";
+		break;
+	case AMULET_MODE_LAMP:
+		return "lamp";
 		break;
 	case AMULET_MODE_COUNT:
 	default:
@@ -42,10 +46,13 @@ AmuletMode *amulet_mode_start(amulet_mode_t mode, bool enterConfig)
 		gAmuletMode = new RuneMode();
 	} else if (mode == AMULET_MODE_BEACON) {
 		gAmuletMode = new RuneMode();
-	} else {
+	} else if (mode == AMULET_MODE_LAMP) {
+		gAmuletMode = new LampMode();
+	} else
+	{
 		gAmuletMode = new ConfigMode();
 	}
-	
+
 	gAmuletMode->start();
 	return gAmuletMode;
 }
@@ -65,15 +72,15 @@ void AmuletMode::loop() {
 
 }
 
-void AmuletMode::buttonPressMode(bool released) {
-	if (released) {
+void AmuletMode::buttonActionMode(button_action_t action) {
+	if (action == BUTTON_ACTION_RELEASE) {
 		led_next_brightness();
 	}
 }
 
-void AmuletMode::buttonPressReset(bool released)
+void AmuletMode::buttonActionReset(button_action_t action)
 {
-	if (released) {
+	if (action == BUTTON_ACTION_RELEASE) {
 		led_next_brightness();
 	}
 }

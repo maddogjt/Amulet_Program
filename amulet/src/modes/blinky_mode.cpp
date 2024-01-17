@@ -1,4 +1,5 @@
 #include "blinky_mode.h"
+#include "lamp_mode.h"
 #include "../animation/animations.h"
 #include "../communication/signal.h"
 #include "../settings/settings.h"
@@ -223,7 +224,7 @@ void BlinkyMode::loop() {
 	// Stop Broadcasting if it's time
 	if (sendingPattern_ && millis() > sendPatternStop_)
 	{
-		//digitalWrite(LED_BUILTIN, !LED_STATE_ON);
+		digitalWrite(LED_BUILTIN, !LED_STATE_ON);
 		sendingPattern_ = false;
 
 		this->advertiseCurrentPattern();
@@ -273,6 +274,7 @@ void BlinkyMode::broadcastAction() {
 	sendPatternStop_ = millis() + 15000;
 
 	this->advertiseCurrentPattern(AdvertisementType::Beacon);
+	digitalWrite(LED_BUILTIN, LED_STATE_ON);
 }
 
 void BlinkyMode::nextAnimationAction() {
@@ -299,53 +301,60 @@ void BlinkyMode::ledBrightnessAction() {
 }
 
 // Brightness/Power Action
-void BlinkyMode::buttonPressReset(bool released) {
-	LOG_LV1("MODE", "Blinky press reset %d", released);
-	if (!released) {
+void BlinkyMode::buttonActionReset(button_action_t action)
+{
+	if (ignoreNextButton)
+	{
+		if (action != BUTTON_ACTION_PRESS) {
+			ignoreNextButton = false;
+		}
 		return;
 	}
-	if (!ignoreNextButton) {
-		this->ledBrightnessAction();
-	} else {
-		ignoreNextButton = false;
-	}
-}
 
-// Broadcast
-void BlinkyMode::buttonHoldReset(bool released) {
-	LOG_LV1("MODE", "Blinky hold reset %d", released);
-	if (!released) {
-		return;
-	}
-	if (!ignoreNextButton) {
+	if (action == BUTTON_ACTION_PRESS)
+	{
+		resetPressed_ = true;
+		if (modePressed_)
+		{
+			start_lamp_mode(AMULET_MODE_BLINKY);
+		}
+	} else if (action == BUTTON_ACTION_RELEASE) {
+		resetPressed_ = false;
+		this->ledBrightnessAction();
+	
+	} else if (action == BUTTON_ACTION_LONG_PRESS_RELEASE) {
+		resetPressed_ = false;
 		this->broadcastAction();
-	} else {
-		ignoreNextButton = false;
 	}
 }
 
 // Change Animation
-void BlinkyMode::buttonPressMode(bool released) {
-	LOG_LV1("MODE", "Blinky press mode %d", released);
-	if (!released) {
-		return;
-	}
-	if (!ignoreNextButton) {
-		this->nextAnimationAction();
-	} else {
-		ignoreNextButton = false;
-	}
-}
+void BlinkyMode::buttonActionMode(button_action_t action) {
 
-// Alt Animation
-void BlinkyMode::buttonHoldMode(bool released) {
-	LOG_LV1("MODE", "Blinky hold mode %d", released);
-	if (!released) {
-		this->altAnimationAction();
+	if (ignoreNextButton)
+	{
+		if (action != BUTTON_ACTION_PRESS) {
+			ignoreNextButton = false;	
+		}
 		return;
 	}
-	if (!ignoreNextButton) {
-	} else {
-		ignoreNextButton = false;
+
+	if (action == BUTTON_ACTION_PRESS)
+	{
+		modePressed_ = true;
+		if (resetPressed_)
+		{
+			start_lamp_mode(AMULET_MODE_BLINKY);
+		}
+	}
+	else if (action == BUTTON_ACTION_RELEASE)
+	{
+		modePressed_ = false;
+		this->nextAnimationAction();
+	}
+	else if (action == BUTTON_ACTION_LONG_PRESS_START)
+	{
+		modePressed_ = false;
+		this->altAnimationAction();
 	}
 }

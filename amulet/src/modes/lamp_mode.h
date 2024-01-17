@@ -7,19 +7,19 @@
 
 class Signal;
 
-class RuneMode : public AmuletMode
+class LampMode : public AmuletMode
 { 
 public:
 	void start() override;
 	void loop() override;
 	void buttonActionReset(button_action_t action) override;
 	void buttonActionMode(button_action_t action) override;
-	
-	// startup
-	bool ignoreNextButton = true;
 
-	// LED brightness
-	bool brightnessChanged_ = true;
+	bool modePressed_ = false;
+	bool resetPressed_ = false;
 
-	void ledBrightnessAction();
+	void restorePreviousMode();
+	static amulet_mode_t previousMode_;
 };
+
+void start_lamp_mode(amulet_mode_t returnMode);

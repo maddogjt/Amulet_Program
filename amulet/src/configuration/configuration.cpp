@@ -118,7 +118,7 @@ void modeCycle(bool next, uint8_t unused)
 		config.ad.decay = 96;
 		config.ad.range = -90;
 	}
-	else if (config.mode == AMULET_MODE_BLINKY)
+	else if (config.mode == AMULET_MODE_BLINKY || config.mode == AMULET_MODE_LAMP)
 	{
 		config.ad.power = 80;
 		config.ad.decay = 64;
