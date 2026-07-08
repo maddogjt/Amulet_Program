@@ -3,7 +3,7 @@
 	url = https://github.com/JChristensen/JC_Button
 [submodule "libraries/FastLED"]
 	path = libraries/FastLED
-	url = git@github.com:maddogjt/FastLED.git
+	url = https://github.com/projects-land/FastLED.git
 [submodule "hardware/narc/amulet"]
 	path = hardware/narc/amulet
-	url = git@github.com:maddogjt/Amulet_Arduino
+	url = https://github.com/projects-land/Amulet_Arduino
